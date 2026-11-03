@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { db } from "@/lib/db/api";
+import { db } from "@/lib/db/admin-api";
 import { getAdminSession } from "@/lib/auth";
 
 export async function POST(request: Request) {
