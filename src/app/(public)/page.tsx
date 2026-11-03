@@ -65,7 +65,7 @@ export default async function HomePage() {
       <AksaraMarquee />
 
       {/* 5. DYNAMIC STATS COUNTER GRID */}
-      <section className="relative py-20 bg-[var(--green-950)] text-[var(--cream-50)] border-b border-[var(--gold-500)]/20 px-4 sm:px-6 lg:px-8">
+      <section className="relative py-24 sm:py-28 bg-[var(--green-950)] text-[var(--cream-50)] border-b border-[var(--gold-500)]/20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--gold-400)]">
@@ -77,7 +77,7 @@ export default async function HomePage() {
             <div className="w-16 h-1 bg-[var(--gold-500)] rounded-full mx-auto mt-4" />
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12 lg:gap-x-10">
             <StatCounter
               end={stats.totalMushaf}
               label="Mushaf Al-Qur'an Tersalurkan"
@@ -175,13 +175,13 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--gold-400)]">
-              Transparansi Geografis Real-Time
+              Data Penyaluran
             </span>
             <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--cream-50)] mt-2">
               Jejak Titik Penyaluran Nusantara
             </h2>
             <p className="text-sm text-[var(--cream-200)]/80 mt-3">
-              Setiap mushaf Al-Qur&apos;an yang disalurkan dan masjid yang dibersihkan tercatat presisi di peta nasional ini.
+              Lokasi penyaluran yang telah dipublikasikan ditampilkan pada peta berikut.
             </p>
           </div>
 
@@ -291,7 +291,7 @@ export default async function HomePage() {
                     {rep.summary}
                   </p>
                   <div className="text-xs text-[var(--green-800)] font-semibold">
-                    &bull; {rep.beneficiaries.toLocaleString("id-ID")} Penerima Manfaat
+                    {rep.beneficiaries.toLocaleString("id-ID")} penerima manfaat
                   </div>
                 </div>
 
