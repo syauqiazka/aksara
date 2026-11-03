@@ -1,31 +1,46 @@
+import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createAdminSession } from "@/lib/auth";
 
-export async function POST(request: Request) {
-  try {
-    const { email, password } = await request.json();
+function safeCompare(left: string, right: string): boolean {
+  const leftBuffer = Buffer.from(left);
+  const rightBuffer = Buffer.from(right);
+  return leftBuffer.length === rightBuffer.length && timingSafeEqual(leftBuffer, rightBuffer);
+}
 
-    const expectedEmail = process.env.ADMIN_DEFAULT_EMAIL || "admin@sahabataksara.id";
-    const expectedPassword = process.env.ADMIN_DEFAULT_PASSWORD || "aksaramulia2026";
+export async function POST(request: Request) {
+  const expectedEmail = process.env.ADMIN_DEFAULT_EMAIL;
+  const expectedPassword = process.env.ADMIN_DEFAULT_PASSWORD;
+  const sessionSecret = process.env.ADMIN_SESSION_SECRET;
+
+  if (!expectedEmail || !expectedPassword || !sessionSecret || sessionSecret.length < 32) {
+    return NextResponse.json(
+      { success: false, message: "Akses admin belum dikonfigurasi oleh pengelola." },
+      { status: 503 }
+    );
+  }
+
+  try {
+    const body = await request.json();
+    const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+    const password = typeof body.password === "string" ? body.password : "";
 
     if (
-      email?.toLowerCase().trim() === expectedEmail.toLowerCase().trim() &&
-      password === expectedPassword
+      safeCompare(email, expectedEmail.trim().toLowerCase()) &&
+      safeCompare(password, expectedPassword)
     ) {
       await createAdminSession(email);
       return NextResponse.json({ success: true });
     }
 
-    // Generic error as per AGENTS.md §4
     return NextResponse.json(
       { success: false, message: "Email atau kata sandi salah" },
       { status: 401 }
     );
   } catch {
     return NextResponse.json(
-      { success: false, message: "Email atau kata sandi salah" },
-      { status: 500 }
+      { success: false, message: "Permintaan tidak dapat diproses" },
+      { status: 400 }
     );
   }
 }
-
