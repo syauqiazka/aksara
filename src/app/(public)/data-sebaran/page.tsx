@@ -3,7 +3,7 @@ import DataSebaranView from "@/components/sections/DataSebaranView";
 import { Sparkles } from "lucide-react";
 
 export const metadata = {
-  title: "Data Sebaran Donasi — Al-Qur'an & Geber Masjid",
+  title: "Data Sebaran Donasi: Al-Qur'an & Geber Masjid",
   description:
     "Peta dan tabel sebaran transparan infak Al-Qur'an custom nama dan aksi Geber Masjid di seluruh Indonesia.",
 };

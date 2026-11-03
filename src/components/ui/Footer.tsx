@@ -1,24 +1,16 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Copy, Check, Heart, Mail, Phone, MapPin, ExternalLink } from "lucide-react";
+import { Heart, Mail, MapPin, ExternalLink } from "lucide-react";
 import { organizationContent } from "@/content/organization";
 
 export default function Footer() {
   const pathname = usePathname();
-  const [copiedBank, setCopiedBank] = useState<string | null>(null);
 
   // If on admin route, don't show public footer
   if (pathname.startsWith("/admin")) return null;
-
-  const copyToClipboard = (accountNo: string, bank: string) => {
-    navigator.clipboard.writeText(accountNo);
-    setCopiedBank(bank);
-    setTimeout(() => setCopiedBank(null), 2500);
-  };
 
   return (
     <footer className="relative bg-[var(--green-950)] text-[var(--cream-100)] pt-16 pb-12 overflow-hidden border-t-2 border-[var(--gold-500)]/40">
@@ -102,59 +94,9 @@ export default function Footer() {
             <h4 className="text-sm font-semibold uppercase tracking-widest text-[var(--gold-400)] mb-4 font-sans">
               Rekening Resmi Infaq
             </h4>
-            <p className="text-xs text-[var(--cream-200)]/70 mb-3">
-              Klik nomor rekening untuk menyalin secara instan:
-            </p>
-            <div className="space-y-3">
-              <div
-                onClick={() => copyToClipboard("7283829102", "BSI")}
-                className="group cursor-pointer p-3 rounded-xl bg-[var(--green-900)]/60 border border-[var(--gold-500)]/30 hover:border-[var(--gold-400)] transition-all"
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => e.key === "Enter" && copyToClipboard("7283829102", "BSI")}
-              >
-                <div className="flex items-center justify-between text-xs text-[var(--gold-300)] font-medium mb-1">
-                  <span>Bank Syariah Indonesia (BSI)</span>
-                  {copiedBank === "BSI" ? (
-                    <span className="flex items-center gap-1 text-[var(--gold-400)] text-[11px] font-bold">
-                      <Check className="w-3.5 h-3.5" /> Tersalin!
-                    </span>
-                  ) : (
-                    <Copy className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
-                  )}
-                </div>
-                <div className="font-mono text-base font-bold tracking-wider text-[var(--cream-50)]">
-                  7283 829 102
-                </div>
-                <div className="text-[11px] text-[var(--sage-300)] truncate">
-                  a.n [KONFIRMASI] Yayasan Ajirasa Aksara Semesta
-                </div>
-              </div>
-
-              <div
-                onClick={() => copyToClipboard("1370029384721", "Mandiri")}
-                className="group cursor-pointer p-3 rounded-xl bg-[var(--green-900)]/60 border border-[var(--gold-500)]/30 hover:border-[var(--gold-400)] transition-all"
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => e.key === "Enter" && copyToClipboard("1370029384721", "Mandiri")}
-              >
-                <div className="flex items-center justify-between text-xs text-[var(--gold-300)] font-medium mb-1">
-                  <span>Bank Mandiri</span>
-                  {copiedBank === "Mandiri" ? (
-                    <span className="flex items-center gap-1 text-[var(--gold-400)] text-[11px] font-bold">
-                      <Check className="w-3.5 h-3.5" /> Tersalin!
-                    </span>
-                  ) : (
-                    <Copy className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
-                  )}
-                </div>
-                <div className="font-mono text-base font-bold tracking-wider text-[var(--cream-50)]">
-                  137 002 938 4721
-                </div>
-                <div className="text-[11px] text-[var(--sage-300)] truncate">
-                  a.n [KONFIRMASI] Yayasan Sahabat Aksara
-                </div>
-              </div>
+            <div className="p-4 rounded-xl bg-[var(--green-900)]/60 border border-[var(--gold-500)]/30 text-xs text-[var(--cream-200)]/90 leading-relaxed">
+              <p className="font-semibold text-[var(--gold-300)] mb-1">Informasi rekening segera diumumkan</p>
+              <p>Transfer donasi saat ini dapat dikonfirmasikan langsung melalui email pengurus yayasan.</p>
             </div>
           </div>
 
@@ -166,13 +108,7 @@ export default function Footer() {
             <ul className="space-y-3 text-sm text-[var(--cream-200)]/90">
               <li className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-[var(--gold-400)] flex-shrink-0 mt-1" />
-                <span>[KONFIRMASI] Jakarta, Indonesia</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-[var(--gold-400)] flex-shrink-0" />
-                <a href="https://wa.me/6281234567890" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--gold-300)]">
-                  +62 812-3456-7890 (WhatsApp)
-                </a>
+                <span>Indonesia</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-[var(--gold-400)] flex-shrink-0" />

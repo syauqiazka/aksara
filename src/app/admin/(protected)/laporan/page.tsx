@@ -117,7 +117,7 @@ export default function AdminReportsListPage() {
                     {row.program.replace("_", " ")}
                   </td>
                   <td className="py-3 px-4 text-xs text-[var(--ink-600)]">
-                    {row.period_start} &mdash; {row.period_end}
+                    {row.period_start} s/d {row.period_end}
                   </td>
                   <td className="py-3 px-4 font-mono font-semibold">
                     {row.beneficiaries} Orang

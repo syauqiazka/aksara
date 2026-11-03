@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Copy, Check, Building2 } from "lucide-react";
+import { Copy, Check, Building2, Info } from "lucide-react";
 import { BankAccount } from "@/lib/db/types";
 
 export default function BankAccountsList({ initialAccounts }: { initialAccounts: BankAccount[] }) {
@@ -12,6 +12,22 @@ export default function BankAccountsList({ initialAccounts }: { initialAccounts:
     setCopiedIndex(idx);
     setTimeout(() => setCopiedIndex(null), 2500);
   };
+
+  if (!initialAccounts || initialAccounts.length === 0) {
+    return (
+      <div className="max-w-2xl mx-auto p-8 rounded-3xl bg-[var(--green-950)] text-[var(--cream-50)] border border-[var(--gold-500)]/30 text-center shadow-lg">
+        <div className="w-12 h-12 rounded-2xl bg-[var(--green-900)] text-[var(--gold-400)] flex items-center justify-center mx-auto mb-4 border border-[var(--gold-500)]/30">
+          <Info className="w-6 h-6" />
+        </div>
+        <h4 className="font-serif text-xl font-bold text-[var(--cream-50)]">
+          Informasi rekening segera diumumkan
+        </h4>
+        <p className="text-sm text-[var(--cream-200)]/80 mt-2 max-w-md mx-auto leading-relaxed">
+          Penyaluran transfer infak saat ini dikoordinasikan langsung bersama pengurus yayasan demi transparansi dan akuntabilitas pencatatan amanah.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -63,4 +79,3 @@ export default function BankAccountsList({ initialAccounts }: { initialAccounts:
     </div>
   );
 }
-

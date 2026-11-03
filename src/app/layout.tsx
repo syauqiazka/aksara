@@ -28,7 +28,7 @@ const amiri = Amiri({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://sahabataksara.id"),
   title: {
-    default: "Yayasan Sahabat Aksara — Satu Mushaf, Sejuta Pahala Abadi",
+    default: "Yayasan Sahabat Aksara: Satu Mushaf, Sejuta Pahala Abadi",
     template: "%s | Yayasan Sahabat Aksara",
   },
   description:
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     locale: "id_ID",
     url: "/",
     siteName: "Yayasan Sahabat Aksara",
-    title: "Yayasan Sahabat Aksara — Satu Mushaf, Sejuta Pahala Abadi",
+    title: "Yayasan Sahabat Aksara: Satu Mushaf, Sejuta Pahala Abadi",
     description:
       "Lembaga nirlaba yang berkhidmat dalam 4 pilar utama: Spiritual, Sosial, Pendidikan, dan Teknologi untuk membangun peradaban umat yang mulia dan mandiri.",
     images: [

@@ -56,7 +56,7 @@ export default async function LaporanPage() {
                   <div className="flex items-center justify-between gap-2 mb-3">
                     <span className="text-xs text-[var(--gold-700)] font-semibold uppercase tracking-wider flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5" />
-                      <span>{rep.period_start} &mdash; {rep.period_end}</span>
+                      <span>{rep.period_start} s/d {rep.period_end}</span>
                     </span>
                     <Badge variant="neutral">
                       {rep.program.replace("_", " ")}

@@ -30,7 +30,7 @@ export default function AksaraMarquee() {
                 {item.word}
               </span>
               <span className="text-xs text-[var(--gold-400)]/80 italic font-serif">
-                &mdash; {item.desc.slice(0, 32)}...
+                : {item.desc.slice(0, 32)}...
               </span>
             </button>
           ))}

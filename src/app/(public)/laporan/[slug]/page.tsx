@@ -42,7 +42,7 @@ export default async function LaporanDetailPage({ params }: Props) {
           </Link>
 
           <div className="flex items-center gap-3 text-xs text-[var(--gold-400)] uppercase tracking-wider mb-4 font-semibold">
-            <span>Periode: {report.period_start} &mdash; {report.period_end}</span>
+            <span>Periode: {report.period_start} s/d {report.period_end}</span>
             <span>&bull;</span>
             <span>Program: {report.program.replace("_", " ")}</span>
           </div>

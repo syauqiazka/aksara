@@ -10,14 +10,16 @@ import {
   AggregatedStats
 } from './types';
 
-// Initial local seed state
-const infakList: InfakDistribution[] = [
+// Mode Demo: hanya memuat data simulasi jika NEXT_PUBLIC_DEMO=true
+const isDemo = process.env.NEXT_PUBLIC_DEMO === 'true';
+
+const demoInfakList: InfakDistribution[] = [
   {
     id: "infak-1",
     mushaf_no: 1,
     donor_name: "Inayah Binti Kartoni",
     show_donor_name: true,
-    recipient_name: "Pondok Pesantren Al-Hikmah",
+    recipient_name: "Pondok Pesantren Al-Hikmah (Contoh)",
     recipient_type: "pesantren",
     province: "Jawa Barat",
     city: "Bogor",
@@ -35,9 +37,9 @@ const infakList: InfakDistribution[] = [
   {
     id: "infak-2",
     mushaf_no: 2,
-    donor_name: "Keluarga Bpk. H. Sutrisno",
+    donor_name: "Hamba Allah",
     show_donor_name: false,
-    recipient_name: "Madrasah Diniyah Nurul Iman",
+    recipient_name: "Madrasah Diniyah Nurul Iman (Contoh)",
     recipient_type: "madrasah",
     province: "Banten",
     city: "Serang",
@@ -55,9 +57,9 @@ const infakList: InfakDistribution[] = [
   {
     id: "infak-3",
     mushaf_no: 3,
-    donor_name: "Ibu Hj. Siti Rahmah",
+    donor_name: "Hamba Allah",
     show_donor_name: true,
-    recipient_name: "Masjid Jami Al-Barkah",
+    recipient_name: "Masjid Jami Al-Barkah (Contoh)",
     recipient_type: "masjid",
     province: "Jawa Tengah",
     city: "Magelang",
@@ -77,7 +79,7 @@ const infakList: InfakDistribution[] = [
     mushaf_no: 4,
     donor_name: "Hamba Allah",
     show_donor_name: false,
-    recipient_name: "Pesantren Tahfidz Darul Furqon",
+    recipient_name: "Pesantren Tahfidz Darul Furqon (Contoh)",
     recipient_type: "pesantren",
     province: "Jawa Timur",
     city: "Malang",
@@ -95,9 +97,9 @@ const infakList: InfakDistribution[] = [
   {
     id: "infak-5",
     mushaf_no: 5,
-    donor_name: "Dr. Hendra Wijaya",
+    donor_name: "Hamba Allah",
     show_donor_name: true,
-    recipient_name: "Rumah Qur'an As-Salam",
+    recipient_name: "Rumah Qur'an As-Salam (Contoh)",
     recipient_type: "lainnya",
     province: "DI Yogyakarta",
     city: "Sleman",
@@ -134,10 +136,12 @@ const infakList: InfakDistribution[] = [
   }
 ];
 
-const geberList: GeberMasjidDistribution[] = [
+const infakList: InfakDistribution[] = isDemo ? demoInfakList : [];
+
+const demoGeberList: GeberMasjidDistribution[] = [
   {
     id: "geber-1",
-    mosque_name: "Masjid Agung Al-Barkah",
+    mosque_name: "Masjid Agung Al-Barkah (Contoh)",
     province: "Jawa Barat",
     city: "Bekasi",
     district: "Bekasi Selatan",
@@ -154,7 +158,7 @@ const geberList: GeberMasjidDistribution[] = [
   },
   {
     id: "geber-2",
-    mosque_name: "Masjid Baiturrahim",
+    mosque_name: "Masjid Baiturrahim (Contoh)",
     province: "Banten",
     city: "Tangerang Selatan",
     district: "Pamulang",
@@ -171,7 +175,7 @@ const geberList: GeberMasjidDistribution[] = [
   },
   {
     id: "geber-3",
-    mosque_name: "Masjid At-Taqwa",
+    mosque_name: "Masjid At-Taqwa (Contoh)",
     province: "DKI Jakarta",
     city: "Jakarta Timur",
     district: "Cipayung",
@@ -188,7 +192,7 @@ const geberList: GeberMasjidDistribution[] = [
   },
   {
     id: "geber-4",
-    mosque_name: "Masjid Darussalam",
+    mosque_name: "Masjid Darussalam (Contoh)",
     province: "Jawa Barat",
     city: "Bandung Barat",
     district: "Padalarang",
@@ -222,7 +226,9 @@ const geberList: GeberMasjidDistribution[] = [
   }
 ];
 
-const reportList: Report[] = [
+const geberList: GeberMasjidDistribution[] = isDemo ? demoGeberList : [];
+
+const demoReportList: Report[] = [
   {
     id: "rep-1",
     slug: "laporan-infak-mushaf-q1-2026",
@@ -278,6 +284,8 @@ const reportList: Report[] = [
     updated_at: "2026-04-06T15:00:00Z"
   }
 ];
+
+const reportList: Report[] = isDemo ? demoReportList : [];
 
 const themedCampaignsList: ThemedCampaign[] = [
   {
@@ -339,24 +347,11 @@ const galleryList: GalleryItem[] = [
   }
 ];
 
-let bankAccounts: BankAccount[] = [
-  {
-    bank: "BSI (Bank Syariah Indonesia)",
-    number: "7283829102",
-    holder: "Yayasan Ajirasa Aksara Semesta",
-    branch: "KCP Jakarta"
-  },
-  {
-    bank: "Bank Mandiri",
-    number: "1370029384721",
-    holder: "Yayasan Sahabat Aksara",
-    branch: "Jakarta Thamrin"
-  }
-];
+let bankAccounts: BankAccount[] = [];
 
 let contactInfo: ContactInfo = {
-  whatsapp: "+6281234567890",
-  phone: "+62215551234",
+  whatsapp: "",
+  phone: "",
   email: "kontak@sahabataksara.id",
   address: "Jl. Aksara No. 1, Jakarta, Indonesia"
 };

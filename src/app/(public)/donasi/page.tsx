@@ -7,6 +7,7 @@ import {
   Copy,
   CheckCircle2,
   Phone,
+  Mail,
   AlertTriangle,
   Building,
   Image as ImageIcon,
@@ -74,15 +75,25 @@ export default async function DonasiPage() {
               Konfirmasikan bukti transfer dan kirimkan nama custom yang ingin dicetak pada cover mushaf melalui kontak resmi layanan donatur kami.
             </p>
           </div>
-          <a
-            href={`https://wa.me/${contact.whatsapp.replace(/[^0-9]/g, "")}?text=Assalamu'alaikum%20Sahabat%20Aksara,%20saya%20sudah%20melakukan%20transfer%20donasi...`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-semibold text-base bg-gold-gradient text-[var(--green-950)] hover:brightness-110 shadow-lg flex-shrink-0"
-          >
-            <Phone className="w-5 h-5 text-[var(--green-950)]" />
-            <span>Konfirmasi via WhatsApp</span>
-          </a>
+          {contact.whatsapp ? (
+            <a
+              href={`https://wa.me/${contact.whatsapp.replace(/[^0-9]/g, "")}?text=Assalamu'alaikum%20Sahabat%20Aksara,%20saya%20sudah%20melakukan%20transfer%20donasi...`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-semibold text-base bg-gold-gradient text-[var(--green-950)] hover:brightness-110 shadow-lg flex-shrink-0"
+            >
+              <Phone className="w-5 h-5 text-[var(--green-950)]" />
+              <span>Konfirmasi via WhatsApp</span>
+            </a>
+          ) : (
+            <a
+              href={`mailto:${contact.email}?subject=Konfirmasi%20Donasi%20Sahabat%20Aksara`}
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-semibold text-base bg-gold-gradient text-[var(--green-950)] hover:brightness-110 shadow-lg flex-shrink-0"
+            >
+              <Mail className="w-5 h-5 text-[var(--green-950)]" />
+              <span>Konfirmasi via Email</span>
+            </a>
+          )}
         </div>
       </section>
 

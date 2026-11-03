@@ -193,7 +193,7 @@ export default function TentangPage() {
               Makna Filosofis Logo Sahabat Aksara
             </h2>
             <p className="text-sm text-[var(--ink-600)] mt-3">
-              Cincin ganda, sepasang tangan, bola dunia, tunas bertumbuh, dan lembaran terbuka — sebuah ikrar pengabdian tanpa henti.
+              Cincin ganda, sepasang tangan, bola dunia, tunas bertumbuh, dan lembaran terbuka: sebuah ikrar pengabdian tanpa henti.
             </p>
           </div>
 

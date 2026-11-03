@@ -25,6 +25,7 @@ export default function AdminInfakListPage() {
   const [showImportModal, setShowImportModal] = useState(false);
   const [csvText, setCsvText] = useState("");
   const [importStatus, setImportStatus] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -33,7 +34,7 @@ export default function AdminInfakListPage() {
       const list = await res.json();
       if (Array.isArray(list)) setData(list);
     } catch {
-      // fallback
+      setFeedback({ type: "error", message: "Gagal memuat data dari server." });
     } finally {
       setLoading(false);
     }
@@ -51,9 +52,10 @@ export default function AdminInfakListPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...item, status: nextStatus }),
       });
+      setFeedback({ type: "success", message: `Status mushaf #${item.mushaf_no} berhasil diubah ke ${nextStatus}.` });
       fetchData();
     } catch {
-      alert("Gagal memperbarui status");
+      setFeedback({ type: "error", message: "Gagal memperbarui status data." });
     }
   };
 
@@ -61,9 +63,10 @@ export default function AdminInfakListPage() {
     if (!confirm(`Hapus data penyaluran mushaf #${no}?`)) return;
     try {
       await fetch(`/api/admin/infak?id=${id}`, { method: "DELETE" });
+      setFeedback({ type: "success", message: `Data penyaluran mushaf #${no} berhasil dihapus.` });
       fetchData();
     } catch {
-      alert("Gagal menghapus data");
+      setFeedback({ type: "error", message: "Gagal menghapus data penyaluran." });
     }
   };
 
@@ -133,6 +136,26 @@ export default function AdminInfakListPage() {
           </Link>
         </div>
       </div>
+
+      {feedback && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`px-4 py-3 rounded-xl text-xs flex items-center justify-between border ${
+            feedback.type === "success"
+              ? "bg-[var(--green-50)] border-[var(--green-200)] text-[var(--green-900)]"
+              : "bg-red-50 border-red-200 text-red-900"
+          }`}
+        >
+          <span>{feedback.message}</span>
+          <button
+            onClick={() => setFeedback(null)}
+            className="text-[11px] font-semibold underline ml-3"
+          >
+            Tutup
+          </button>
+        </div>
+      )}
 
       {/* Filter and Search Bar */}
       <div className="p-4 rounded-2xl bg-[var(--cream-100)] border border-[var(--cream-200)] flex flex-col sm:flex-row gap-4 justify-between items-center">

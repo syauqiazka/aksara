@@ -282,7 +282,7 @@ export default async function HomePage() {
               >
                 <div>
                   <div className="text-xs text-[var(--gold-700)] font-semibold uppercase tracking-wider mb-2">
-                    Periode: {rep.period_start} &mdash; {rep.period_end}
+                    Periode: {rep.period_start} s/d {rep.period_end}
                   </div>
                   <h3 className="font-serif text-xl font-bold text-[var(--ink-900)] mb-3 leading-snug">
                     {rep.title}

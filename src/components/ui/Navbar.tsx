@@ -43,7 +43,7 @@ export default function Navbar() {
         {/* Brand Logo */}
         <Link
           href="/"
-          className="flex items-center gap-3 group outline-none focus:outline-none focus-visible:outline-none rounded-lg p-1 select-none"
+          className="flex items-center gap-3 group rounded-lg p-1 select-none focus-visible:ring-2 focus-visible:ring-[var(--gold-500)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--green-950)] focus-visible:outline-none"
         >
           <div className="relative w-11 h-11 rounded-full overflow-hidden border-2 border-[var(--gold-500)] shadow-sm bg-[var(--green-900)] flex-shrink-0 transition-transform duration-300 group-hover:scale-105">
             <Image
@@ -73,7 +73,7 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm font-medium transition-all relative py-1 px-1 outline-none focus:outline-none focus-visible:outline-none ${
+                className={`text-sm font-medium transition-all relative py-1 px-1.5 rounded-md focus-visible:ring-2 focus-visible:ring-[var(--gold-500)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--green-950)] focus-visible:outline-none ${
                   isActive
                     ? "text-[var(--gold-400)] font-semibold"
                     : "text-[var(--cream-100)] hover:text-[var(--gold-300)]"
@@ -102,7 +102,7 @@ export default function Navbar() {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 text-[var(--cream-50)] hover:text-[var(--gold-300)] outline-none rounded-lg"
+            className="lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center p-2.5 text-[var(--cream-50)] hover:text-[var(--gold-300)] rounded-lg focus-visible:ring-2 focus-visible:ring-[var(--gold-500)] focus-visible:outline-none"
             aria-expanded={mobileMenuOpen}
             aria-label={mobileMenuOpen ? "Tutup Menu" : "Buka Menu"}
           >

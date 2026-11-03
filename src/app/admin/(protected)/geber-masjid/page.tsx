@@ -9,6 +9,7 @@ export default function AdminGeberListPage() {
   const [data, setData] = useState<GeberMasjidDistribution[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -17,7 +18,7 @@ export default function AdminGeberListPage() {
       const list = await res.json();
       if (Array.isArray(list)) setData(list);
     } catch {
-      // fallback
+      setFeedback({ type: "error", message: "Gagal memuat data sebaran Geber Masjid." });
     } finally {
       setLoading(false);
     }
@@ -35,9 +36,10 @@ export default function AdminGeberListPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...item, status: nextStatus }),
       });
+      setFeedback({ type: "success", message: `Status kegiatan di ${item.mosque_name} diubah ke ${nextStatus}.` });
       fetchData();
     } catch {
-      alert("Gagal memperbarui status");
+      setFeedback({ type: "error", message: "Gagal memperbarui status kegiatan." });
     }
   };
 
@@ -45,9 +47,10 @@ export default function AdminGeberListPage() {
     if (!confirm(`Hapus data kegiatan Geber Masjid di ${name}?`)) return;
     try {
       await fetch(`/api/admin/geber?id=${id}`, { method: "DELETE" });
+      setFeedback({ type: "success", message: `Data kegiatan di ${name} berhasil dihapus.` });
       fetchData();
     } catch {
-      alert("Gagal menghapus data");
+      setFeedback({ type: "error", message: "Gagal menghapus data kegiatan." });
     }
   };
 
@@ -79,6 +82,26 @@ export default function AdminGeberListPage() {
           <span>Tambah Geber Masjid</span>
         </Link>
       </div>
+
+      {feedback && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`px-4 py-3 rounded-xl text-xs flex items-center justify-between border ${
+            feedback.type === "success"
+              ? "bg-[var(--green-50)] border-[var(--green-200)] text-[var(--green-900)]"
+              : "bg-red-50 border-red-200 text-red-900"
+          }`}
+        >
+          <span>{feedback.message}</span>
+          <button
+            onClick={() => setFeedback(null)}
+            className="text-[11px] font-semibold underline ml-3"
+          >
+            Tutup
+          </button>
+        </div>
+      )}
 
       <div className="p-4 rounded-2xl bg-[var(--cream-100)] border border-[var(--cream-200)] flex justify-between items-center">
         <div className="relative w-full sm:w-80">

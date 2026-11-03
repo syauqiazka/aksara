@@ -118,13 +118,13 @@ export default function HeroShowcase({ totalMushaf, totalMasjid }: HeroShowcaseP
             </div>
 
             {/* Floating Live Badge 1: Mushaf Tersalurkan */}
-            <div className="absolute -top-4 -left-4 sm:-left-6 bg-[var(--green-900)]/95 backdrop-blur-md border-2 border-[var(--gold-500)] px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-[float_4s_ease-in-out_infinite]">
+            <div className="absolute -top-4 -left-4 sm:-left-6 bg-[var(--green-900)] border-2 border-[var(--gold-500)] px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-[float_4s_ease-in-out_infinite]">
               <div className="w-10 h-10 rounded-xl bg-[var(--green-800)] text-[var(--gold-400)] flex items-center justify-center">
                 <BookOpen className="w-5 h-5" />
               </div>
               <div>
                 <div className="font-mono text-lg font-extrabold text-gold-gradient">
-                  {totalMushaf.toLocaleString("id-ID")}+
+                  {totalMushaf > 0 ? `${totalMushaf.toLocaleString("id-ID")}+` : "0"}
                 </div>
                 <div className="text-[10px] uppercase tracking-wider text-[var(--cream-200)] font-semibold">
                   Mushaf Tersalurkan
@@ -133,7 +133,7 @@ export default function HeroShowcase({ totalMushaf, totalMasjid }: HeroShowcaseP
             </div>
 
             {/* Floating Live Badge 2: Geber Masjid */}
-            <div className="absolute -bottom-4 -right-4 sm:-right-6 bg-[var(--green-900)]/95 backdrop-blur-md border-2 border-[var(--gold-500)] px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-[float_5s_ease-in-out_infinite_reverse]">
+            <div className="absolute -bottom-4 -right-4 sm:-right-6 bg-[var(--green-900)] border-2 border-[var(--gold-500)] px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-[float_5s_ease-in-out_infinite_reverse]">
               <div className="w-10 h-10 rounded-xl bg-[var(--gold-500)] text-[var(--green-950)] flex items-center justify-center">
                 <Building className="w-5 h-5" />
               </div>
@@ -157,6 +157,12 @@ export default function HeroShowcase({ totalMushaf, totalMasjid }: HeroShowcaseP
           }
           50% {
             transform: translateY(-8px);
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          :global(.animate-\[float_4s_ease-in-out_infinite\]),
+          :global(.animate-\[float_5s_ease-in-out_infinite_reverse\]) {
+            animation: none !important;
           }
         }
       `}</style>
