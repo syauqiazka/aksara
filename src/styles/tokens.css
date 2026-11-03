@@ -1,0 +1,80 @@
+:root {
+  /* Core brand colors */
+  --green-950: #06210F;
+  --green-900: #0C3A18;
+  --green-800: #114A1C;
+  --green-700: #1A5F2A;
+  --green-600: #2C7A3F;
+
+  --gold-300: #EAD58A;
+  --gold-400: #E0BF4F;
+  --gold-500: #D4AF37;
+  --gold-600: #B8922A;
+  --gold-700: #8A6A12;
+
+  /* Neutrals & secondary */
+  --cream-50: #FBF8EF;
+  --cream-100: #F5EFDD;
+  --cream-200: #EBE2C8;
+  --sage-100: #E4EDDF;
+  --sage-300: #B5CBAD;
+  --sage-500: #6F9269;
+  --teal-600: #1F7A74;
+  --terracotta-500: #C8793F;
+  --terracotta-100: #F4E2D2;
+  --ink-900: #14231A;
+  --ink-600: #3E5246;
+  --ink-400: #6B7C71;
+
+  /* Semantic */
+  --success: #2C7A3F;
+  --warning: #C98A1B;
+  --danger: #B3382C;
+  --info: #1F7A74;
+
+  /* Radii */
+  --r-sm: 8px;
+  --r-md: 16px;
+  --r-lg: 28px;
+  --r-pill: 9999px;
+
+  /* Elevations */
+  --shadow-sm: 0 1px 2px rgba(20, 35, 26, 0.06);
+  --shadow-md: 0 12px 32px -12px rgba(12, 58, 24, 0.25);
+  --border-gold-glow: 1px solid rgba(212, 175, 55, 0.3);
+
+  /* Motion timing */
+  --dur-xs: 0.2s;
+  --dur-sm: 0.4s;
+  --dur-md: 0.7s;
+  --dur-lg: 1.1s;
+  --dur-xl: 1.8s;
+  --stagger-fast: 0.04s;
+  --stagger-normal: 0.08s;
+}
+
+/* Arch/Mihrab utility shape */
+.shape-mihrab {
+  border-top-left-radius: 9999px;
+  border-top-right-radius: 9999px;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+/* Gold shimmer gradient */
+.text-gold-gradient {
+  background: linear-gradient(135deg, var(--gold-300) 0%, var(--gold-500) 50%, var(--gold-700) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.bg-gold-gradient {
+  background: linear-gradient(135deg, var(--gold-400) 0%, var(--gold-500) 50%, var(--gold-600) 100%);
+}
+
+.border-gold-double {
+  border-top: 1px solid var(--gold-500);
+  border-bottom: 1px solid var(--gold-500);
+  box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.3);
+}
+
