@@ -12,21 +12,26 @@ interface StatCounterProps {
   sublabel?: string;
 }
 
-export default function StatCounter({ end, label, prefix = "", suffix = "", sublabel }: StatCounterProps) {
+export default function StatCounter({
+  end,
+  label,
+  prefix = "",
+  suffix = "",
+  sublabel,
+}: StatCounterProps) {
   const [displayValue, setDisplayValue] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const hasAnimated = useRef(false);
 
   useEffect(() => {
-    const { ScrollTrigger } = registerGSAP();
-
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) {
       setDisplayValue(end);
       return;
     }
 
-    const obj = { val: 0 };
+    const { ScrollTrigger } = registerGSAP();
+    const counter = { value: 0 };
     const trigger = ScrollTrigger.create({
       trigger: containerRef.current,
       start: "top 85%",
@@ -34,38 +39,36 @@ export default function StatCounter({ end, label, prefix = "", suffix = "", subl
       onEnter: () => {
         if (hasAnimated.current) return;
         hasAnimated.current = true;
-        gsap.to(obj, {
-          val: end,
-          duration: 2.2,
+        gsap.to(counter, {
+          value: end,
+          duration: 1.6,
           ease: "power2.out",
-          onUpdate: () => {
-            setDisplayValue(Math.floor(obj.val));
-          },
+          onUpdate: () => setDisplayValue(Math.floor(counter.value)),
         });
       },
     });
 
-    return () => {
-      trigger.kill();
-    };
+    return () => trigger.kill();
   }, [end]);
 
   return (
-    <div ref={containerRef} className="flex flex-col items-center sm:items-start text-center sm:text-left">
-      <div className="font-serif font-bold text-3xl sm:text-4xl lg:text-5xl text-gold-gradient tabular-numbers tracking-tight">
+    <div
+      ref={containerRef}
+      className="flex min-h-[148px] flex-col items-center justify-center px-3 text-center"
+    >
+      <div className="font-serif font-bold text-5xl sm:text-6xl lg:text-[4.25rem] leading-none text-gold-gradient tabular-nums tracking-tight">
         {prefix}
         {displayValue.toLocaleString("id-ID")}
         {suffix}
       </div>
-      <div className="text-sm sm:text-base font-semibold text-[var(--cream-100)] mt-1">
+      <div className="mt-4 max-w-[15rem] text-sm sm:text-base font-semibold leading-snug text-[var(--cream-100)]">
         {label}
       </div>
       {sublabel && (
-        <div className="text-xs text-[var(--sage-300)] mt-0.5">
+        <div className="mt-2 max-w-[15rem] text-xs leading-relaxed text-[var(--sage-300)]">
           {sublabel}
         </div>
       )}
     </div>
   );
 }
-
