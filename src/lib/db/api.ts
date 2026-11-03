@@ -55,9 +55,9 @@ export const db = {
 
   async deleteInfak(id: string): Promise<boolean> {
     const client = getClient();
-    const { error } = await client.from("infak_distributions").delete().eq("id", id);
+    const { data, error } = await client.from("infak_distributions").delete().eq("id", id).select("id");
     throwIfError(error, "menghapus data infak");
-    return true;
+    return Boolean(data?.length);
   },
 
   async getGeberDistributions(onlyPublished = true): Promise<GeberMasjidDistribution[]> {
@@ -89,9 +89,9 @@ export const db = {
 
   async deleteGeber(id: string): Promise<boolean> {
     const client = getClient();
-    const { error } = await client.from("geber_masjid_distributions").delete().eq("id", id);
+    const { data, error } = await client.from("geber_masjid_distributions").delete().eq("id", id).select("id");
     throwIfError(error, "menghapus data Geber Masjid");
-    return true;
+    return Boolean(data?.length);
   },
 
   async getReports(onlyPublished = true): Promise<Report[]> {
@@ -130,9 +130,9 @@ export const db = {
 
   async deleteReport(id: string): Promise<boolean> {
     const client = getClient();
-    const { error } = await client.from("reports").delete().eq("id", id);
+    const { data, error } = await client.from("reports").delete().eq("id", id).select("id");
     throwIfError(error, "menghapus laporan");
-    return true;
+    return Boolean(data?.length);
   },
 
   async getThemedCampaigns(): Promise<ThemedCampaign[]> {
