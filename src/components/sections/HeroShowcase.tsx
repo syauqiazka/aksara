@@ -1,16 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import {
   HeartHandshake,
   MapPin,
-  Sparkles,
   ShieldCheck,
   CheckCircle2,
   BookOpen,
   Award,
-  Users,
   Building,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
@@ -31,10 +28,9 @@ export default function HeroShowcase({ totalMushaf, totalMasjid }: HeroShowcaseP
       <div className="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         {/* Left Column: Headline & Value Proposition */}
         <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-          {/* Institution Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--green-900)] border border-[var(--gold-500)]/40 text-[var(--gold-300)] text-xs font-semibold shadow-md">
-            <span className="w-2 h-2 rounded-full bg-[var(--gold-400)] animate-pulse" />
-            <span>Yayasan Sahabat Aksara &bull; Badan Nirlaba Terdaftar</span>
+          {/* Eyebrow Label (Text without pill container per R-24 / antislop) */}
+          <div className="text-xs uppercase tracking-[0.2em] text-[var(--gold-400)] font-semibold">
+            Yayasan Sahabat Aksara &bull; Badan Nirlaba Terdaftar
           </div>
 
           {/* Main Title with Fraunces Display Font */}
@@ -88,7 +84,7 @@ export default function HeroShowcase({ totalMushaf, totalMasjid }: HeroShowcaseP
           </div>
         </div>
 
-        {/* Right Column: Layered Card Composition (Like SMK TI Bazma / Bazma) */}
+        {/* Right Column: Layered Card Composition */}
         <div className="lg:col-span-5 relative flex justify-center">
           <div className="relative w-full max-w-md">
             {/* Main Featured Photo Card */}

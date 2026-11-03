@@ -3,7 +3,7 @@ import Link from "next/link";
 import { organizationContent } from "@/content/organization";
 import InteractiveLogoHotspots from "@/components/sections/InteractiveLogoHotspots";
 import Button from "@/components/ui/Button";
-import { Sparkles, Quote, Award, Heart, CheckCircle2 } from "lucide-react";
+import { Quote, Award, Heart, CheckCircle2 } from "lucide-react";
 
 export const metadata = {
   title: "Tentang Kami & Makna Filosofis Logo",
@@ -20,9 +20,8 @@ export default function TentangPage() {
       <section className="relative py-20 bg-[var(--green-950)] text-[var(--cream-50)] px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 bg-islamic-stars opacity-25 pointer-events-none" />
         <div className="relative z-10 max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--green-900)] border border-[var(--gold-500)]/40 text-[var(--gold-300)] text-xs font-semibold mb-6">
-            <Sparkles className="w-4 h-4 text-[var(--gold-400)]" />
-            <span>Profil & Rekam Jejak Lembaga</span>
+          <div className="text-xs uppercase tracking-[0.2em] text-[var(--gold-400)] font-semibold mb-4">
+            Profil & Rekam Jejak Lembaga
           </div>
           <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-bold [text-wrap:balance]">
             Berkhidmat Menghidupkan Nur Al-Qur&apos;an di Seluruh Penjuru Semesta

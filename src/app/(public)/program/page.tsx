@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { programsContent } from "@/content/programs";
 import Button from "@/components/ui/Button";
-import { ArrowRight, BookOpen, Sparkles, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 
 export const metadata = {
   title: "Program Lembaga",
@@ -17,9 +17,8 @@ export default function ProgramPage() {
       <section className="relative py-20 bg-[var(--green-950)] text-[var(--cream-50)] px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 bg-islamic-stars opacity-25 pointer-events-none" />
         <div className="relative z-10 max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--green-900)] border border-[var(--gold-500)]/40 text-[var(--gold-300)] text-xs font-semibold mb-6">
-            <Sparkles className="w-4 h-4 text-[var(--gold-400)]" />
-            <span>Portofolio Pengabdian Umat</span>
+          <div className="text-xs uppercase tracking-[0.2em] text-[var(--gold-400)] font-semibold mb-4">
+            Portofolio Pengabdian Umat
           </div>
           <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-bold [text-wrap:balance]">
             Program Nyata Menjawab Kebutuhan Ummat

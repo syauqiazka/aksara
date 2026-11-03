@@ -2,28 +2,16 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   HeartHandshake,
-  MapPin,
   ArrowRight,
-  Sparkles,
-  ShieldCheck,
-  CheckCircle2,
-  BookOpen,
-  Award,
-  Users2,
-  Building,
-  Calculator,
 } from "lucide-react";
 import { db } from "@/lib/db/api";
 import { organizationContent } from "@/content/organization";
 import Preloader from "@/components/motion/Preloader";
 import StatCounter from "@/components/motion/StatCounter";
 import AksaraMarquee from "@/components/motion/AksaraMarquee";
-import AnnouncementTicker from "@/components/sections/AnnouncementTicker";
 import HeroShowcase from "@/components/sections/HeroShowcase";
-import InfaqCalculator from "@/components/sections/InfaqCalculator";
 import HomeProgramsTab from "@/components/sections/HomeProgramsTab";
 import IndonesiaMap from "@/components/sections/IndonesiaMap";
-import HomeFAQ from "@/components/sections/HomeFAQ";
 import Button from "@/components/ui/Button";
 
 export default async function HomePage() {
@@ -36,35 +24,13 @@ export default async function HomePage() {
     <div className="flex flex-col w-full overflow-hidden">
       <Preloader />
 
-      {/* 1. TOP ANNOUNCEMENT TICKER (Bazma / SMK TI Bazma Style) */}
-      <AnnouncementTicker />
-
-      {/* 2. SPLIT HERO SHOWCASE WITH FLOATING LIVE BADGES */}
+      {/* 1. HERO SHOWCASE */}
       <HeroShowcase totalMushaf={stats.totalMushaf} totalMasjid={stats.totalMasjid} />
 
-      {/* 3. INTERACTIVE IMPACT CALCULATOR (Kalkulator Kebaikan Langsung di Beranda) */}
-      <section className="py-16 bg-[var(--green-900)] text-[var(--cream-50)] px-4 sm:px-6 lg:px-8 border-y border-[var(--gold-500)]/20">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--gold-300)]">
-              Simulasi Jariyah
-            </span>
-            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[var(--cream-50)] mt-2">
-              Kalkulator Kebaikan Mushaf
-            </h2>
-            <p className="text-xs sm:text-sm text-[var(--cream-200)]/80 mt-2">
-              Pilih jumlah mushaf atau tentukan nama custom yang ingin diabadikan di lembar Al-Qur&apos;an santri pelosok.
-            </p>
-          </div>
-
-          <InfaqCalculator />
-        </div>
-      </section>
-
-      {/* 4. MARQUEE NILAI (A-K-S-A-R-A) */}
+      {/* 2. MARQUEE NILAI (A-K-S-A-R-A) */}
       <AksaraMarquee />
 
-      {/* 5. DYNAMIC STATS COUNTER GRID */}
+      {/* 3. ANGKA DAMPAK (DYNAMIC STATS COUNTER GRID) */}
       <section className="relative py-24 sm:py-28 bg-[var(--green-950)] text-[var(--cream-50)] border-b border-[var(--gold-500)]/20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-12">
@@ -102,7 +68,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 6. EMPAT PILAR UTAMA (Warm Cream Background) */}
+      {/* 4. EMPAT PILAR UTAMA (Warm Cream Background) */}
       <section className="py-24 bg-[var(--cream-50)] text-[var(--ink-900)] px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="max-w-3xl mb-16">
@@ -145,7 +111,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 7. PROGRAM UNGGULAN DENGAN TAB PILAR (Bazma Style) */}
+      {/* 5. PROGRAM UNGGULAN */}
       <section className="py-24 bg-[var(--sage-100)] text-[var(--ink-900)] px-4 sm:px-6 lg:px-8 border-y border-[var(--sage-300)]/40">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
@@ -170,7 +136,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 8. PETA SEBARAN NASIONAL INTERAKTIF */}
+      {/* 6. PETA SEBARAN NASIONAL INTERAKTIF */}
       <section className="py-24 bg-[var(--green-950)] text-[var(--cream-50)] px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-12">
@@ -181,7 +147,7 @@ export default async function HomePage() {
               Jejak Titik Penyaluran Nusantara
             </h2>
             <p className="text-sm text-[var(--cream-200)]/80 mt-3">
-              Lokasi penyaluran yang telah dipublikasikan ditampilkan pada peta berikut.
+              Lokasi penyaluran yang telah diverifikasi ditampilkan pada peta interaktif nusantara berikut.
             </p>
           </div>
 
@@ -195,7 +161,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 9. KISAH FOUNDER & BIOGRAFI */}
+      {/* 7. KISAH FOUNDER & BIOGRAFI */}
       <section className="py-24 bg-[var(--cream-100)] text-[var(--ink-900)] px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Founder Portrait in Mihrab Frame */}
@@ -237,6 +203,9 @@ export default async function HomePage() {
               {organizationContent.founder.story[0]}
             </p>
             <p className="text-sm sm:text-base text-[var(--ink-600)] leading-relaxed">
+              {organizationContent.founder.story[1]}
+            </p>
+            <p className="text-sm sm:text-base text-[var(--ink-600)] leading-relaxed">
               {organizationContent.founder.story[2]}
             </p>
 
@@ -253,7 +222,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 10. LAPORAN PENYALURAN TERBARU (Transparansi) */}
+      {/* 8. LAPORAN PENYALURAN TERBARU (Transparansi) */}
       <section className="py-24 bg-[var(--cream-50)] text-[var(--ink-900)] px-4 sm:px-6 lg:px-8 border-t border-[var(--cream-200)]">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
@@ -310,38 +279,18 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 11. FAQ SECTION (Pertanyaan Umum Donatur) */}
-      <section className="py-24 bg-[var(--cream-100)] text-[var(--ink-900)] px-4 sm:px-6 lg:px-8 border-t border-[var(--cream-200)]">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--gold-700)]">
-              Tanya Jawab Donatur
-            </span>
-            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[var(--ink-900)] mt-2">
-              Pertanyaan yang Sering Diajukan
-            </h2>
-            <p className="text-sm text-[var(--ink-600)] mt-3">
-              Informasi lengkap seputar mekanisme pencetakan nama donatur, legalitas yayasan, dan tata kelola penyaluran.
-            </p>
-          </div>
-
-          <HomeFAQ />
-        </div>
-      </section>
-
-      {/* 12. GRAND CALL TO ACTION */}
+      {/* 9. GRAND CALL TO ACTION */}
       <section className="py-24 bg-[var(--green-950)] text-[var(--cream-50)] text-center px-4 relative overflow-hidden">
         <div className="absolute inset-0 bg-islamic-pattern opacity-25 pointer-events-none" />
         <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--green-900)] border border-[var(--gold-500)]/40 text-[var(--gold-300)] text-xs font-semibold mb-6">
-            <Sparkles className="w-4 h-4 text-[var(--gold-400)]" />
-            <span>Sedekah Jariyah Mengalir Tiada Putus</span>
+          <div className="text-xs uppercase tracking-[0.2em] text-[var(--gold-400)] font-semibold mb-4">
+            Sedekah Jariyah Mengalir Tiada Putus
           </div>
           <h2 className="font-serif text-3xl sm:text-5xl font-bold [text-wrap:balance]">
             Mari Mengukir Nama di Lembar Al-Qur&apos;an Santri Pelosok
           </h2>
           <p className="mt-4 text-sm sm:text-base text-[var(--cream-200)]/90 leading-relaxed max-w-xl">
-            Setiap huruf yang dibaca dan dihafal akan terus mengalirkan pahala tanpa henti. Salurkan infak terbaik Anda hari ini.
+            Setiap huruf yang dibaca dan dihafal akan terus mengalirkan kebaikan. Salurkan infak terbaik Anda hari ini.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
             <Button href="/donasi" variant="gold" size="lg">

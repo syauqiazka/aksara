@@ -106,6 +106,20 @@ create table if not exists public.admin_users (
   created_at timestamptz default now()
 );
 
+-- Helper function to check if current user is admin without RLS recursion
+create or replace function public.is_admin()
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select coalesce(
+    (select true from public.admin_users where user_id = auth.uid() limit 1),
+    false
+  );
+$$;
+
 -- Enable RLS
 alter table public.infak_distributions enable row level security;
 alter table public.geber_masjid_distributions enable row level security;
@@ -134,25 +148,25 @@ create policy "Public can view themed campaigns" on public.themed_campaigns
 create policy "Public can view site settings" on public.site_settings
   for select using (true);
 
--- Admin CRUD policies
+-- Admin CRUD policies using security definer function
+create policy "Admins can view admin_users" on public.admin_users
+  for select using (auth.uid() = user_id);
+
 create policy "Admins have full access to infak" on public.infak_distributions
-  for all using (auth.uid() in (select user_id from public.admin_users));
+  for all using (public.is_admin());
 
 create policy "Admins have full access to geber" on public.geber_masjid_distributions
-  for all using (auth.uid() in (select user_id from public.admin_users));
+  for all using (public.is_admin());
 
 create policy "Admins have full access to reports" on public.reports
-  for all using (auth.uid() in (select user_id from public.admin_users));
+  for all using (public.is_admin());
 
 create policy "Admins have full access to gallery" on public.gallery_items
-  for all using (auth.uid() in (select user_id from public.admin_users));
+  for all using (public.is_admin());
 
 create policy "Admins have full access to campaigns" on public.themed_campaigns
-  for all using (auth.uid() in (select user_id from public.admin_users));
+  for all using (public.is_admin());
 
 create policy "Admins have full access to settings" on public.site_settings
-  for all using (auth.uid() in (select user_id from public.admin_users));
-
-create policy "Admins can view admin_users" on public.admin_users
-  for select using (auth.uid() in (select user_id from public.admin_users));
+  for all using (public.is_admin());
 

@@ -13,7 +13,7 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
+  SearchX,
 } from "lucide-react";
 import { InfakDistribution, GeberMasjidDistribution, AggregatedStats } from "@/lib/db/types";
 import IndonesiaMap from "@/components/sections/IndonesiaMap";
@@ -265,7 +265,7 @@ export default function DataSebaranView({
       {/* 4. Table & Cards */}
       {paginatedData.length === 0 ? (
         <div className="p-12 text-center rounded-3xl bg-[var(--cream-100)] border border-[var(--cream-200)]">
-          <Sparkles className="w-10 h-10 text-[var(--gold-600)] mx-auto mb-3" />
+          <SearchX className="w-10 h-10 text-[var(--ink-400)] mx-auto mb-3" />
           <h4 className="font-serif text-xl font-bold text-[var(--ink-900)]">
             Tidak Ada Data yang Cocok
           </h4>

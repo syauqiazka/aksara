@@ -111,7 +111,7 @@ Mode gelap pengguna: **tidak wajib**. Situs sudah punya section gelap alami; fok
 | `body` | 1rem / 1.7 | Isi |
 | `caption` | 0.875rem / 1.5 | Keterangan; jangan di bawah 14 px |
 
-Aturan: `letter-spacing` judul display −0.02em; eyebrow (label kecil) uppercase +0.14em, warna `--gold-700`/`--gold-400`. Paragraf maks ~68 karakter per baris. Judul besar selalu `text-wrap: balance`.
+Aturan: `letter-spacing` judul display −0.02em; eyebrow berupa teks polos tanpa bingkai pill, uppercase +0.14em, warna `--gold-700`/`--gold-400`. Paragraf maks ~68 karakter per baris. Judul besar selalu `text-wrap: balance`.
 
 ---
 
@@ -122,7 +122,7 @@ Aturan: `letter-spacing` judul display −0.02em; eyebrow (label kecil) uppercas
 - **Kartu program**: bentuk arch di atas untuk media, judul Fraunces, tag pilar, panah. Hover: gambar zoom 1.06, garis emas menjalar di tepi.
 - **Stat counter**: angka besar Fraunces emas, label kecil krem; hitung naik saat masuk viewport.
 - **Tabel data sebaran**: header hijau tua teks krem, baris zebra `--sage-100`, hover `--cream-100`, kolom angka rata kanan tabular. Sticky header. Mobile → kartu.
-- **Badge/tag**: pill kecil; warna per jenis (pesantren = hijau, masjid = emas, madrasah = teal, tematik = terracotta).
+- **Label kategori / Status**: teks kategori ringkas atau penanda status sederhana; warna per jenis (pesantren = hijau, masjid = emas, madrasah = teal, tematik = terracotta). Dilarang membungkus eyebrow di atas judul utama dengan bingkai pill/kapsul AI.
 - **Form (admin & publik)**: label di atas, input radius 8 px, border `--cream-200`, fokus ring emas, pesan error jelas (ikon + teks), tanpa mengandalkan warna saja.
 - **Footer**: `--green-950`, pola geometri samar, logo, rekening (salin dengan satu klik), kontak, medsos, garis ganda emas di atasnya.
 
