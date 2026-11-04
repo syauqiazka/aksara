@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, AlertCircle } from "lucide-react";
+import ImageUploader from "@/components/admin/ImageUploader";
 
 export default function AdminNewReportPage() {
   const router = useRouter();
@@ -191,6 +192,15 @@ export default function AdminNewReportPage() {
               className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
             />
           </div>
+        </div>
+
+        <div>
+          <ImageUploader
+            label="Foto Sampul / Cover Laporan *"
+            value={formData.cover_url}
+            onChange={(url) => setFormData({ ...formData, cover_url: url })}
+            helperText="Upload foto cover laporan kegiatan. Disimpan di Vercel Blob."
+          />
         </div>
 
         <div>

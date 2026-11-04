@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, AlertCircle } from "lucide-react";
+import ImageUploader from "@/components/admin/ImageUploader";
 
 export default function AdminNewGeberPage() {
   const router = useRouter();
@@ -21,6 +22,7 @@ export default function AdminNewGeberPage() {
     activity_date: new Date().toISOString().split("T")[0],
     participants: "25",
     activity_notes: "",
+    photo_url: "",
     status: "published",
   });
 
@@ -39,7 +41,7 @@ export default function AdminNewGeberPage() {
           lat: formData.lat ? parseFloat(formData.lat) : null,
           lng: formData.lng ? parseFloat(formData.lng) : null,
           activity_notes: formData.activity_notes || null,
-          photo_urls: [],
+          photo_urls: formData.photo_url ? [formData.photo_url] : [],
         }),
       });
 
@@ -179,6 +181,15 @@ export default function AdminNewGeberPage() {
               className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
             />
           </div>
+        </div>
+
+        <div>
+          <ImageUploader
+            label="Foto Dokumentasi Geber Masjid (Opsional)"
+            value={formData.photo_url}
+            onChange={(url) => setFormData({ ...formData, photo_url: url })}
+            helperText="Upload foto aksi pembersihan atau sanitasi masjid. Disimpan di Vercel Blob."
+          />
         </div>
 
         <div>

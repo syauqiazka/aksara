@@ -54,3 +54,27 @@ export const reportSchema = z.object({
 
 export type ReportInput = z.infer<typeof reportSchema>;
 
+export const gallerySchema = z.object({
+  title: z.string().min(2, "Judul foto minimal 2 karakter"),
+  program: z.string().min(2, "Nama program harus diisi"),
+  date: z.string().min(8, "Tanggal harus valid"),
+  image_url: z.string().min(2, "URL foto atau gambar harus diisi"),
+  caption: z.string().nullable().optional(),
+  status: z.enum(["draft", "published"]).default("published"),
+});
+
+export type GalleryInput = z.infer<typeof gallerySchema>;
+
+export const campaignSchema = z.object({
+  title: z.string().min(3, "Judul kampanye minimal 3 karakter"),
+  disaster_type: z.string().min(2, "Jenis bencana harus diisi"),
+  location: z.string().min(2, "Lokasi harus diisi"),
+  status: z.enum(["aktif", "selesai"]).default("aktif"),
+  description: z.string().min(10, "Deskripsi minimal 10 karakter"),
+  cover_url: z.string().nullable().optional(),
+  target_idr: z.coerce.number().min(0, "Target donasi minimal 0"),
+  collected_idr: z.coerce.number().min(0, "Donasi terkumpul minimal 0").default(0),
+});
+
+export type CampaignInput = z.infer<typeof campaignSchema>;
+

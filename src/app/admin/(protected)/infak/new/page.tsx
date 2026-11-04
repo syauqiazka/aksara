@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, AlertCircle } from "lucide-react";
 import Button from "@/components/ui/Button";
+import ImageUploader from "@/components/admin/ImageUploader";
 
 export default function AdminNewInfakPage() {
   const router = useRouter();
@@ -247,6 +248,15 @@ export default function AdminNewInfakPage() {
               <option value="draft">Draft (Simpan Sementara)</option>
             </select>
           </div>
+        </div>
+
+        <div>
+          <ImageUploader
+            label="Foto Serah Terima / Dokumentasi (Opsional)"
+            value={formData.photo_url}
+            onChange={(url) => setFormData({ ...formData, photo_url: url })}
+            helperText="Upload foto penyerahan mushaf ke santri/pesantren. Disimpan di Vercel Blob."
+          />
         </div>
 
         <div>

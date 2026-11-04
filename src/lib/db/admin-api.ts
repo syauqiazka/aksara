@@ -139,11 +139,69 @@ export const db = {
     return (data ?? []) as ThemedCampaign[];
   },
 
-  async getGalleryItems(): Promise<GalleryItem[]> {
+  async getThemedCampaignById(id: string): Promise<ThemedCampaign | null> {
     const client = getClient();
-    const { data, error } = await client.from("gallery_items").select("*").eq("status", "published").order("date", { ascending: false });
+    const { data, error } = await client.from("themed_campaigns").select("*").eq("id", id).maybeSingle();
+    throwIfError(error, "memuat detail kampanye tematik");
+    return (data as ThemedCampaign | null) ?? null;
+  },
+
+  async saveThemedCampaign(
+    item: Omit<ThemedCampaign, "id" | "created_at">,
+    id?: string
+  ): Promise<ThemedCampaign> {
+    const client = getClient();
+    const query = id
+      ? client.from("themed_campaigns").update(item).eq("id", id)
+      : client.from("themed_campaigns").insert(item);
+    const { data, error } = await query.select().single();
+    throwIfError(error, id ? "memperbarui kampanye tematik" : "menambahkan kampanye tematik");
+    if (!data) throw new Error("Data kampanye tidak dikembalikan oleh database.");
+    return data as ThemedCampaign;
+  },
+
+  async deleteThemedCampaign(id: string): Promise<boolean> {
+    const client = getClient();
+    const { data, error } = await client.from("themed_campaigns").delete().eq("id", id).select("id");
+    throwIfError(error, "menghapus kampanye tematik");
+    return Boolean(data?.length);
+  },
+
+  async getGalleryItems(onlyPublished = false): Promise<GalleryItem[]> {
+    const client = getClient();
+    let query = client.from("gallery_items").select("*").order("date", { ascending: false });
+    if (onlyPublished) query = query.eq("status", "published");
+    const { data, error } = await query;
     throwIfError(error, "memuat galeri");
     return (data ?? []) as GalleryItem[];
+  },
+
+  async getGalleryItemById(id: string): Promise<GalleryItem | null> {
+    const client = getClient();
+    const { data, error } = await client.from("gallery_items").select("*").eq("id", id).maybeSingle();
+    throwIfError(error, "memuat detail foto galeri");
+    return (data as GalleryItem | null) ?? null;
+  },
+
+  async saveGalleryItem(
+    item: Omit<GalleryItem, "id" | "created_at">,
+    id?: string
+  ): Promise<GalleryItem> {
+    const client = getClient();
+    const query = id
+      ? client.from("gallery_items").update(item).eq("id", id)
+      : client.from("gallery_items").insert(item);
+    const { data, error } = await query.select().single();
+    throwIfError(error, id ? "memperbarui foto galeri" : "menambahkan foto galeri");
+    if (!data) throw new Error("Data galeri tidak dikembalikan oleh database.");
+    return data as GalleryItem;
+  },
+
+  async deleteGalleryItem(id: string): Promise<boolean> {
+    const client = getClient();
+    const { data, error } = await client.from("gallery_items").delete().eq("id", id).select("id");
+    throwIfError(error, "menghapus foto galeri");
+    return Boolean(data?.length);
   },
 
   async getBankAccounts(): Promise<BankAccount[]> {
