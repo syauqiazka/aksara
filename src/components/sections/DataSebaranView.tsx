@@ -1,582 +1,991 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import {
   Search,
-  ArrowUpDown,
   BookOpen,
+  GraduationCap,
+  HeartHandshake,
   Building2,
   Calendar,
   MapPin,
   X,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   SearchX,
+  ImageIcon,
 } from "lucide-react";
-import { InfakDistribution, GeberMasjidDistribution, AggregatedStats } from "@/lib/db/types";
+import {
+  PublicInfakJinanRecord,
+  PublicBussDistribution,
+  YatimActivity,
+  GeberMasjidDistribution,
+  AggregatedStats,
+} from "@/lib/db/types";
 import IndonesiaMap from "@/components/sections/IndonesiaMap";
-import Badge from "@/components/ui/Badge";
+import Select from "@/components/ui/Select";
+import Input from "@/components/ui/Input";
 
 interface DataSebaranViewProps {
-  initialInfak: InfakDistribution[];
+  initialInfakJinan: PublicInfakJinanRecord[];
+  initialBuss: PublicBussDistribution[];
+  initialYatim: YatimActivity[];
   initialGeber: GeberMasjidDistribution[];
   stats: AggregatedStats;
 }
 
-function cleanName(str: string): string {
-  return str.replace(/\s*\[CONTOH[^\]]*\]/gi, "").trim();
-}
+type TabType = "jinan" | "buss" | "yatim" | "geber";
 
 export default function DataSebaranView({
-  initialInfak,
+  initialInfakJinan,
+  initialBuss,
+  initialYatim,
   initialGeber,
 }: DataSebaranViewProps) {
-  const [activeTab, setActiveTab] = useState<"infak" | "geber">("infak");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedProvince, setSelectedProvince] = useState<string>("all");
-  const [selectedType, setSelectedType] = useState<string>("all");
-  const [sortField, setSortField] = useState<string>("date");
-  const [sortAsc, setSortAsc] = useState<boolean>(false);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const pageSize = 10;
+  // Flag untuk Geber Masjid (disembunyikan dari publik kecuali diaktifkan via env)
+  const showGeberTab = process.env.NEXT_PUBLIC_SHOW_GEBER_SEBARAN === "true";
 
-  // Selected item for detail drawer
-  const [selectedDrawerItem, setSelectedDrawerItem] = useState<{
+  const [activeTab, setActiveTab] = useState<TabType>("jinan");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedYear, setSelectedYear] = useState<string>("all");
+  const [selectedOrigin, setSelectedOrigin] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+
+  // Modal / Drawer state
+  const [activeGalleryModal, setActiveGalleryModal] = useState<{
     title: string;
-    subtitle: string;
-    date: string;
-    location: string;
-    detail: string;
-    photoUrl?: string | null;
-    type?: string;
+    subtitle?: string;
+    photos: string[];
+    description?: string;
   } | null>(null);
 
-  // Clean provinces list
-  const provinces = useMemo(() => {
+  // Filter lists
+  const years = useMemo(() => {
     const list = new Set<string>();
-    initialInfak.forEach((i) => i.province && list.add(i.province));
-    initialGeber.forEach((g) => g.province && list.add(g.province));
-    return Array.from(list);
-  }, [initialInfak, initialGeber]);
+    initialBuss.forEach((b) => list.add(b.year.toString()));
+    initialYatim.forEach((y) => list.add(y.year.toString()));
+    return Array.from(list).sort().reverse();
+  }, [initialBuss, initialYatim]);
 
-  // Filtered & Sorted Infak
-  const filteredInfak = useMemo(() => {
-    return initialInfak
-      .filter((item) => {
-        const cDonor = cleanName(item.donor_name);
-        const cRecipient = cleanName(item.recipient_name);
-        const matchesSearch =
-          searchQuery.trim() === "" ||
-          item.mushaf_no.toString().includes(searchQuery.trim()) ||
-          cRecipient.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
-          (item.show_donor_name && cDonor.toLowerCase().includes(searchQuery.toLowerCase().trim())) ||
-          item.city.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
-          item.province.toLowerCase().includes(searchQuery.toLowerCase().trim());
+  const origins = useMemo(() => {
+    const list = new Set<string>();
+    initialInfakJinan.forEach((i) => i.donor_origin && list.add(i.donor_origin));
+    initialBuss.forEach((b) => b.origin && list.add(b.origin));
+    return Array.from(list).sort();
+  }, [initialInfakJinan, initialBuss]);
 
-        const matchesProvince = selectedProvince === "all" || item.province === selectedProvince;
-        const matchesType = selectedType === "all" || item.recipient_type === selectedType;
+  // Tab 1: Filtered Infak Jinan
+  const filteredJinan = useMemo(() => {
+    return initialInfakJinan.filter((item) => {
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch =
+        q === "" ||
+        item.mushaf_no.toString().includes(q) ||
+        item.display_donor_name.toLowerCase().includes(q) ||
+        item.dedication_name.toLowerCase().includes(q) ||
+        item.pesantren_name.toLowerCase().includes(q) ||
+        item.donor_origin.toLowerCase().includes(q) ||
+        item.address.toLowerCase().includes(q);
 
-        return matchesSearch && matchesProvince && matchesType;
-      })
-      .sort((a, b) => {
-        if (sortField === "mushaf_no") {
-          return sortAsc ? a.mushaf_no - b.mushaf_no : b.mushaf_no - a.mushaf_no;
-        }
-        if (sortField === "quantity") {
-          return sortAsc ? a.quantity - b.quantity : b.quantity - a.quantity;
-        }
-        const dateA = new Date(a.distributed_at).getTime();
-        const dateB = new Date(b.distributed_at).getTime();
-        return sortAsc ? dateA - dateB : dateB - dateA;
-      });
-  }, [initialInfak, searchQuery, selectedProvince, selectedType, sortField, sortAsc]);
+      const matchesOrigin = selectedOrigin === "all" || item.donor_origin === selectedOrigin;
 
-  // Filtered & Sorted Geber
+      return matchesSearch && matchesOrigin;
+    });
+  }, [initialInfakJinan, searchQuery, selectedOrigin]);
+
+  // Tab 2: Filtered BUSS
+  const filteredBuss = useMemo(() => {
+    return initialBuss.filter((item) => {
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch =
+        q === "" ||
+        item.santri_name.toLowerCase().includes(q) ||
+        item.pesantren_name.toLowerCase().includes(q) ||
+        item.display_donor_name.toLowerCase().includes(q) ||
+        item.origin.toLowerCase().includes(q) ||
+        item.current_surah.toLowerCase().includes(q);
+
+      const matchesYear = selectedYear === "all" || item.year.toString() === selectedYear;
+      const matchesOrigin = selectedOrigin === "all" || item.origin === selectedOrigin;
+
+      return matchesSearch && matchesYear && matchesOrigin;
+    });
+  }, [initialBuss, searchQuery, selectedYear, selectedOrigin]);
+
+  // Tab 3: Filtered Yatim
+  const filteredYatim = useMemo(() => {
+    return initialYatim.filter((item) => {
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch =
+        q === "" ||
+        item.activity_name.toLowerCase().includes(q) ||
+        item.organizer.toLowerCase().includes(q) ||
+        item.description.toLowerCase().includes(q);
+
+      const matchesYear = selectedYear === "all" || item.year.toString() === selectedYear;
+
+      return matchesSearch && matchesYear;
+    });
+  }, [initialYatim, searchQuery, selectedYear]);
+
+  // Tab 4 (Optional): Filtered Geber
   const filteredGeber = useMemo(() => {
-    return initialGeber
-      .filter((item) => {
-        const cMosque = cleanName(item.mosque_name);
-        const matchesSearch =
-          searchQuery.trim() === "" ||
-          cMosque.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
-          item.city.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
-          item.district.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
-          item.province.toLowerCase().includes(searchQuery.toLowerCase().trim());
+    return initialGeber.filter((item) => {
+      const q = searchQuery.toLowerCase().trim();
+      return (
+        q === "" ||
+        item.mosque_name.toLowerCase().includes(q) ||
+        item.city.toLowerCase().includes(q) ||
+        item.province.toLowerCase().includes(q)
+      );
+    });
+  }, [initialGeber, searchQuery]);
 
-        const matchesProvince = selectedProvince === "all" || item.province === selectedProvince;
+  // Pagination calculation
+  const currentDataset = useMemo(() => {
+    switch (activeTab) {
+      case "jinan":
+        return filteredJinan;
+      case "buss":
+        return filteredBuss;
+      case "yatim":
+        return filteredYatim;
+      case "geber":
+        return filteredGeber;
+    }
+  }, [activeTab, filteredJinan, filteredBuss, filteredYatim, filteredGeber]);
 
-        return matchesSearch && matchesProvince;
-      })
-      .sort((a, b) => {
-        if (sortField === "participants") {
-          return sortAsc ? a.participants - b.participants : b.participants - a.participants;
-        }
-        const dateA = new Date(a.activity_date).getTime();
-        const dateB = new Date(b.activity_date).getTime();
-        return sortAsc ? dateA - dateB : dateB - dateA;
-      });
-  }, [initialGeber, searchQuery, selectedProvince, sortField, sortAsc]);
+  const totalPages = Math.ceil(currentDataset.length / pageSize) || 1;
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return currentDataset.slice(start, start + pageSize);
+  }, [currentDataset, currentPage, pageSize]);
 
-  const activeDataset = activeTab === "infak" ? filteredInfak : filteredGeber;
-  const totalPages = Math.ceil(activeDataset.length / pageSize) || 1;
-  const paginatedData = activeDataset.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-
-  const handleTabSwitch = (tab: "infak" | "geber") => {
+  const handleTabSwitch = (tab: TabType) => {
     setActiveTab(tab);
     setSearchQuery("");
-    setSelectedProvince("all");
-    setSelectedType("all");
+    setSelectedYear("all");
+    setSelectedOrigin("all");
     setCurrentPage(1);
   };
 
   return (
     <div className="space-y-12">
-      {/* 1. Large Switching Tabs */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+      {/* 1. Main Navigation Tabs (Infak Jinan | BUSS Al-Qur'an | Yatim Berdikari) */}
+      <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+        {/* Tab A: Infak Jinan */}
         <button
-          onClick={() => handleTabSwitch("infak")}
-          className={`w-full sm:w-auto px-8 py-4 rounded-2xl font-serif text-lg font-bold transition-all duration-300 flex items-center justify-center gap-3 border ${
-            activeTab === "infak"
+          onClick={() => handleTabSwitch("jinan")}
+          className={`px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl font-serif text-sm sm:text-base font-bold transition-all duration-300 flex items-center justify-center gap-2.5 border ${
+            activeTab === "jinan"
               ? "bg-[var(--green-950)] text-gold-gradient border-[var(--gold-400)] shadow-xl scale-105"
               : "bg-[var(--cream-100)] text-[var(--ink-600)] border-[var(--cream-200)] hover:bg-[var(--cream-200)]"
           }`}
         >
           <BookOpen className="w-5 h-5 text-[var(--gold-400)]" />
-          <span>Infak 1 Jt Al-Qur&apos;an ({initialInfak.length})</span>
+          <span>Infak Al-Qur&apos;an Jinan ({initialInfakJinan.length})</span>
         </button>
 
+        {/* Tab B: BUSS Al-Qur'an */}
         <button
-          onClick={() => handleTabSwitch("geber")}
-          className={`w-full sm:w-auto px-8 py-4 rounded-2xl font-serif text-lg font-bold transition-all duration-300 flex items-center justify-center gap-3 border ${
-            activeTab === "geber"
+          onClick={() => handleTabSwitch("buss")}
+          className={`px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl font-serif text-sm sm:text-base font-bold transition-all duration-300 flex items-center justify-center gap-2.5 border ${
+            activeTab === "buss"
               ? "bg-[var(--green-950)] text-gold-gradient border-[var(--gold-400)] shadow-xl scale-105"
               : "bg-[var(--cream-100)] text-[var(--ink-600)] border-[var(--cream-200)] hover:bg-[var(--cream-200)]"
           }`}
         >
-          <Building2 className="w-5 h-5 text-[var(--gold-400)]" />
-          <span>Geber Masjid ({initialGeber.length})</span>
+          <GraduationCap className="w-5 h-5 text-[var(--gold-400)]" />
+          <span>BUSS Al-Qur&apos;an ({initialBuss.length})</span>
         </button>
+
+        {/* Tab C: Yatim Berdikari */}
+        <button
+          onClick={() => handleTabSwitch("yatim")}
+          className={`px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl font-serif text-sm sm:text-base font-bold transition-all duration-300 flex items-center justify-center gap-2.5 border ${
+            activeTab === "yatim"
+              ? "bg-[var(--green-950)] text-gold-gradient border-[var(--gold-400)] shadow-xl scale-105"
+              : "bg-[var(--cream-100)] text-[var(--ink-600)] border-[var(--cream-200)] hover:bg-[var(--cream-200)]"
+          }`}
+        >
+          <HeartHandshake className="w-5 h-5 text-[var(--gold-400)]" />
+          <span>Yatim Berdikari ({initialYatim.length})</span>
+        </button>
+
+        {/* Optional Tab D: Geber Masjid (If Flag Enabled) */}
+        {showGeberTab && (
+          <button
+            onClick={() => handleTabSwitch("geber")}
+            className={`px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl font-serif text-sm sm:text-base font-bold transition-all duration-300 flex items-center justify-center gap-2.5 border ${
+              activeTab === "geber"
+                ? "bg-[var(--green-950)] text-gold-gradient border-[var(--gold-400)] shadow-xl scale-105"
+                : "bg-[var(--cream-100)] text-[var(--ink-600)] border-[var(--cream-200)] hover:bg-[var(--cream-200)]"
+            }`}
+          >
+            <Building2 className="w-5 h-5 text-[var(--gold-400)]" />
+            <span>Geber Masjid ({initialGeber.length})</span>
+          </button>
+        )}
       </div>
 
-      {/* 2. Interactive Map */}
+      {/* 2. Interactive National Map (Pratinjau Sebaran) */}
       <IndonesiaMap
-        infakData={initialInfak}
+        infakData={initialInfakJinan.map((j) => ({
+          id: j.id,
+          mushaf_no: j.mushaf_no,
+          donor_name: j.display_donor_name,
+          show_donor_name: true,
+          recipient_name: j.pesantren_name,
+          recipient_type: "pesantren" as const,
+          province: j.donor_origin,
+          city: j.donor_origin,
+          district: "",
+          lat: null,
+          lng: null,
+          distributed_at: j.distributed_at,
+          quantity: 1,
+          photo_url: j.photos[0]?.url || null,
+          notes: null,
+          status: "published" as const,
+          created_at: j.distributed_at,
+          updated_at: j.distributed_at,
+        }))}
         geberData={initialGeber}
-        activeTab={activeTab}
+        activeTab="infak"
       />
 
-      {/* 3. Filter Bar & Search */}
+      {/* 3. Search & Filter Bar */}
       <div className="p-6 rounded-3xl bg-[var(--cream-100)] border border-[var(--cream-200)] shadow-sm space-y-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          {/* Search box - Always clean placeholder without pre-filled text */}
-          <div className="relative flex-grow">
-            <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--ink-400)]" />
-            <input
+        <div className="flex flex-col md:flex-row gap-4 items-center">
+          {/* Search box */}
+          <div className="w-full md:flex-1">
+            <Input
               type="text"
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
+              startIcon={<Search className="w-4 h-4" />}
               placeholder={
-                activeTab === "infak"
-                  ? "Cari nama pesantren, sekolah, nomor mushaf, atau kota..."
-                  : "Cari nama masjid atau kota..."
+                activeTab === "jinan"
+                  ? "Cari nomor mushaf, nama donatur, santri, atau pesantren..."
+                  : activeTab === "buss"
+                  ? "Cari nama santri, asal, pesantren, atau donatur..."
+                  : "Cari nama kegiatan atau penyelenggara..."
               }
-              className="w-full pl-11 pr-4 py-3 rounded-2xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--gold-400)]"
             />
           </div>
 
-          {/* Province Filter */}
-          <div className="w-full md:w-56">
-            <select
-              value={selectedProvince}
-              onChange={(e) => {
-                setSelectedProvince(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full px-4 py-3 rounded-2xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--gold-400)]"
-            >
-              <option value="all">Semua Provinsi</option>
-              {provinces.map((prov) => (
-                <option key={prov} value={prov}>
-                  {prov}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Type Filter */}
-          {activeTab === "infak" && (
-            <div className="w-full md:w-48">
-              <select
-                value={selectedType}
+          {/* Year Filter (for BUSS & Yatim) */}
+          {(activeTab === "buss" || activeTab === "yatim") && (
+            <div className="w-full md:w-52">
+              <Select
+                value={selectedYear}
                 onChange={(e) => {
-                  setSelectedType(e.target.value);
+                  setSelectedYear(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full px-4 py-3 rounded-2xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--gold-400)]"
               >
-                <option value="all">Semua Lembaga</option>
-                <option value="pesantren">Pesantren</option>
-                <option value="masjid">Masjid</option>
-                <option value="madrasah">Madrasah</option>
-                <option value="lainnya">Lainnya</option>
-              </select>
+                <option value="all">Semua Tahun</option>
+                {years.map((y) => (
+                  <option key={y} value={y}>
+                    Tahun {y}
+                  </option>
+                ))}
+              </Select>
             </div>
           )}
+
+          {/* Origin / Wilayah Filter (for Jinan & BUSS) */}
+          {(activeTab === "jinan" || activeTab === "buss") && origins.length > 0 && (
+            <div className="w-full md:w-56">
+              <Select
+                value={selectedOrigin}
+                onChange={(e) => {
+                  setSelectedOrigin(e.target.value);
+                  setCurrentPage(1);
+                }}
+              >
+                <option value="all">Semua Asal Wilayah</option>
+                {origins.map((o) => (
+                  <option key={o} value={o}>
+                    {o}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          )}
+
+          {/* PageSize selector */}
+          <div className="w-full md:w-40">
+            <Select
+              value={pageSize.toString()}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+            >
+              <option value="10">10 / halaman</option>
+              <option value="25">25 / halaman</option>
+              <option value="50">50 / halaman</option>
+            </Select>
+          </div>
         </div>
 
-        {/* Quick summary line & sort toggles */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-[var(--ink-600)] pt-2 border-t border-[var(--cream-200)] gap-2">
-          <div>
-            Menampilkan <span className="font-bold text-[var(--ink-900)]">{activeDataset.length}</span> data penyaluran terverifikasi
-          </div>
-          <div className="flex items-center gap-2">
-            <span>Urutkan:</span>
+        {/* Active Filter Info & Reset Button */}
+        {(searchQuery || selectedYear !== "all" || selectedOrigin !== "all") && (
+          <div className="flex items-center justify-between pt-2 border-t border-[var(--cream-200)] text-xs text-[var(--ink-600)]">
+            <div>
+              Menampilkan <strong>{currentDataset.length}</strong> hasil pencarian
+            </div>
             <button
               onClick={() => {
-                setSortField("date");
-                setSortAsc(!sortAsc);
+                setSearchQuery("");
+                setSelectedYear("all");
+                setSelectedOrigin("all");
+                setCurrentPage(1);
               }}
-              className="px-2.5 py-1 rounded-lg bg-[var(--cream-50)] border border-[var(--cream-200)] hover:border-[var(--gold-500)] flex items-center gap-1 font-medium"
+              className="text-[var(--terracotta-500)] hover:underline font-semibold flex items-center gap-1"
             >
-              <span>Tanggal</span>
-              <ArrowUpDown className="w-3 h-3 text-[var(--gold-700)]" />
+              <X className="w-3.5 h-3.5" />
+              <span>Reset Filter</span>
             </button>
-            {activeTab === "infak" && (
-              <button
-                onClick={() => {
-                  setSortField("mushaf_no");
-                  setSortAsc(!sortAsc);
-                }}
-                className="px-2.5 py-1 rounded-lg bg-[var(--cream-50)] border border-[var(--cream-200)] hover:border-[var(--gold-500)] flex items-center gap-1 font-medium"
-              >
-                <span>No. Mushaf</span>
-                <ArrowUpDown className="w-3 h-3 text-[var(--gold-700)]" />
-              </button>
-            )}
           </div>
-        </div>
+        )}
       </div>
 
-      {/* 4. Table & Cards */}
-      {paginatedData.length === 0 ? (
-        <div className="p-12 text-center rounded-3xl bg-[var(--cream-100)] border border-[var(--cream-200)]">
-          <SearchX className="w-10 h-10 text-[var(--ink-400)] mx-auto mb-3" />
-          <h4 className="font-serif text-xl font-bold text-[var(--ink-900)]">
-            Tidak Ada Data yang Cocok
-          </h4>
-          <p className="text-sm text-[var(--ink-600)] mt-1">
-            Silakan sesuaikan kata kunci pencarian Anda.
-          </p>
-        </div>
-      ) : activeTab === "infak" ? (
-        <div className="overflow-hidden rounded-3xl border border-[var(--cream-200)] shadow-sm bg-[var(--cream-50)]">
-          {/* Desktop Table View */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-[var(--green-950)] text-[var(--cream-50)] text-xs uppercase tracking-wider font-sans">
-                <tr>
-                  <th className="py-4 px-6 font-semibold">Mushaf Ke-</th>
-                  <th className="py-4 px-6 font-semibold">Donatur / Atas Nama</th>
-                  <th className="py-4 px-6 font-semibold">Lembaga Penerima</th>
-                  <th className="py-4 px-6 font-semibold">Jenis</th>
-                  <th className="py-4 px-6 font-semibold">Wilayah</th>
-                  <th className="py-4 px-6 font-semibold">Tanggal</th>
-                  <th className="py-4 px-6 font-semibold text-right">Jumlah</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--cream-200)]">
-                {(paginatedData as InfakDistribution[]).map((row, idx) => {
-                  const donorDisplay = row.show_donor_name ? cleanName(row.donor_name) : "Hamba Allah";
-                  const recipientDisplay = cleanName(row.recipient_name);
-                  return (
-                    <tr
-                      key={row.id}
-                      onClick={() =>
-                        setSelectedDrawerItem({
-                          title: recipientDisplay,
-                          subtitle: `Donatur: ${donorDisplay}`,
-                          date: row.distributed_at,
-                          location: `${row.district}, ${row.city}, ${row.province}`,
-                          detail: row.notes || "Mushaf Al-Qur'an hafalan diserahkan langsung ke santri tahfidz.",
-                          photoUrl: row.photo_url,
-                          type: row.recipient_type,
-                        })
-                      }
-                      className={`cursor-pointer transition-colors ${
-                        idx % 2 === 0 ? "bg-[var(--cream-50)]" : "bg-[var(--sage-100)]/60"
-                      } hover:bg-[var(--cream-100)]`}
-                    >
-                      <td className="py-4 px-6 font-mono font-bold text-[var(--green-800)]">
-                        #{row.mushaf_no}
-                      </td>
-                      <td className="py-4 px-6 font-medium text-[var(--ink-900)]">
-                        {donorDisplay}
-                      </td>
-                      <td className="py-4 px-6 font-serif font-bold text-[var(--ink-900)]">
-                        {recipientDisplay}
-                      </td>
-                      <td className="py-4 px-6">
-                        <Badge variant={row.recipient_type === "pesantren" ? "pesantren" : row.recipient_type === "masjid" ? "masjid" : "madrasah"}>
-                          {row.recipient_type}
-                        </Badge>
-                      </td>
-                      <td className="py-4 px-6 text-xs text-[var(--ink-600)]">
-                        {row.city}, {row.province}
-                      </td>
-                      <td className="py-4 px-6 text-xs text-[var(--ink-600)]">
-                        {row.distributed_at}
-                      </td>
-                      <td className="py-4 px-6 font-mono font-bold text-right text-[var(--ink-900)]">
-                        {row.quantity} Mushaf
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile Stacked Card View */}
-          <div className="md:hidden divide-y divide-[var(--cream-200)]">
-            {(paginatedData as InfakDistribution[]).map((row) => {
-              const donorDisplay = row.show_donor_name ? cleanName(row.donor_name) : "Hamba Allah";
-              const recipientDisplay = cleanName(row.recipient_name);
-              return (
-                <div
-                  key={row.id}
-                  onClick={() =>
-                    setSelectedDrawerItem({
-                      title: recipientDisplay,
-                      subtitle: `Donatur: ${donorDisplay}`,
-                      date: row.distributed_at,
-                      location: `${row.district}, ${row.city}, ${row.province}`,
-                      detail: row.notes || "Mushaf Al-Qur'an hafalan diserahkan langsung ke santri tahfidz.",
-                      photoUrl: row.photo_url,
-                      type: row.recipient_type,
-                    })
-                  }
-                  className="p-5 space-y-3 cursor-pointer hover:bg-[var(--cream-100)]"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono font-bold text-xs px-2.5 py-1 rounded bg-[var(--green-950)] text-[var(--gold-400)]">
-                      Mushaf #{row.mushaf_no}
-                    </span>
-                    <Badge variant={row.recipient_type === "pesantren" ? "pesantren" : "masjid"}>
-                      {row.recipient_type}
-                    </Badge>
-                  </div>
-                  <div>
-                    <h4 className="font-serif text-lg font-bold text-[var(--ink-900)]">
-                      {recipientDisplay}
-                    </h4>
-                    <p className="text-xs text-[var(--gold-700)] font-medium mt-0.5">
-                      Donatur: {donorDisplay}
-                    </p>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-[var(--ink-600)] pt-2 border-t border-[var(--cream-200)]">
-                    <span>{row.city}, {row.province}</span>
-                    <span className="font-bold text-[var(--green-800)]">{row.quantity} Mushaf</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      ) : (
-        /* Geber Table */
-        <div className="overflow-hidden rounded-3xl border border-[var(--cream-200)] shadow-sm bg-[var(--cream-50)]">
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-[var(--green-950)] text-[var(--cream-50)] text-xs uppercase tracking-wider font-sans">
-                <tr>
-                  <th className="py-4 px-6 font-semibold">Nama Masjid</th>
-                  <th className="py-4 px-6 font-semibold">Alamat Lengkap</th>
-                  <th className="py-4 px-6 font-semibold">Kota / Wilayah</th>
-                  <th className="py-4 px-6 font-semibold">Tanggal Aksi</th>
-                  <th className="py-4 px-6 font-semibold text-right">Peserta Relawan</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--cream-200)]">
-                {(paginatedData as GeberMasjidDistribution[]).map((row, idx) => {
-                  const mosqueDisplay = cleanName(row.mosque_name);
-                  return (
-                    <tr
-                      key={row.id}
-                      onClick={() =>
-                        setSelectedDrawerItem({
-                          title: mosqueDisplay,
-                          subtitle: `${row.participants} Relawan Terjun`,
-                          date: row.activity_date,
-                          location: `${row.address}, ${row.district}, ${row.city}, ${row.province}`,
-                          detail: row.activity_notes || "Aksi pembersihan karpet, sanitasi wudhu, dan pengecatan fasilitas.",
-                          photoUrl: row.photo_urls[0] || null,
-                          type: "masjid",
-                        })
-                      }
-                      className={`cursor-pointer transition-colors ${
-                        idx % 2 === 0 ? "bg-[var(--cream-50)]" : "bg-[var(--sage-100)]/60"
-                      } hover:bg-[var(--cream-100)]`}
-                    >
-                      <td className="py-4 px-6 font-serif font-bold text-[var(--ink-900)]">
-                        {mosqueDisplay}
-                      </td>
-                      <td className="py-4 px-6 text-xs text-[var(--ink-600)]">
-                        {row.address}
-                      </td>
-                      <td className="py-4 px-6 text-xs text-[var(--ink-600)]">
-                        {row.city}, {row.province}
-                      </td>
-                      <td className="py-4 px-6 text-xs text-[var(--ink-600)]">
-                        {row.activity_date}
-                      </td>
-                      <td className="py-4 px-6 font-mono font-bold text-right text-[var(--ink-900)]">
-                        {row.participants} Orang
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="md:hidden divide-y divide-[var(--cream-200)]">
-            {(paginatedData as GeberMasjidDistribution[]).map((row) => {
-              const mosqueDisplay = cleanName(row.mosque_name);
-              return (
-                <div
-                  key={row.id}
-                  onClick={() =>
-                    setSelectedDrawerItem({
-                      title: mosqueDisplay,
-                      subtitle: `${row.participants} Relawan Terjun`,
-                      date: row.activity_date,
-                      location: `${row.address}, ${row.district}, ${row.city}, ${row.province}`,
-                      detail: row.activity_notes || "Aksi pembersihan karpet, sanitasi wudhu, dan pengecatan fasilitas.",
-                      photoUrl: row.photo_urls[0] || null,
-                      type: "masjid",
-                    })
-                  }
-                  className="p-5 space-y-3 cursor-pointer hover:bg-[var(--cream-100)]"
-                >
-                  <div className="flex items-center justify-between">
-                    <Badge variant="masjid">Aksi Geber Masjid</Badge>
-                    <span className="text-xs text-[var(--ink-600)]">{row.activity_date}</span>
-                  </div>
-                  <div>
-                    <h4 className="font-serif text-lg font-bold text-[var(--ink-900)]">
-                      {mosqueDisplay}
-                    </h4>
-                    <p className="text-xs text-[var(--ink-600)] mt-0.5">{row.address}, {row.city}</p>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-[var(--ink-600)] pt-2 border-t border-[var(--cream-200)]">
-                    <span>{row.province}</span>
-                    <span className="font-bold text-[var(--green-800)]">{row.participants} Relawan</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* 5. Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between pt-4">
-          <div className="text-xs text-[var(--ink-600)]">
-            Halaman {currentPage} dari {totalPages}
-          </div>
-          <div className="flex items-center gap-2">
+      {/* 4. Table Views */}
+      <div className="space-y-6">
+        {/* Empty State */}
+        {paginatedData.length === 0 ? (
+          <div className="p-16 rounded-3xl bg-[var(--cream-100)] border border-[var(--cream-200)] text-center max-w-xl mx-auto space-y-4">
+            <div className="w-16 h-16 rounded-full bg-[var(--cream-200)] text-[var(--ink-600)] flex items-center justify-center mx-auto">
+              <SearchX className="w-8 h-8" />
+            </div>
+            <h3 className="font-serif text-xl font-bold text-[var(--ink-900)]">
+              Belum ada data penyaluran pada filter ini
+            </h3>
+            <p className="text-sm text-[var(--ink-600)] leading-relaxed">
+              Silakan sesuaikan kata kunci pencarian atau reset filter untuk menampilkan data sebaran lainnya.
+            </p>
             <button
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={currentPage === 1}
-              className="p-2 rounded-xl bg-[var(--cream-100)] border border-[var(--cream-200)] disabled:opacity-40 hover:bg-[var(--cream-200)]"
+              onClick={() => {
+                setSearchQuery("");
+                setSelectedYear("all");
+                setSelectedOrigin("all");
+              }}
+              className="px-6 py-2.5 rounded-full text-xs font-semibold bg-[var(--green-800)] text-[var(--cream-50)] hover:bg-[var(--green-700)] transition-colors inline-block"
             >
-              <ChevronLeft className="w-4 h-4 text-[var(--ink-900)]" />
-            </button>
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className="p-2 rounded-xl bg-[var(--cream-100)] border border-[var(--cream-200)] disabled:opacity-40 hover:bg-[var(--cream-200)]"
-            >
-              <ChevronRight className="w-4 h-4 text-[var(--ink-900)]" />
+              Reset Semua Filter
             </button>
           </div>
-        </div>
-      )}
+        ) : (
+          <>
+            {/* ======================================================== */}
+            {/* TAB A: INFAK AL-QUR'AN JINAN (1 baris = 1 donasi/mushaf) */}
+            {/* ======================================================== */}
+            {activeTab === "jinan" && (
+              <>
+                {/* Desktop View (Table) */}
+                <div className="hidden lg:block overflow-x-auto rounded-3xl border border-[var(--cream-200)] shadow-sm bg-[var(--cream-50)]">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-[var(--green-950)] text-[var(--cream-50)] font-serif uppercase tracking-wider text-[11px]">
+                        <th className="py-4 px-3 text-center sticky left-0 z-10 bg-[var(--green-950)]">No.</th>
+                        <th className="py-4 px-4 sticky left-12 z-10 bg-[var(--green-950)]">Donatur</th>
+                        <th className="py-4 px-3">Asal</th>
+                        <th className="py-4 px-3 text-center">Urutan Mushaf</th>
+                        <th className="py-4 px-4">Dedikasi untuk</th>
+                        <th className="py-4 px-4">Pesantren Tujuan</th>
+                        <th className="py-4 px-4">Alamat &amp; Peta</th>
+                        <th className="py-4 px-4">Tanggal Distribusi</th>
+                        <th className="py-4 px-4 text-center">Tersalurkan</th>
+                        <th className="py-4 px-4 text-center">Dokumentasi</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[var(--cream-200)] text-[var(--ink-900)]">
+                      {(paginatedData as PublicInfakJinanRecord[]).map((item, idx) => {
+                        const displayIndex = (currentPage - 1) * pageSize + idx + 1;
+                        return (
+                          <tr
+                            key={item.id}
+                            className="hover:bg-[var(--cream-100)] transition-colors group"
+                          >
+                            <td className="py-4 px-3 text-center font-mono text-[var(--ink-600)] sticky left-0 bg-[var(--cream-50)] group-hover:bg-[var(--cream-100)]">
+                              {displayIndex}
+                            </td>
+                            <td className="py-4 px-4 font-semibold text-[var(--green-950)] sticky left-12 bg-[var(--cream-50)] group-hover:bg-[var(--cream-100)]">
+                              {item.display_donor_name}
+                            </td>
+                            <td className="py-4 px-3 text-[var(--ink-600)]">
+                              {item.donor_origin}
+                            </td>
+                            <td className="py-4 px-3 text-center">
+                              <span className="inline-block px-2.5 py-1 rounded-full bg-[var(--gold-500)] text-[var(--green-950)] font-bold font-mono shadow-xs">
+                                Mushaf ke-{item.mushaf_no}
+                              </span>
+                            </td>
+                            <td className="py-4 px-4 italic text-[var(--ink-800)]">
+                              &ldquo;{item.dedication_name}&rdquo;
+                            </td>
+                            <td className="py-4 px-4 font-medium text-[var(--ink-900)]">
+                              {item.pesantren_name}
+                            </td>
+                            <td className="py-4 px-4">
+                              <div className="text-[11px] text-[var(--ink-600)] line-clamp-2 max-w-xs">
+                                {item.address}
+                              </div>
+                              {item.maps_url && (
+                                <a
+                                  href={item.maps_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 text-[11px] text-[var(--green-800)] hover:underline font-semibold mt-1"
+                                >
+                                  <MapPin className="w-3 h-3 text-[var(--gold-600)]" />
+                                  <span>Buka peta</span>
+                                </a>
+                              )}
+                            </td>
+                            <td className="py-4 px-4 text-[var(--ink-600)] whitespace-nowrap">
+                              {item.distributed_at}
+                            </td>
+                            <td className="py-4 px-4 text-center">
+                              {item.santri_count > 0 ? (
+                                <Link
+                                  href={`/data-sebaran/infak-jinan/${item.id}`}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--green-900)] text-[var(--cream-50)] text-xs font-semibold hover:bg-[var(--green-800)] shadow-xs transition-colors"
+                                >
+                                  <BookOpen className="w-3.5 h-3.5 text-[var(--gold-300)]" />
+                                  <span>{item.santri_count} Santri</span>
+                                </Link>
+                              ) : (
+                                <span className="text-xs text-[var(--ink-400)]">Belum ada data</span>
+                              )}
+                            </td>
+                            <td className="py-4 px-4 text-center">
+                              {item.photos && item.photos.length > 0 ? (
+                                <button
+                                  onClick={() =>
+                                    setActiveGalleryModal({
+                                      title: `Mushaf ke-${item.mushaf_no} - ${item.display_donor_name}`,
+                                      subtitle: `${item.pesantren_name} (${item.distributed_at})`,
+                                      photos: item.photos.map(p => p.url),
+                                      description: item.photos[0]?.caption || `Dokumentasi serah terima Mushaf ke-${item.mushaf_no} di ${item.pesantren_name}`,
+                                    })
+                                  }
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[var(--gold-500)] text-[var(--green-950)] text-xs font-semibold bg-[var(--cream-100)] hover:bg-gold-gradient transition-all shadow-xs"
+                                >
+                                  <ImageIcon className="w-3.5 h-3.5 text-[var(--gold-700)]" />
+                                  <span>Lihat</span>
+                                </button>
+                              ) : (
+                                <span className="text-xs text-[var(--ink-400)]">-</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
 
-      {/* 6. Detail Drawer Modal */}
-      {selectedDrawerItem && (
+                {/* Mobile View (Stacked Cards) */}
+                <div className="lg:hidden space-y-4">
+                  {(paginatedData as PublicInfakJinanRecord[]).map((item, idx) => {
+                    const displayIndex = (currentPage - 1) * pageSize + idx + 1;
+                    return (
+                      <div
+                        key={item.id}
+                        className="p-5 rounded-3xl bg-[var(--cream-100)] border border-[var(--cream-200)] shadow-sm space-y-4"
+                      >
+                        <div className="flex items-center justify-between pb-3 border-b border-[var(--cream-200)]">
+                          <span className="text-xs font-mono text-[var(--ink-600)]">
+                            No. {displayIndex}
+                          </span>
+                          <span className="px-2.5 py-0.5 rounded-full bg-[var(--gold-500)] text-[var(--green-950)] font-bold font-mono text-xs shadow-xs">
+                            Mushaf ke-{item.mushaf_no}
+                          </span>
+                        </div>
+
+                        <div className="space-y-1 text-xs">
+                          <span className="text-[10px] uppercase font-bold text-[var(--gold-700)] block">
+                            Donatur &amp; Asal
+                          </span>
+                          <p className="font-serif text-base font-bold text-[var(--green-950)]">
+                            {item.display_donor_name}
+                          </p>
+                          <p className="text-[11px] text-[var(--ink-600)]">
+                            Wilayah: <strong>{item.donor_origin}</strong>
+                          </p>
+                        </div>
+
+                        <div className="p-3 rounded-2xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-xs space-y-1">
+                          <span className="text-[10px] uppercase font-bold text-[var(--gold-700)] block">
+                            Dedikasi
+                          </span>
+                          <p className="italic text-[var(--ink-800)]">
+                            &ldquo;{item.dedication_name}&rdquo;
+                          </p>
+                          <p className="text-[11px] text-[var(--ink-600)] pt-1">
+                            Pesantren Tujuan: <strong>{item.pesantren_name}</strong>
+                          </p>
+                          <p className="text-[10px] text-[var(--ink-500)] line-clamp-2">
+                            {item.address}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center justify-between text-xs text-[var(--ink-600)] pt-1 border-t border-[var(--cream-200)]">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3 text-[var(--green-700)]" />
+                            {item.distributed_at}
+                          </span>
+                          {item.maps_url && (
+                            <a
+                              href={item.maps_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[var(--green-800)] hover:underline font-semibold flex items-center gap-1"
+                            >
+                              <MapPin className="w-3 h-3 text-[var(--gold-600)]" />
+                              <span>Buka peta</span>
+                            </a>
+                          )}
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
+                          {item.santri_count > 0 ? (
+                            <Link
+                              href={`/data-sebaran/infak-jinan/${item.id}`}
+                              className="w-full py-2.5 rounded-full bg-[var(--green-900)] text-[var(--cream-50)] text-xs font-semibold text-center hover:bg-[var(--green-800)] transition-colors shadow-xs flex items-center justify-center gap-1.5"
+                            >
+                              <BookOpen className="w-3.5 h-3.5 text-[var(--gold-300)]" />
+                              <span>Lihat {item.santri_count} Santri Penerima</span>
+                            </Link>
+                          ) : (
+                            <span className="w-full py-2.5 text-center text-xs text-[var(--ink-400)] bg-[var(--cream-200)]/40 rounded-full">
+                              Belum ada data santri
+                            </span>
+                          )}
+
+                          {item.photos && item.photos.length > 0 && (
+                            <button
+                              onClick={() =>
+                                setActiveGalleryModal({
+                                  title: `Mushaf ke-${item.mushaf_no} - ${item.display_donor_name}`,
+                                  subtitle: `${item.pesantren_name} (${item.distributed_at})`,
+                                  photos: item.photos.map(p => p.url),
+                                  description: item.photos[0]?.caption || `Dokumentasi serah terima Mushaf ke-${item.mushaf_no} di ${item.pesantren_name}`,
+                                })
+                              }
+                              className="w-full py-2.5 rounded-full border border-[var(--green-800)] text-[var(--green-950)] text-xs font-semibold text-center hover:bg-[var(--cream-200)] transition-colors"
+                            >
+                              Lihat Foto
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+            {/* TAB B: BUSS AL-QUR'AN                                    */}
+            {/* ======================================================== */}
+            {activeTab === "buss" && (
+              <>
+                {/* Desktop View */}
+                <div className="hidden lg:block overflow-x-auto rounded-3xl border border-[var(--cream-200)] shadow-sm bg-[var(--cream-50)]">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-[var(--green-950)] text-[var(--cream-50)] font-serif uppercase tracking-wider text-[11px]">
+                        <th className="py-4 px-3 text-center">Tahun</th>
+                        <th className="py-4 px-3 text-center">No.</th>
+                        <th className="py-4 px-4">Nama Santri</th>
+                        <th className="py-4 px-3">Asal</th>
+                        <th className="py-4 px-4">Pesantren</th>
+                        <th className="py-4 px-4">Surat &amp; Ayat Terkini</th>
+                        <th className="py-4 px-3 text-center">Juz</th>
+                        <th className="py-4 px-4">Nama Donatur</th>
+                        <th className="py-4 px-4 text-center">Dokumentasi</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[var(--cream-200)] text-[var(--ink-900)]">
+                      {(paginatedData as PublicBussDistribution[]).map((item, idx) => {
+                        const displayIndex = (currentPage - 1) * pageSize + idx + 1;
+                        return (
+                          <tr key={item.id} className="hover:bg-[var(--cream-100)] transition-colors">
+                            <td className="py-4 px-3 text-center font-bold text-[var(--gold-700)]">
+                              {item.year}
+                            </td>
+                            <td className="py-4 px-3 text-center font-mono text-[var(--ink-600)]">
+                              {displayIndex}
+                            </td>
+                            <td className="py-4 px-4 font-semibold text-[var(--green-950)]">
+                              {item.santri_name}
+                            </td>
+                            <td className="py-4 px-3 text-[var(--ink-600)]">
+                              {item.origin}
+                            </td>
+                            <td className="py-4 px-4 font-medium text-[var(--ink-800)]">
+                              {item.pesantren_name}
+                            </td>
+                            <td className="py-4 px-4 font-semibold text-[var(--ink-900)]">
+                              {item.current_surah}
+                            </td>
+                            <td className="py-4 px-3 text-center font-bold text-[var(--gold-700)]">
+                              Juz {item.juz}
+                            </td>
+                            <td className="py-4 px-4 font-medium text-[var(--ink-800)]">
+                              {item.display_donor_name}
+                            </td>
+                            <td className="py-4 px-4 text-center">
+                              {item.photo_urls.length > 0 ? (
+                                <button
+                                  onClick={() =>
+                                    setActiveGalleryModal({
+                                      title: `Dokumentasi BUSS - ${item.santri_name}`,
+                                      subtitle: `${item.pesantren_name} (${item.year})`,
+                                      photos: item.photo_urls,
+                                      description: `Penerima beasiswa santri tahfidz atas dukungan donatur ${item.display_donor_name}.`,
+                                    })
+                                  }
+                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-[var(--gold-500)] text-xs font-semibold bg-[var(--cream-100)] hover:bg-gold-gradient transition-all"
+                                >
+                                  <ImageIcon className="w-3.5 h-3.5 text-[var(--gold-700)]" />
+                                  <span>Lihat Foto</span>
+                                </button>
+                              ) : (
+                                <span className="text-[var(--ink-400)]">-</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile View */}
+                <div className="lg:hidden space-y-4">
+                  {(paginatedData as PublicBussDistribution[]).map((item, idx) => {
+                    const displayIndex = (currentPage - 1) * pageSize + idx + 1;
+                    return (
+                      <div
+                        key={item.id}
+                        className="p-5 rounded-3xl bg-[var(--cream-100)] border border-[var(--cream-200)] shadow-sm space-y-3"
+                      >
+                        <div className="flex items-center justify-between pb-2 border-b border-[var(--cream-200)] text-xs">
+                          <span className="font-mono text-[var(--ink-600)]">
+                            No. {displayIndex} &bull; Tahun {item.year}
+                          </span>
+                          <span className="font-bold text-[var(--gold-700)]">
+                            Juz {item.juz}
+                          </span>
+                        </div>
+
+                        <div className="space-y-1">
+                          <h4 className="font-serif text-base font-bold text-[var(--green-950)]">
+                            {item.santri_name}
+                          </h4>
+                          <p className="text-xs text-[var(--ink-600)]">
+                            {item.pesantren_name} &bull; Asal: {item.origin}
+                          </p>
+                        </div>
+
+                        <div className="p-3 rounded-2xl bg-[var(--cream-50)] text-xs space-y-1 border border-[var(--cream-200)]">
+                          <p className="font-semibold text-[var(--ink-900)]">
+                            Capaian: {item.current_surah}
+                          </p>
+                          <p className="text-[11px] text-[var(--ink-600)]">
+                            Donatur: <strong className="text-[var(--green-800)]">{item.display_donor_name}</strong>
+                          </p>
+                        </div>
+
+                        {item.photo_urls.length > 0 && (
+                          <button
+                            onClick={() =>
+                              setActiveGalleryModal({
+                                title: `Dokumentasi BUSS - ${item.santri_name}`,
+                                subtitle: `${item.pesantren_name} (${item.year})`,
+                                photos: item.photo_urls,
+                                description: `Penerima beasiswa santri tahfidz atas dukungan donatur ${item.display_donor_name}.`,
+                              })
+                            }
+                            className="w-full py-2 rounded-full border border-[var(--gold-500)] text-xs font-semibold text-center hover:bg-gold-gradient transition-all"
+                          >
+                            Lihat Foto Dokumentasi
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+
+            {/* ======================================================== */}
+            {/* TAB C: YATIM BERDIKARI                                   */}
+            {/* ======================================================== */}
+            {activeTab === "yatim" && (
+              <>
+                {/* Desktop View */}
+                <div className="hidden lg:block overflow-x-auto rounded-3xl border border-[var(--cream-200)] shadow-sm bg-[var(--cream-50)]">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-[var(--green-950)] text-[var(--cream-50)] font-serif uppercase tracking-wider text-[11px]">
+                        <th className="py-4 px-3 text-center">Tahun</th>
+                        <th className="py-4 px-3 text-center">No.</th>
+                        <th className="py-4 px-6">Nama Kegiatan</th>
+                        <th className="py-4 px-5">Penyelenggara</th>
+                        <th className="py-4 px-4">Tanggal Pelaksanaan</th>
+                        <th className="py-4 px-4 text-center">Dokumentasi</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[var(--cream-200)] text-[var(--ink-900)]">
+                      {(paginatedData as YatimActivity[]).map((item, idx) => {
+                        const displayIndex = (currentPage - 1) * pageSize + idx + 1;
+                        return (
+                          <tr key={item.id} className="hover:bg-[var(--cream-100)] transition-colors">
+                            <td className="py-4 px-3 text-center font-bold text-[var(--gold-700)]">
+                              {item.year}
+                            </td>
+                            <td className="py-4 px-3 text-center font-mono text-[var(--ink-600)]">
+                              {displayIndex}
+                            </td>
+                            <td className="py-4 px-6">
+                              <div className="font-serif text-sm font-bold text-[var(--green-950)]">
+                                {item.activity_name}
+                              </div>
+                              <div className="text-[11px] text-[var(--ink-600)] line-clamp-1 mt-0.5">
+                                {item.description}
+                              </div>
+                            </td>
+                            <td className="py-4 px-5 font-medium text-[var(--ink-800)]">
+                              {item.organizer}
+                            </td>
+                            <td className="py-4 px-4 text-[var(--ink-600)] whitespace-nowrap">
+                              {item.activity_date}
+                            </td>
+                            <td className="py-4 px-4 text-center">
+                              <button
+                                onClick={() =>
+                                  setActiveGalleryModal({
+                                    title: item.activity_name,
+                                    subtitle: `Penyelenggara: ${item.organizer} (${item.activity_date})`,
+                                    photos: item.documentation_urls,
+                                    description: item.description,
+                                  })
+                                }
+                                className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full bg-[var(--green-800)] text-[var(--cream-50)] text-xs font-semibold hover:bg-[var(--green-700)] shadow-xs transition-colors"
+                              >
+                                <ImageIcon className="w-3.5 h-3.5" />
+                                <span>Lihat Dokumentasi Kegiatan</span>
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile View */}
+                <div className="lg:hidden space-y-4">
+                  {(paginatedData as YatimActivity[]).map((item, idx) => {
+                    const displayIndex = (currentPage - 1) * pageSize + idx + 1;
+                    return (
+                      <div
+                        key={item.id}
+                        className="p-5 rounded-3xl bg-[var(--cream-100)] border border-[var(--cream-200)] shadow-sm space-y-3"
+                      >
+                        <div className="flex items-center justify-between pb-2 border-b border-[var(--cream-200)] text-xs">
+                          <span className="font-mono text-[var(--ink-600)]">
+                            No. {displayIndex} &bull; Tahun {item.year}
+                          </span>
+                          <span className="text-[var(--ink-600)] flex items-center gap-1">
+                            <Calendar className="w-3 h-3 text-[var(--green-700)]" />
+                            {item.activity_date}
+                          </span>
+                        </div>
+
+                        <div>
+                          <h4 className="font-serif text-base font-bold text-[var(--green-950)]">
+                            {item.activity_name}
+                          </h4>
+                          <p className="text-xs text-[var(--ink-600)] mt-1 leading-relaxed">
+                            {item.description}
+                          </p>
+                        </div>
+
+                        <div className="text-xs text-[var(--ink-800)]">
+                          Penyelenggara: <strong>{item.organizer}</strong>
+                        </div>
+
+                        <button
+                          onClick={() =>
+                            setActiveGalleryModal({
+                              title: item.activity_name,
+                              subtitle: `Penyelenggara: ${item.organizer} (${item.activity_date})`,
+                              photos: item.documentation_urls,
+                              description: item.description,
+                            })
+                          }
+                          className="w-full py-2.5 rounded-full bg-[var(--green-800)] text-[var(--cream-50)] text-xs font-semibold text-center hover:bg-[var(--green-700)] transition-colors shadow-xs"
+                        >
+                          Klik Lihat Dokumentasi Kegiatan
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+
+            {/* ======================================================== */}
+            {/* TAB D: GEBER MASJID (Hanya tampil jika env diaktifkan)   */}
+            {/* ======================================================== */}
+            {showGeberTab && activeTab === "geber" && (
+              <div className="overflow-x-auto rounded-3xl border border-[var(--cream-200)] shadow-sm bg-[var(--cream-50)]">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-[var(--green-950)] text-[var(--cream-50)] font-serif uppercase tracking-wider text-[11px]">
+                      <th className="py-4 px-3 text-center">No.</th>
+                      <th className="py-4 px-4">Nama Masjid</th>
+                      <th className="py-4 px-4">Lokasi &amp; Alamat</th>
+                      <th className="py-4 px-3">Tanggal Kegiatan</th>
+                      <th className="py-4 px-3 text-center">Relawan</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--cream-200)] text-[var(--ink-900)]">
+                    {(paginatedData as GeberMasjidDistribution[]).map((item, idx) => (
+                      <tr key={item.id} className="hover:bg-[var(--cream-100)] transition-colors">
+                        <td className="py-4 px-3 text-center font-mono text-[var(--ink-600)]">
+                          {idx + 1}
+                        </td>
+                        <td className="py-4 px-4 font-semibold text-[var(--green-950)]">
+                          {item.mosque_name}
+                        </td>
+                        <td className="py-4 px-4">
+                          <div>{item.city}, {item.province}</div>
+                          <div className="text-[10px] text-[var(--ink-600)] line-clamp-1">{item.address}</div>
+                        </td>
+                        <td className="py-4 px-3 text-[var(--ink-600)]">{item.activity_date}</td>
+                        <td className="py-4 px-3 text-center font-bold text-[var(--green-800)]">
+                          {item.participants} orang
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* 5. Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-[var(--cream-200)]">
+                <div className="text-xs text-[var(--ink-600)]">
+                  Menampilkan <strong>{(currentPage - 1) * pageSize + 1}</strong> s/d{" "}
+                  <strong>{Math.min(currentPage * pageSize, currentDataset.length)}</strong> dari{" "}
+                  <strong>{currentDataset.length}</strong> data
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    disabled={currentPage <= 1}
+                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                    className="p-2 rounded-xl border border-[var(--cream-300)] text-[var(--ink-800)] hover:bg-[var(--cream-200)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    aria-label="Halaman sebelumnya"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+
+                  <span className="text-xs font-semibold px-3 py-1 bg-[var(--cream-100)] rounded-lg text-[var(--ink-900)]">
+                    Halaman {currentPage} dari {totalPages}
+                  </span>
+
+                  <button
+                    disabled={currentPage >= totalPages}
+                    onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                    className="p-2 rounded-xl border border-[var(--cream-300)] text-[var(--ink-800)] hover:bg-[var(--cream-200)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    aria-label="Halaman selanjutnya"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* ======================================================== */}
+      {/* 6. MODAL: GALERI FOTO KEGIATAN                          */}
+      {/* ======================================================== */}
+      {activeGalleryModal && (
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
-          onClick={() => setSelectedDrawerItem(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in"
+          onClick={() => setActiveGalleryModal(null)}
         >
           <div
+            className="bg-[var(--cream-50)] rounded-3xl max-w-xl w-full max-h-[90vh] overflow-y-auto border border-[var(--gold-500)]/40 shadow-2xl p-6 sm:p-8 space-y-5"
             onClick={(e) => e.stopPropagation()}
-            className="max-w-lg w-full bg-[var(--green-950)] text-[var(--cream-50)] border-2 border-[var(--gold-500)] rounded-3xl p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto"
           >
-            <button
-              onClick={() => setSelectedDrawerItem(null)}
-              className="absolute top-5 right-5 text-[var(--sage-300)] hover:text-white"
-            >
-              <X className="w-6 h-6" />
-            </button>
-
-            {selectedDrawerItem.photoUrl && (
-              <div className="relative h-48 w-full rounded-2xl overflow-hidden mb-6 border border-[var(--gold-500)]/40 bg-[var(--green-900)]">
-                <Image
-                  src={selectedDrawerItem.photoUrl}
-                  alt={selectedDrawerItem.title}
-                  fill
-                  className="object-cover"
-                />
+            <div className="flex items-start justify-between pb-3 border-b border-[var(--cream-200)]">
+              <div>
+                <h3 className="font-serif text-xl font-bold text-[var(--green-950)]">
+                  {activeGalleryModal.title}
+                </h3>
+                {activeGalleryModal.subtitle && (
+                  <p className="text-xs text-[var(--ink-600)] mt-0.5">
+                    {activeGalleryModal.subtitle}
+                  </p>
+                )}
               </div>
+              <button
+                onClick={() => setActiveGalleryModal(null)}
+                className="p-2 rounded-full hover:bg-[var(--cream-200)] text-[var(--ink-600)] transition-colors"
+                aria-label="Tutup modal galeri"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {activeGalleryModal.description && (
+              <p className="text-xs text-[var(--ink-700)] leading-relaxed">
+                {activeGalleryModal.description}
+              </p>
             )}
 
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-[var(--gold-500)] text-[var(--green-950)] mb-3">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Berita Acara Penyaluran</span>
+            <div className="grid grid-cols-1 gap-3">
+              {activeGalleryModal.photos.map((url, pIdx) => (
+                <div
+                  key={pIdx}
+                  className="relative aspect-16/10 rounded-2xl overflow-hidden border border-[var(--cream-200)] bg-[var(--green-950)] shadow-sm"
+                >
+                  <Image
+                    src={url}
+                    alt={activeGalleryModal.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 550px"
+                  />
+                </div>
+              ))}
             </div>
 
-            <h3 className="font-serif text-2xl font-bold text-[var(--cream-50)] mb-1">
-              {selectedDrawerItem.title}
-            </h3>
-            <p className="text-xs text-[var(--gold-300)] font-medium mb-4">
-              {selectedDrawerItem.subtitle}
-            </p>
-
-            <div className="space-y-3 py-4 border-y border-[var(--gold-500)]/20 text-xs text-[var(--cream-100)]">
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-[var(--gold-400)] flex-shrink-0" />
-                <span>{selectedDrawerItem.location}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-[var(--gold-400)] flex-shrink-0" />
-                <span>Tanggal Penyaluran: {selectedDrawerItem.date}</span>
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <div className="text-xs text-[var(--gold-400)] uppercase tracking-wider font-semibold mb-1">
-                Catatan Lapangan & Dokumentasi:
-              </div>
-              <p className="text-sm text-[var(--cream-200)] leading-relaxed">
-                {selectedDrawerItem.detail}
-              </p>
-            </div>
-
-            <div className="mt-6 pt-4 border-t border-[var(--gold-500)]/20 flex justify-end">
+            <div className="pt-2 text-right">
               <button
-                onClick={() => setSelectedDrawerItem(null)}
-                className="px-6 py-2.5 rounded-full text-xs font-semibold bg-gold-gradient text-[var(--green-950)]"
+                onClick={() => setActiveGalleryModal(null)}
+                className="px-6 py-2 rounded-full bg-[var(--green-800)] text-[var(--cream-50)] text-xs font-semibold hover:bg-[var(--green-700)] transition-colors"
               >
-                Tutup Dokumen
+                Tutup
               </button>
             </div>
           </div>

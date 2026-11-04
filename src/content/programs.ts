@@ -1,5 +1,6 @@
 export interface ProgramDetail {
   slug: string;
+  aliases?: string[];
   title: string;
   pillar: string;
   shortDesc: string;
@@ -14,142 +15,221 @@ export interface ProgramDetail {
 
 export const programsContent: ProgramDetail[] = [
   {
-    slug: "infak-alquran",
-    title: "Infak 1 Jt Al-Qur'an Custom Nama",
+    slug: "infak-jinan",
+    aliases: ["infak-alquran"],
+    title: "Infak Al-Qur'an Jinan (Jelajah Langsung Infak Al-Qur'an Sampai ke Tangan)",
     pillar: "Spiritual",
-    shortDesc: "Wakaf mushaf Al-Qur'an hafalan berkualitas dengan nama donatur/keluarga tercetak permanen di cover untuk santri pelosok nusantara.",
+    shortDesc:
+      "Program Infak 1 Jt Al-Qur'an Jinan memastikan amanah infak tersampaikan langsung ke tangan para santri penghafal Al-Qur'an dengan custom nama donatur di cover dan laporan berkala.",
     heroImage: "/images/infak-mushaf-custom.jpg",
-    quote: "Apabila manusia meninggal dunia, maka terputuslah amalnya kecuali tiga perkara: sedekah jariyah, ilmu yang bermanfaat, atau anak saleh yang mendoakannya.",
+    quote:
+      "Setiap huruf yang dibaca dari mushaf yang Anda infakkan akan menjadi pahala jariyah yang terus mengalir, bahkan setelah kita tiada.",
     overview: [
-      "Banyak pesantren rakyat dan madrasah pelosok di tanah air yang para santrinya harus bergantian memakai mushaf yang sudah robek dan hilang beberapa halamannya.",
-      "Program Infak 1 Juta Al-Qur'an hadir menyediakan mushaf baru berstandar Kementerian Agama RI dengan kertas khusus Quranic Paper (QPP) yang nyaman dibaca berjam-jam.",
-      "Keistimewaan program ini: setiap mushaf dicetak dengan nama pewakaf atau almarhum/almarhumah keluarga donatur pada bagian cover, menjadi wasilah doa harian yang dipanjatkan para penghafal Al-Qur'an.",
+      "Salah satu pahala yang akan mengalir abadi adalah Amal Jariyah, seperti donasi infak Al-Qur'an untuk pesantren penghafal Al-Qur'an di seluruh Indonesia.",
+      "Program Infak 1 Jt Al-Qur'an Jinan memastikan amanah infak dari para donatur tersampaikan dengan amanah langsung ke tangan para santri penghafal Al-Qur'an.",
+      "Disertai data sebaran donasi infak yang memungkinkan para donatur melihat langsung sebaran keterangan tempat dan wilayah lengkap dengan nama santri penerima, progres jumlah hafalan Al-Qur'an yang diperbarui secara bulanan, serta dokumentasi kegiatan.",
+      "Mari kita bersama menebar cahaya ilmu dan iman serta pahala abadi dengan ikut berkontribusi dalam program Infak 1 Jt Al-Qur'an Jinan sebesar Rp 100.000,- dengan custom nama donatur, keluarga, atau lembaga untuk disebarkan ke pesantren dan masjid di seluruh Indonesia.",
     ],
     impactPoints: [
-      "Target penyaluran: 1.000.000 mushaf ke pesantren dan pelosok kepulauan nusantara.",
-      "Custom plat nama pewakaf di cover mushaf (misal: 'Donasi Infak dari: Inayah Binti Kartoni').",
-      "Setiap mushaf didistribusikan langsung disertai berita acara, dokumentasi foto, dan titik koordinat GPS yang tercatat transparan.",
+      "Target penyaluran: 1.000.000 Mushaf Al-Qur'an untuk santri tahfidz nusantara.",
+      "Custom nama donatur, keluarga, atau lembaga tercetak permanen pada cover mushaf.",
+      "Data sebaran terbuka: nama santri, lokasi pesantren, progres hafalan bulanan, dan dokumentasi.",
     ],
     howToJoin: [
-      "Tentukan jumlah mushaf yang ingin Anda infakkan (Rp 200.000 / mushaf).",
-      "Cantumkan nama donatur atau nama keluarga yang ingin dicetak pada cover.",
-      "Pilih apakah nama ingin ditampilkan di papan sebaran publik atau sebagai Hamba Allah.",
-      "Lakukan transfer ke rekening resmi yayasan dan pantau status penyaluran Anda di menu Data Sebaran.",
+      "Tentukan jumlah mushaf yang ingin Anda infakkan (Rp 100.000 / mushaf).",
+      "Cantumkan nama donatur, keluarga, atau dedikasi yang ingin dicetak pada cover.",
+      "Pilih apakah nama ingin ditampilkan di tabel publik atau sebagai Hamba Allah.",
+      "Lakukan transfer dan pantau penyaluran amanah Anda di menu Data Sebaran.",
     ],
     targetMushafOrGoal: "1.000.000 Mushaf Al-Qur'an",
-    pricePerUnit: "Rp 200.000 / Mushaf",
+    pricePerUnit: "Rp 100.000 / Mushaf",
+  },
+  {
+    slug: "buss-quran",
+    aliases: ["buss-alquran"],
+    title: "Program BUSS Al-Qur'an (Bantuan Uang Saku Santri Penghafal Al-Qur'an)",
+    pillar: "Spiritual & Pendidikan",
+    shortDesc:
+      "Skema apresiasi beasiswa uang saku bagi santri penghafal Al-Qur'an penerima mushaf Jinan agar fokus menghafal dan menuntaskan pendidikan tanpa terkendala biaya hidup.",
+    heroImage: "/images/founder-ahmad-dahlan.jpg",
+    quote:
+      "Memberikan motivasi dan dukungan nyata dalam proses menghafal Al-Qur'an serta memastikan kelangsungan belajar santri hingga tujuan akhir.",
+    overview: [
+      "Program bantuan uang saku/beasiswa untuk santri penghafal Al-Qur'an (BUSS Qur'an) merupakan skema apresiasi dan dukungan lembaga melalui para dermawan dan donatur yang menyisihkan sebagian rezekinya.",
+      "Diberikan kepada para santri penghafal Al-Qur'an yang sebelumnya pernah menerima Infak Mushaf Al-Qur'an.",
+      "Besaran dana bervariasi: Program BUSS Ekonomi sebesar Rp 150.000,-, Program BUSS Bisnis sebesar Rp 300.000,-, dan Program BUSS Eksekutif sebesar Rp 500.000,-.",
+      "Tujuan utamanya adalah memberikan jalan motivasi dan semangat serta dukungan dalam proses menghafal Al-Qur'an serta memastikan kelangsungan belajar para santri agar fokus menghafal Al-Qur'an dan mengantarkan pendidikan formal tanpa terkendala biaya hidup maupun pendidikan.",
+    ],
+    impactPoints: [
+      "Program BUSS Ekonomi: Bantuan uang saku Rp 150.000 / bulan.",
+      "Program BUSS Bisnis: Dukungan sarana belajar Rp 300.000 / bulan.",
+      "Program BUSS Eksekutif: Kafalah santri tahfidz Rp 500.000 / bulan.",
+      "Monitoring berkala capaian juz dan ayat hafalan para santri binaan.",
+    ],
+    howToJoin: [
+      "Pilih skema tier BUSS Al-Qur'an yang ingin Anda dukung (Ekonomi, Bisnis, atau Eksekutif).",
+      "Pilih komitmen donasi rutin per bulan atau per semester.",
+      "Dapatkan laporan berkala perkembangan santri tahfidz penerima beasiswa.",
+    ],
+    targetMushafOrGoal: "Ribuan Santri Tahfidz Mandiri",
+    pricePerUnit: "Mulai Rp 150.000 / Bulan",
   },
   {
     slug: "geber-masjid",
-    title: "Geber Masjid (Gerakan Bersih-Bersih Masjid)",
+    title: "Gerakan Bersih Masjid (Geber Masjid)",
     pillar: "Spiritual & Sosial",
-    shortDesc: "Aksi relawan terpadu membersihkan karpet, toilet, tempat wudhu, dan peremajaan fasilitas rumah ibadah di pemukiman dan pelosok.",
+    shortDesc:
+      "Aksi nyata gotong-royong merawat, membersihkan, dan memakmurkan masjid sebagai pusat peradaban dan ibadah kaum muslimin.",
     heroImage: "/images/tasmi-30-juz-dokumentasi.jpg",
-    quote: "Sesungguhnya yang memakmurkan masjid-masjid Allah hanyalah orang-orang yang beriman kepada Allah dan hari kemudian.",
+    quote:
+      "Masjid yang bersih, suci, rapi, dan nyaman merupakan wujud kepedulian bersama serta landasan khusyuknya setiap ibadah yang dijalankan.",
     overview: [
-      "Masjid adalah jantung peradaban kaum muslimin. Kebersihan dan keharuman masjid adalah cermin kemuliaan akhlak masyarakat di sekitarnya.",
-      "Tim relawan Geber Masjid membawa peralatan sanitasi modern, mesin ekstraktor cuci karpet, cairan disinfektan ramah lingkungan, serta tenaga sukarela pemuda.",
-      "Selain membersihkan, tim juga mengedukasi DKM lokal tentang manajemen perawatan fasilitas hemat energi dan ramah air.",
+      "Masjid bukan hanya sekadar tempat menunaikan ibadah sholat, melainkan pusat peradaban, pembinaan umat, dan simbol kebersamaan masyarakat muslim.",
+      "Masjid yang bersih, suci, rapi, dan nyaman merupakan wujud kepedulian bersama serta landasan khusyuknya setiap ibadah yang dijalankan.",
+      "Mari bergabung dengan kami dengan berkontribusi nyata melalui Gerakan Bersih-Bersih Masjid, untuk bergotong-royong merawat, menjaga, menumbuhkan semangat keimanan kepada Allah SWT, sekaligus mempererat tali silaturahmi antar jamaah.",
     ],
     impactPoints: [
-      "Pembersihan menyeluruh: karpet utama, plafon, mihrab, kaca, dan tempat wudhu.",
-      "Sedekah paket alat kebersihan lengkap dan pewangi tahan lama untuk takmir masjid.",
-      "Menggerakkan pemuda karang taruna dan remaja masjid untuk kembali mencintai rumah Allah.",
+      "Pembersihan menyeluruh karpet, toilet, tempat wudhu, dan area utama masjid.",
+      "Bantuan sarana dan perlengkapan kebersihan bagi takmir masjid.",
+      "Menggerakkan partisipasi pemuda dan jamaah untuk mencintai dan memakmurkan rumah Allah.",
     ],
     howToJoin: [
-      "Daftarkan masjid atau musholla di lingkungan Anda yang membutuhkan aksi Geber Masjid.",
-      "Bergabung menjadi relawan lapangan akhir pekan bersama tim Sahabat Aksara.",
-      "Donasi perlengkapan dan operasional kebersihan masjid melalui rekening yayasan.",
+      "Ajukan masjid di lingkungan Anda yang membutuhkan aksi Geber Masjid.",
+      "Bergabung menjadi relawan kebersihan lapangan di akhir pekan.",
+      "Donasi perlengkapan sanitasi dan kebersihan melalui kanal resmi yayasan.",
     ],
     targetMushafOrGoal: "1.000 Masjid Bersih & Makmur",
   },
   {
     slug: "tasmi-30-juz",
-    title: "Majlis Tasmi' Al-Qur'an 30 Juz Bil Ghaib",
-    pillar: "Pendidikan & Spiritual",
-    shortDesc: "Ujian dan penyimakan hafalan 30 juz Al-Qur'an sekali duduk oleh santri pilihan di hadapan dewan huffazh bersanad.",
+    title: "Majlis Tasmi' Al-Qur'an 30 Juz Bil-Ghoib",
+    pillar: "Spiritual & Pendidikan",
+    shortDesc:
+      "Ikhtiar penguatan hafalan Al-Qur'an 30 juz utuh tanpa melihat mushaf secara estafet dalam kurun 1 hari khatam sebagai doa untuk negeri Indonesia.",
     heroImage: "/images/tasmi-30-juz-dokumentasi.jpg",
-    quote: "Sebaik-baik kalian adalah orang yang belajar Al-Qur'an dan mengajarkannya.",
+    quote:
+      "Investasi peradaban untuk mencetak generasi Rabbani yang jujur, tangguh, dan menjaga kemurnian Al-Qur'an di dalam dada.",
     overview: [
-      "Majlis Tasmi' 30 Juz Bil Ghaib adalah puncak pembuktian mutqinnya hafalan para santri binaan beasiswa Yayasan Sahabat Aksara.",
-      "Santri melantunkan ayat-ayat suci dari surat Al-Fatihah hingga An-Nas tanpa melihat mushaf, disimak secara teliti oleh asatidz bersanad qira'ah.",
-      "Acara disiarkan langsung melalui platform digital agar menjadi inspirasi bagi jutaan anak muda muslim di tanah air.",
+      "Majlis Tasmi’ 30 Juz Bil-Ghoib adalah program ikhtiar penguatan hafalan Al-Qur'an secara utuh (sekaligus/berkelanjutan dalam satu tatanan waktu) tanpa melihat mushaf yang dibacakan para penghafal Al-Qur'an secara estafet dalam kurun 1 hari khatam.",
+      "Program ini juga sekaligus menjadi ikhtiar dukungan doa untuk negeri Indonesia tercinta.",
+      "Dirancang untuk menguji kelancaran, ketepatan tajwid, fashahah, serta ketahanan mental dan fisik para hafidz/hafidzah (penghafal Al-Qur'an).",
+      "Dukungan penuh terhadap gerakan ini menjadi investasi peradaban untuk mencetak generasi Rabbani yang jujur, tangguh, dan menjaga kemurnian Al-Qur'an di dalam dada.",
     ],
     impactPoints: [
-      "Menjaga kemurnian hafalan para calon ulama dan pemimpin masa depan.",
-      "Memberikan penghargaan dan sertifikat sanad bagi santri yang lulus ujian mutqin.",
-      "Menumbuhkan kecintaan masyarakat luas terhadap tradisi tasmi' Al-Qur'an bil ghaib.",
+      "Khataman 30 juz bil-ghoib secara estafet tuntas dalam satu hari.",
+      "Penyimakan teliti oleh para asatidz dan huffazh bersanad.",
+      "Rangkaian doa bersama untuk keberkahan dan kedamaian bangsa Indonesia.",
     ],
     howToJoin: [
-      "Kirimkan santri terbaik pondok pesantren Anda untuk mengikuti kurasi majlis tasmi'.",
-      "Hadiri dan simak langsung pelaksanaan majlis tasmi' di lokasi acara atau siaran streaming.",
-      "Salurkan infak beasiswa kafalah santri huffazh untuk menjamin pendidikan mereka.",
+      "Dukung kafalah operasional santri peserta majlis tasmi'.",
+      "Hadiri dan simak langsung pelaksanaan majlis tasmi' di lokasi acara.",
     ],
-    targetMushafOrGoal: "500 Huffazh Bersanad Mutqin",
+    targetMushafOrGoal: "Khataman 30 Juz Bil-Ghoib",
   },
   {
-    slug: "pena-yatim",
-    title: "PENA (Pendidikan & Santunan) Anak Yatim",
-    pillar: "Pendidikan & Sosial",
-    shortDesc: "Pemberian beasiswa pendidikan berkelanjutan, perlengkapan sekolah, dan pembinaan karakter qur'ani bagi anak-anak yatim dhuafa.",
-    heroImage: "/images/founder-ahmad-dahlan.jpg",
-    quote: "Aku dan orang yang menanggung anak yatim (kedudukannya) di surga seperti ini (beliau merapatkan dua jarinya).",
-    overview: [
-      "Setiap anak berhak memiliki mimpi yang tinggi. Program PENA memastikan anak-anak yatim tidak terhenti sekolahnya karena ketiadaan biaya.",
-      "Bukan hanya santunan tunai berkala, program ini mendampingi anak secara holistik: bimbingan belajar, mentoring akhlak, dan akses ke pondok pesantren tahfidz.",
-    ],
-    impactPoints: [
-      "Beasiswa SPP sekolah dan uang saku bulanan.",
-      "Paket perlengkapan belajar, seragam baru, dan gizi bergizi.",
-      "Camp pembinaan karakter dan kepemimpinan tahunan.",
-    ],
-    howToJoin: [
-      "Pilih opsi Orang Tua Asuh dengan komitmen donasi rutin per bulan.",
-      "Rekomendasikan anak yatim berprestasi di sekitar Anda yang membutuhkan beasiswa.",
-    ],
-    targetMushafOrGoal: "1.000 Anak Asuh Berkelanjutan",
-  },
-  {
-    slug: "bela-berdikari",
-    title: "Bela Berdikari (Pelatihan Keterampilan Mandiri)",
+    slug: "yatim-berdikari",
+    aliases: ["pena-yatim"],
+    title: "Program Yatim Berdikari",
     pillar: "Sosial & Pendidikan",
-    shortDesc: "Pelatihan vokasi praktis, coding dasar, servis elektronika, dan wirausaha bagi pemuda putus sekolah agar berdaya secara ekonomi.",
+    shortDesc:
+      "Pemberdayaan berkelanjutan bagi remaja yatim dan piatu membekali keterampilan praktis (hard skills) dan keberanian (soft skills) menuju kemandirian finansial.",
     heroImage: "/images/founder-ahmad-dahlan.jpg",
+    quote:
+      "Memberikan kail, bukan sekadar ikan: memutus rantai kemiskinan dengan bekal keterampilan nyata menuju masa depan yang cerah.",
     overview: [
-      "Terinspirasi dari kisah perjuangan founder yang bangkit dari putus sekolah, program Bela Berdikari membekali generasi muda dengan keterampilan bernilai tinggi di era modern.",
-      "Peserta dibimbing langsung oleh praktisi industri hingga mampu menghasilkan karya atau mandiri membuka usaha.",
+      "Merupakan program selain santunan yakni dengan pemberdayaan berkelanjutan yang dirancang khusus untuk membekali anak-anak yatim dan piatu khususnya usia remaja hingga usia produktif dengan keterampilan praktis (hard skills) dan karakter keberanian (soft skills).",
+      "Kami percaya bahwa memberi bantuan materi belaka hanya menyelesaikan masalah sesaat. Melalui program pelatihan ini, kami berikhtiar memutus rantai ketergantungan dan kemiskinan dengan memberikan 'kail', bukan sekadar 'ikan'.",
+      "Sehingga mereka mampu berkarya meraih kemandirian finansial, dan merancang masa depan yang cerah.",
     ],
     impactPoints: [
-      "Kurikulum aplikatif: literasi digital, desain grafis, coding, dan teknisi perangkat.",
-      "Bantuan modal awal alat kerja untuk lulusan terbaik pelatihan.",
-      "Penyaluran magang ke mitra industri dan jaringan wirausaha yayasan.",
+      "Pelatihan vokasi praktis sesuai bakat dan kebutuhan lapangan kerja.",
+      "Pembinaan karakter mandiri, etika kerja, dan ketahanan mental.",
+      "Pendampingan hingga alumni mampu menghasilkan karya dan mandiri finansial.",
     ],
     howToJoin: [
-      "Daftar kelas pelatihan vokasi gratis untuk pemuda usia 17–25 tahun.",
-      "Menjadi mentor relawan praktisi industri.",
+      "Salurkan donasi beasiswa pelatihan program Yatim Berdikari.",
+      "Bergabung menjadi mentor industri atau relawan pengajar.",
     ],
-    targetMushafOrGoal: "500 Lulusan Siap Kerja",
+    targetMushafOrGoal: "Anak Asuh Berdaya Mandiri",
   },
   {
-    slug: "umkm-berkah",
-    title: "Pemberdayaan UMKM & Koperasi Berkah",
-    pillar: "Teknologi & Sosial",
-    shortDesc: "Bantuan modal usaha tanpa riba, pendampingan legalitas halal, dan integrasi digital payment untuk pedagang kecil jamaah masjid.",
-    heroImage: "/images/infak-mushaf-custom.jpg",
+    slug: "pelatihan-it",
+    aliases: ["bela-berdikari"],
+    title: "Beasiswa Pelatihan IT Mitra Produktif",
+    pillar: "Pendidikan & Teknologi",
+    shortDesc:
+      "Pembinaan intensif mitra dengan Project-Based Learning dan bimbingan mentor industri hingga Exhibition & Demo Day produk karya nyata.",
+    heroImage: "/images/founder-ahmad-dahlan.jpg",
+    quote:
+      "Mencetak talenta unggul yang tidak hanya menguasai teori, tetapi mampu melahirkan karya nyata yang inovatif dan berdaya guna bagi ummat.",
     overview: [
-      "Memperkuat ekonomi umat dari akar rumput melalui pembebasan dari jeratan pinjaman rentenir.",
-      "Menggunakan akad qardhul hasan (pinjaman kebajikan) yang digulirkan secara transparan melalui sistem pencatatan aplikasi digital buatan yayasan.",
+      "Program pembinaan intensif bagi mitra yang dirancang untuk mencetak talenta unggul yang tidak hanya menguasai teori, tetapi juga mampu melahirkan karya nyata yang inovatif dan berdaya guna.",
+      "Melalui pendekatan Project-Based Learning, setiap penerima beasiswa (awardee) diarahkan untuk mengikuti pelatihan khusus terkait kurikulum praktis, bimbingan langsung dari mentor industri, serta fasilitas penuh untuk merancang, mengeksekusi, dan menyelesaikan proyek karya akhir.",
+      "Karya akhir dapat berupa produk teknologi, desain UI/UX, karya seni, maupun solusi bisnis sosial.",
+      "Program ini diakhiri dengan Exhibition & Demo Day sebagai ajang publikasi dan peluncuran karya penerima beasiswa yang nanti penerima manfaatnya akan kembali ke masyarakat dan sekolah.",
     ],
     impactPoints: [
-      "Pembiayaan bergulir 100% tanpa bunga dan tanpa denda.",
-      "Pendampingan sertifikasi halal dan perbaikan kemasan produk.",
-      "Digitalisasi transaksi melalui QRIS dan aplikasi kasir Bank Saku Digital.",
+      "Kurikulum aplikatif: programming, desain UI/UX, dan solusi digital kemasyarakatan.",
+      "Mentoring intensif 1-on-1 dari praktisi industri teknologi.",
+      "Exhibition & Demo Day peluncuran karya produk nyata penerima beasiswa.",
     ],
     howToJoin: [
-      "Ajukan modal usaha mikro melalui DKM masjid mitra.",
-      "Investasikan dana infak produktif untuk dana bergulir pedagang kecil.",
+      "Daftar beasiswa program pelatihan IT bagi mitra produktif.",
+      "Menjadi mitra industri penyedia mentor atau proyek riset terapan.",
     ],
-    targetMushafOrGoal: "250 Usaha Mikro Terberdayakan",
+    targetMushafOrGoal: "Talenta Digital Berdaya Guna",
+  },
+  {
+    slug: "umkm",
+    aliases: ["umkm-berkah"],
+    title: "Program Dukungan Pembinaan dan Pemberdayaan UMKM",
+    pillar: "Sosial & Teknologi",
+    shortDesc:
+      "Penguatan daya saing UMKM melalui manajemen keuangan, modernisasi alat, legalitas, digitalisasi pemasaran, serta dukungan finansial tanpa bunga.",
+    heroImage: "/images/infak-mushaf-custom.jpg",
+    quote:
+      "Mendorong kemandirian ekonomi masyarakat berbasis komunitas dengan pelatihan terpadu dan pembiayaan syariah tanpa bunga.",
+    overview: [
+      "Program ini dirancang untuk mendampingi serta memperkuat daya saing para pelaku Usaha Mikro, Kecil, dan Menengah (UMKM) dalam menghadapi tantangan pasar.",
+      "Melalui pendekatan terpadu mencakup pelatihan manajemen keuangan, modernisasi alat usaha, pendampingan legalitas/perizinan, hingga digitalisasi pemasaran.",
+      "Program ini bertujuan meningkatkan produktivitas, memperluas jangkauan pasar, serta mendorong kemandirian ekonomi masyarakat berbasis komunitas.",
+      "Disertai dukungan finansial dengan akad hibah atau pinjaman tanpa bunga sesuai syarat dan ketentuan yang berlaku.",
+    ],
+    impactPoints: [
+      "Pelatihan pembukuan keuangan dan perizinan legalitas usaha.",
+      "Digitalisasi pemasaran, optimasi kemasan, dan adopsi pembayaran digital.",
+      "Bantuan modal bergulir dengan akad tanpa bunga (qardhul hasan) atau hibah.",
+    ],
+    howToJoin: [
+      "Daftarkan usaha mikro Anda untuk seleksi pendampingan UMKM.",
+      "Salurkan dana infak produktif untuk modal bergulir pelaku usaha mikro.",
+    ],
+    targetMushafOrGoal: "UMKM Mandiri & Berdaya Saing",
+  },
+  {
+    slug: "bantuan-tematik",
+    aliases: ["tematik"],
+    title: "Program Bantuan Tematik Nusantara",
+    pillar: "Sosial",
+    shortDesc:
+      "Respon cepat tanggap kemanusiaan untuk setiap kondisi darurat: bencana alam, bencana sosial, bantuan pembangunan, dan pendidikan berbatas waktu.",
+    heroImage: "/images/tasmi-30-juz-dokumentasi.jpg",
+    quote:
+      "Respon tanggap dari setiap kondisi terkini yang membutuhkan uluran tangan kasih sayang para dermawan.",
+    overview: [
+      "Program bantuan ini merupakan respon dari setiap kondisi terkini yang sekiranya membutuhkan uluran tangan para dermawan.",
+      "Dari mulai bencana alam, bencana sosial, pembangunan, pendidikan, dan bantuan kemanusiaan lainnya yang bersifat tematik dan dalam batas waktu tertentu saja.",
+      "Contoh aksi tanggap yang disiagakan antara lain: respon gempa bumi di NTT, karhutla Kalimantan, erupsi Krakatau Selat Sunda, dan banjir di Aceh.",
+    ],
+    impactPoints: [
+      "Aksi tanggap darurat evakuasi, logistik pangan, dan perlengkapan hangat.",
+      "Layanan kesehatan darurat dan tenda perlindungan keluarga pengungsi.",
+      "Rehabilitasi sarana ibadah dan pendidikan pasca-bencana secara terpadu.",
+    ],
+    howToJoin: [
+      "Salurkan bantuan donasi untuk posko kampanye tematik bencana aktif.",
+      "Daftar sebagai relawan medis atau logistik tanggap darurat nusantara.",
+    ],
+    targetMushafOrGoal: "Respon Cepat Tanggap Darurat Bencana",
   },
 ];
-

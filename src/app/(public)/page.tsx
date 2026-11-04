@@ -127,7 +127,7 @@ export default async function HomePage() {
               href="/program"
               className="inline-flex items-center gap-2 font-semibold text-[var(--green-800)] hover:text-[var(--gold-700)] text-sm group"
             >
-              <span>Lihat Seluruh 6 Program</span>
+              <span>Lihat Seluruh 8 Program</span>
               <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
@@ -161,7 +161,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 7. KISAH FOUNDER & BIOGRAFI */}
+      {/* 7. KISAH & LATAR BELAKANG LEMBAGA */}
       <section className="py-24 bg-[var(--cream-100)] text-[var(--ink-900)] px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Founder Portrait in Mihrab Frame */}
@@ -169,7 +169,7 @@ export default async function HomePage() {
             <div className="relative w-full max-w-md aspect-[3/4] shape-mihrab overflow-hidden border-4 border-[var(--gold-500)] shadow-2xl bg-[var(--green-950)]">
               <Image
                 src="/images/founder-ahmad-dahlan.jpg"
-                alt="Ahmad Dahlan, Founder Yayasan Sahabat Aksara"
+                alt="Ahmad Dahlan, Pendiri Yayasan Ajirasa Aksara Semesta"
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 420px"
@@ -189,7 +189,7 @@ export default async function HomePage() {
           {/* Founder Quote & Narrative */}
           <div className="lg:col-span-7 space-y-6">
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--gold-700)]">
-              Kisah & Latar Belakang Perjuangan
+              Kisah &amp; Latar Belakang Lembaga
             </span>
             <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[var(--ink-900)] leading-tight">
               Dari Keterbatasan Menuju Gerakan Satu Juta Mushaf

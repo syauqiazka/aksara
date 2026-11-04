@@ -5,7 +5,7 @@ import Image from "next/image";
 import { organizationContent } from "@/content/organization";
 
 export default function InteractiveLogoHotspots() {
-  const [activeHotspot, setActiveHotspot] = useState<string>("ring");
+  const [activeHotspot, setActiveHotspot] = useState<string>("hands");
 
   const hotspots = organizationContent.logoMeaning;
   const current = hotspots.find((h) => h.id === activeHotspot) || hotspots[0];

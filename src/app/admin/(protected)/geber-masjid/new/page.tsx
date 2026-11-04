@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, AlertCircle } from "lucide-react";
 import ImageUploader from "@/components/admin/ImageUploader";
+import { uploadPendingFileOnSave } from "@/lib/upload-helper";
 
 export default function AdminNewGeberPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const [formData, setFormData] = useState({
     mosque_name: "",
@@ -31,28 +33,61 @@ export default function AdminNewGeberPage() {
     setLoading(true);
     setError(null);
 
-    try {
-      const res = await fetch("/api/admin/geber", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          participants: parseInt(formData.participants, 10),
-          lat: formData.lat ? parseFloat(formData.lat) : null,
-          lng: formData.lng ? parseFloat(formData.lng) : null,
-          activity_notes: formData.activity_notes || null,
-          photo_urls: formData.photo_url ? [formData.photo_url] : [],
-        }),
-      });
+    let uploadRollback: (() => Promise<void>) | null = null;
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Gagal menyimpan data Geber Masjid");
+    try {
+      let finalPhotoUrl = formData.photo_url || null;
+
+      if (selectedFile) {
+        const { url, rollback, commit } = await uploadPendingFileOnSave(selectedFile);
+        uploadRollback = rollback;
+        finalPhotoUrl = url;
+
+        const res = await fetch("/api/admin/geber", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...formData,
+            participants: parseInt(formData.participants, 10),
+            lat: formData.lat ? parseFloat(formData.lat) : null,
+            lng: formData.lng ? parseFloat(formData.lng) : null,
+            activity_notes: formData.activity_notes || null,
+            photo_urls: finalPhotoUrl ? [finalPhotoUrl] : [],
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Gagal menyimpan data Geber Masjid");
+        }
+
+        await commit();
+      } else {
+        const res = await fetch("/api/admin/geber", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...formData,
+            participants: parseInt(formData.participants, 10),
+            lat: formData.lat ? parseFloat(formData.lat) : null,
+            lng: formData.lng ? parseFloat(formData.lng) : null,
+            activity_notes: formData.activity_notes || null,
+            photo_urls: finalPhotoUrl ? [finalPhotoUrl] : [],
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Gagal menyimpan data Geber Masjid");
+        }
       }
 
       router.push("/admin/geber-masjid");
       router.refresh();
     } catch (err: unknown) {
+      if (uploadRollback) {
+        await uploadRollback();
+      }
       setError(err instanceof Error ? err.message : "Terjadi kesalahan");
       setLoading(false);
     }

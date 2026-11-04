@@ -23,7 +23,7 @@ Website punya **dua sisi**:
 3. Laporan Penyaluran Program (di docx disebut "bisa diinput admin")
 4. Dokumentasi Program, Donasi Tematik (bencana), Rekening/Kontak/Medsos (disarankan dinamis, lihat §5)
 
-Sumber konten: `Kerangka_Deskripsi_Website_Sahabat_Aksara.docx`. Teks dari docx adalah **draft** — lihat §11 untuk hal yang harus dikonfirmasi ke owner sebelum publish.
+Sumber konten: `Kerangka_Deskripsi_Website_Sahabat_Aksara_104457.docx` (menggantikan docx lama). Teks dari docx baru adalah rujukan kebenaran konten terkini.
 
 ---
 
@@ -156,7 +156,7 @@ Semua tabel dinamis punya: `id uuid pk`, `status text check (status in ('draft',
 `mosque_name`, `province`, `city`, `district`, `address`, `lat`, `lng`, `activity_date`, `participants` int, `activity_notes`, `photo_urls text[]`, `status`.
 
 ### `reports` — Laporan Penyaluran Program
-`slug`, `title`, `program` (enum: infak_alquran, geber_masjid, tasmi, pena_yatim, bela_berdikari, umkm, tematik), `period_start`, `period_end`, `summary`, `body` (markdown), `beneficiaries` int, `amount_idr` bigint null, `cover_url`, `gallery_urls text[]`, `pdf_url` null.
+`slug`, `title`, `program` (enum: infak_jinan, buss_quran, geber_masjid, tasmi, yatim_berdikari, pelatihan_it, umkm, tematik, infak_alquran, pena_yatim, bela_berdikari), `period_start`, `period_end`, `summary`, `body` (markdown), `beneficiaries` int, `amount_idr` bigint null, `cover_url`, `gallery_urls text[]`, `pdf_url` null.
 
 ### Disarankan dinamis (Tier 2)
 - `gallery_items` (Dokumentasi Program: `title`, `program`, `date`, `image_url`, `caption`)
@@ -165,7 +165,13 @@ Semua tabel dinamis punya: `id uuid pk`, `status text check (status in ('draft',
 - `admin_users` (`user_id`, `role`)
 
 ### Storage
-Bucket `public-media` (baca publik) dan `admin-uploads` (draft). Batas upload 5 MB, hanya `image/jpeg|png|webp`, kompres & resize di sisi server/Edge sebelum disimpan (maks sisi panjang 2000 px, buat varian `webp`).
+Provider penyimpanan: **Vercel Blob** (`@vercel/blob` pada path `sahabat-aksara/`) saat `BLOB_READ_WRITE_TOKEN` aktif, dengan fallback penyimpanan lokal di `public/uploads/` pada lingkungan dev lokal.
+- **Alur Upload**: Upload-on-Save. Pemilihan foto hanya membuat preview lokal `URL.createObjectURL`. Upload ke storage dilakukan saat form disubmit.
+- **Kompensasi**: Jika simpan DB gagal, blob yang baru diunggah dihapus otomatis (kompensasi rollback).
+- **Pembersihan**: Saat foto diganti atau data dihapus, blob lama dihapus dari storage.
+- **Deduplikasi**: Penamaan file menggunakan hash konten SHA-256 (`${hash}.webp`).
+- **Batas & Kompresi**: Batas ukuran input 5 MB, hanya `image/jpeg|png|webp`. Dikonversi otomatis ke format WebP, dimensi maksimal 2000 px, target ≤ 300 KB.
+- **Orphan Cleaner**: File yatim dipantau lewat tabel/ledger `upload_ledger` dan dibersihkan berkala via skrip `pnpm storage:orphans`.
 
 **Statistik beranda** (jumlah mushaf tersalurkan, masjid ter-bersihkan, provinsi terjangkau) dihitung dari query agregat atas tabel di atas — **jangan hardcode angka**.
 
@@ -235,17 +241,16 @@ Foto yang menampilkan wajah orang: pastikan ada izin penggunaan sebelum dipublik
 - Uji manual di Chrome, Safari iOS, dan HP Android kelas menengah. 60 fps saat scroll.
 - Tes e2e minimum: login salah/benar, tambah entri draft → tidak tampil di publik → publish → tampil di publik, `/admin` tanpa login → redirect.
 
-## 11. Hal yang HARUS dikonfirmasi owner (jangan ditebak agent)
+## 11. Hal yang DIKONFIRMASI dari docx baru (Kerangka 104457)
 
-1. **Nama badan hukum**: docx menulis "Yayasan Ajirasa Akasara Semesta / Ajirasa Aksara Semesta", dan satu kali "Sahabat Alam SemestaQu". Mana nama resmi? Disarankan pakai satu nama resmi + "Sahabat Aksara" sebagai nama brand.
-2. **Tanggal**: "resmi berdiri 28 September 2026" tetapi Akta Pendirian tertanggal 15 Januari 2024 dan SK Kemenkumham "Tahun 2026"; kisah founder menyebut "akhir tahun 2026". Perlu diluruskan.
-3. **NPWP** (`827382389`) — apakah boleh tampil publik? Format NPWP biasanya 15/16 digit; nomor ini tampak belum lengkap.
-4. Harga Infak: judul "1 Jt" tapi isi menyebut **Rp 200.000** per mushaf. Maksud "1 Jt" = target 1 juta mushaf? Pastikan wording agar tidak membingungkan donatur.
-5. Rekening yayasan, kontak person, akun medsos, daftar mitra (belum ada di docx).
-6. Apakah nama donatur boleh ditampilkan publik (default: tidak, `show_donor_name = false`).
-7. Foto founder dan foto dokumentasi: izin publikasi.
-8. Tautan unduh/Play Store tiap aplikasi di Portofolio (KajianQu, Bank Saku Digital, DiaryQu, E-AbsensiQu, DKM MasjidQu, SapawargaQu).
-9. Typo di docx yang perlu dirapikan sebelum tayang (mis. "seluuh", "berdesikasi", "Indinesia", "tanggal bencana alam" → "tanggap bencana alam", "Contac Person").
+1. **Nama badan hukum**: Yayasan Ajirasa Aksara Semesta (nama brand: Sahabat Aksara). Seluruh penyebutan nama lama disingkirkan.
+2. **Tanggal resmi berdiri**: 22 Oktober 2026. Akta Pendirian Nomor 195 tanggal 15 Januari 2024. SK Kemenkumham Nomor AHU-0002692.AH.01.04. Tahun 2026.
+3. **NPWP**: 827382389 resmi dicantumkan.
+4. **Harga Infak**: Rp 100.000 per mushaf Jinan (target 1 Juta mushaf). Program BUSS Al-Qur'an bertingkat: Rp 150.000 (ekonomi), Rp 300.000 (bisnis), Rp 500.000 (eksekutif).
+5. **Kontak & Mitra**: Contact Person 0822-6217-0018, IG @Sahabat Aksara, Mitra: Madrasah Al-Huffazh Gedongan.
+6. **Rekening yayasan**: Bank BCA a.n. Yayasan Ajirasa Aksara Semesta (nomor rekening belum terbit, tampilkan "Nomor rekening segera diumumkan", jangan mengarang).
+7. **Latar belakang lembaga**: Ahmad Dahlan, alumni MA Al-Huffazh 2 Gedongan Cirebon (30 juz & kitab kuning), Paket C, Sarjana Institut PTIQ Jakarta.
+8. **Nama program**: 8 program resmi: Infak Al-Qur'an Jinan, BUSS Al-Qur'an, Geber Masjid, Majlis Tasmi' 30 Juz Bil-Ghoib, Yatim Berdikari, Beasiswa Pelatihan IT Mitra Produktif, Pembinaan UMKM, Bantuan Tematik Nusantara.
 
 ## 12. Jangan lakukan
 

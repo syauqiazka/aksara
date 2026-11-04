@@ -4,12 +4,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, AlertCircle } from "lucide-react";
+import Select from "@/components/ui/Select";
 import ImageUploader from "@/components/admin/ImageUploader";
+import { uploadPendingFileOnSave } from "@/lib/upload-helper";
 
 export default function AdminNewReportPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const [formData, setFormData] = useState({
     slug: "",
@@ -30,26 +33,59 @@ export default function AdminNewReportPage() {
     setLoading(true);
     setError(null);
 
-    try {
-      const res = await fetch("/api/admin/reports", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          beneficiaries: parseInt(formData.beneficiaries, 10),
-          amount_idr: formData.amount_idr ? parseInt(formData.amount_idr, 10) : null,
-          gallery_urls: [],
-        }),
-      });
+    let uploadRollback: (() => Promise<void>) | null = null;
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Gagal menyimpan laporan");
+    try {
+      let finalCoverUrl = formData.cover_url || null;
+
+      if (selectedFile) {
+        const { url, rollback, commit } = await uploadPendingFileOnSave(selectedFile);
+        uploadRollback = rollback;
+        finalCoverUrl = url;
+
+        const res = await fetch("/api/admin/reports", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...formData,
+            cover_url: finalCoverUrl,
+            beneficiaries: parseInt(formData.beneficiaries, 10),
+            amount_idr: formData.amount_idr ? parseInt(formData.amount_idr, 10) : null,
+            gallery_urls: [],
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Gagal menyimpan laporan");
+        }
+
+        await commit();
+      } else {
+        const res = await fetch("/api/admin/reports", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...formData,
+            cover_url: finalCoverUrl,
+            beneficiaries: parseInt(formData.beneficiaries, 10),
+            amount_idr: formData.amount_idr ? parseInt(formData.amount_idr, 10) : null,
+            gallery_urls: [],
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Gagal menyimpan laporan");
+        }
       }
 
       router.push("/admin/laporan");
       router.refresh();
     } catch (err: unknown) {
+      if (uploadRollback) {
+        await uploadRollback();
+      }
       setError(err instanceof Error ? err.message : "Terjadi kesalahan");
       setLoading(false);
     }
@@ -118,22 +154,24 @@ export default function AdminNewReportPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase text-[var(--ink-900)] mb-2">
-              Kategori Program *
-            </label>
-            <select
+            <Select
+              label="Kategori Program"
+              required
               value={formData.program}
               onChange={(e) => setFormData({ ...formData, program: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
             >
-              <option value="infak_alquran">Infak Al-Qur&apos;an</option>
-              <option value="geber_masjid">Geber Masjid</option>
-              <option value="tasmi">Majlis Tasmi&apos; 30 Juz</option>
-              <option value="pena_yatim">PENA Anak Yatim</option>
-              <option value="bela_berdikari">Bela Berdikari</option>
-              <option value="umkm">Pemberdayaan UMKM</option>
-              <option value="tematik">Donasi Tematik Bencana</option>
-            </select>
+              <option value="infak_jinan">Infak Al-Qur&apos;an Jinan</option>
+              <option value="buss_quran">Program BUSS Al-Qur&apos;an</option>
+              <option value="geber_masjid">Geber Masjid (Bersih Masjid)</option>
+              <option value="tasmi">Majlis Tasmi&apos; 30 Juz Bil-Ghoib</option>
+              <option value="yatim_berdikari">Program Yatim Berdikari</option>
+              <option value="pelatihan_it">Beasiswa Pelatihan IT Mitra Produktif</option>
+              <option value="umkm">Pembinaan &amp; Pemberdayaan UMKM</option>
+              <option value="tematik">Bantuan Tematik Nusantara</option>
+              <option value="infak_alquran">Infak Al-Qur&apos;an (Legacy)</option>
+              <option value="pena_yatim">PENA Anak Yatim (Legacy)</option>
+              <option value="bela_berdikari">Bela Berdikari (Legacy)</option>
+            </Select>
           </div>
         </div>
 

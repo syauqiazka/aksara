@@ -28,18 +28,19 @@ const amiri = Amiri({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://sahabataksara.id"),
   title: {
-    default: "Yayasan Sahabat Aksara: Satu Mushaf, Sejuta Pahala Abadi",
+    default: "Yayasan Sahabat Aksara: Menebar Cahaya Al-Qur'an & Inovasi Teknologi",
     template: "%s | Yayasan Sahabat Aksara",
   },
   description:
-    "Lembaga nirlaba dengan 4 pilar utama: Spiritual, Sosial, Pendidikan, dan Teknologi. Berkhidmat menyalurkan mushaf Al-Qur'an, membersihkan masjid, dan membina generasi mandiri berkarakter Qur'ani.",
+    "Yayasan Ajirasa Aksara Semesta (Sahabat Aksara) adalah lembaga nirlaba dalam 4 pilar: Spiritual, Sosial, Pendidikan, dan Teknologi. Berkhidmat menyalurkan mushaf Al-Qur'an, memakmurkan masjid, dan mencetak generasi Qur'ani yang mandiri.",
   keywords: [
     "Yayasan Sahabat Aksara",
-    "Wakaf Al-Quran",
-    "Infak Quran Custom Nama",
+    "Yayasan Ajirasa Aksara Semesta",
+    "Infak Al-Quran Jinan",
+    "BUSS Al-Quran",
     "Geber Masjid",
-    "Bersih Masjid",
-    "Tasmi 30 Juz",
+    "Tasmi 30 Juz Bil-Ghoib",
+    "Yatim Berdikari",
     "Sedekah Jariyah",
     "Pemberdayaan Umat",
   ],
@@ -50,7 +51,7 @@ export const metadata: Metadata = {
     locale: "id_ID",
     url: "/",
     siteName: "Yayasan Sahabat Aksara",
-    title: "Yayasan Sahabat Aksara: Satu Mushaf, Sejuta Pahala Abadi",
+    title: "Yayasan Sahabat Aksara: Menebar Cahaya Al-Qur'an & Inovasi Teknologi",
     description:
       "Lembaga nirlaba yang berkhidmat dalam 4 pilar utama: Spiritual, Sosial, Pendidikan, dan Teknologi untuk membangun peradaban umat yang mulia dan mandiri.",
     images: [
@@ -81,7 +82,7 @@ export default function RootLayout({
     "url": "https://sahabataksara.id",
     "logo": "https://sahabataksara.id/images/logo-sahabat-aksara.jpg",
     "description": "Lembaga nirlaba dengan 4 pilar: Spiritual, Sosial, Pendidikan, dan Teknologi.",
-    "slogan": "Satu mushaf, sejuta pahala abadi.",
+    "slogan": "Keberkahan Al-Qur'an dan kemajuan teknologi untuk melahirkan generasi yang cerdas, berakhlak mulia, serta mandiri.",
     "areaServed": "Indonesia",
     "nonprofitStatus": "Nonprofit501c3"
   };
@@ -98,7 +99,7 @@ export default function RootLayout({
         <SmoothScroll>
           <CustomCursor />
           <Navbar />
-          <main className="flex-grow flex flex-col">{children}</main>
+          <main id="main-content" className="flex-grow flex flex-col">{children}</main>
           <Footer />
         </SmoothScroll>
       </body>

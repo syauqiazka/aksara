@@ -1,4 +1,5 @@
 import { isSupabaseConfigured, supabase } from "./client";
+import { localStore } from "./local-store";
 import {
   InfakDistribution,
   GeberMasjidDistribution,
@@ -9,6 +10,13 @@ import {
   ContactInfo,
   SocialLinks,
   AggregatedStats,
+  InfakJinanRecord,
+  PublicInfakJinanRecord,
+  PublicInfakJinanSantri,
+  HafalanUpdate,
+  BussDistribution,
+  PublicBussDistribution,
+  YatimActivity,
 } from "./types";
 
 function getClient() {
@@ -153,7 +161,14 @@ export const db = {
     const client = getClient();
     const { data, error } = await client.from("site_settings").select("value").eq("key", "bank_accounts").maybeSingle();
     throwIfError(error, "memuat rekening bank");
-    return (data?.value as BankAccount[] | undefined) ?? [];
+    return (data?.value as BankAccount[] | undefined) ?? [
+      {
+        bank: "Bank BCA",
+        number: "",
+        holder: "Yayasan Ajirasa Aksara Semesta",
+        branch: "Kantor Cabang",
+      },
+    ];
   },
 
   async updateBankAccounts(accounts: BankAccount[]): Promise<void> {
@@ -171,10 +186,10 @@ export const db = {
     const { data, error } = await client.from("site_settings").select("value").eq("key", "contact_info").maybeSingle();
     throwIfError(error, "memuat informasi kontak");
     return (data?.value as ContactInfo | undefined) ?? {
-      whatsapp: "",
-      phone: "",
-      email: "",
-      address: "",
+      whatsapp: "0822-6217-0018",
+      phone: "0822-6217-0018",
+      email: "kontak@sahabataksara.id",
+      address: "Cirebon, Jawa Barat, Indonesia",
     };
   },
 
@@ -193,9 +208,9 @@ export const db = {
     const { data, error } = await client.from("site_settings").select("value").eq("key", "social_links").maybeSingle();
     throwIfError(error, "memuat tautan media sosial");
     return (data?.value as SocialLinks | undefined) ?? {
-      instagram: "",
-      youtube: "",
-      tiktok: "",
+      instagram: "https://instagram.com/sahabataksara",
+      youtube: "https://youtube.com/@sahabataksara",
+      tiktok: "https://tiktok.com/@sahabataksara",
     };
   },
 
@@ -207,6 +222,165 @@ export const db = {
       updated_at: new Date().toISOString(),
     });
     throwIfError(error, "menyimpan tautan media sosial");
+  },
+
+
+    // Infak Al-Qur'an Jinan (Dua Tingkat: Donasi -> Santri)
+  async getInfakJinan(onlyPublished = true): Promise<InfakJinanRecord[]> {
+    if (!isSupabaseConfigured || !supabase) {
+      return localStore.getInfakJinan(onlyPublished);
+    }
+    try {
+      const client = getClient();
+      let query = client.from("infak_jinan").select("*, photos:infak_jinan_photos(*), santri_list:infak_jinan_santri(*, hafalan_updates:santri_hafalan_updates(*))").order("mushaf_no", { ascending: true });
+      if (onlyPublished) query = query.eq("status", "published");
+      const { data, error } = await query;
+      if (error || !data || data.length === 0) {
+        return localStore.getInfakJinan(onlyPublished);
+      }
+      return data as InfakJinanRecord[];
+    } catch {
+      return localStore.getInfakJinan(onlyPublished);
+    }
+  },
+
+  async getPublicInfakJinan(): Promise<PublicInfakJinanRecord[]> {
+    // Zero-Exposure: Raw phone numbers (donor_phone, santri_phone) are NEVER returned in public view
+    if (!isSupabaseConfigured || !supabase) {
+      return localStore.getPublicInfakJinan();
+    }
+    try {
+      const client = getClient();
+      const { data, error } = await client.from("public_infak_jinan").select("*, photos:infak_jinan_photos(*)");
+      if (error || !data || data.length === 0) {
+        return localStore.getPublicInfakJinan();
+      }
+      return data as PublicInfakJinanRecord[];
+    } catch {
+      return localStore.getPublicInfakJinan();
+    }
+  },
+
+  async getPublicInfakJinanDetail(id: string): Promise<{ donation: PublicInfakJinanRecord; santri: PublicInfakJinanSantri[] } | null> {
+    if (!isSupabaseConfigured || !supabase) {
+      return localStore.getPublicInfakJinanDetail(id);
+    }
+    try {
+      const client = getClient();
+      const { data: donation, error: dErr } = await client
+        .from("public_infak_jinan")
+        .select("*, photos:infak_jinan_photos(*)")
+        .eq("id", id)
+        .maybeSingle();
+
+      if (dErr || !donation) {
+        return localStore.getPublicInfakJinanDetail(id);
+      }
+
+      const { data: santriList, error: sErr } = await client
+        .from("infak_jinan_santri")
+        .select("id, infak_id, name, sort, status, hafalan_updates:santri_hafalan_updates(*)")
+        .eq("infak_id", id)
+        .eq("status", "published")
+        .order("sort", { ascending: true });
+
+      if (sErr || !santriList) {
+        return localStore.getPublicInfakJinanDetail(id);
+      }
+
+      interface RawSantriWithHafalan {
+        id: string;
+        infak_id: string;
+        name: string;
+        sort: number;
+        status: "draft" | "published";
+        hafalan_updates?: HafalanUpdate[];
+      }
+
+      const formattedSantri: PublicInfakJinanSantri[] = (santriList as unknown as RawSantriWithHafalan[]).map((s) => {
+        const sortedUpdates = [...(s.hafalan_updates || [])].sort(
+          (a, b) => new Date(b.updated_on).getTime() - new Date(a.updated_on).getTime()
+        );
+        const latest = sortedUpdates[0];
+        return {
+          id: s.id,
+          infak_id: s.infak_id,
+          santri_name: s.name,
+          sort: s.sort,
+          status: s.status,
+          latest_surah: latest ? latest.surah_name : "-",
+          latest_ayat: latest ? latest.ayat : undefined,
+          latest_juz: latest ? latest.juz : undefined,
+          hafalan_updates: sortedUpdates,
+        };
+      });
+
+      return {
+        donation: donation as PublicInfakJinanRecord,
+        santri: formattedSantri,
+      };
+    } catch {
+      return localStore.getPublicInfakJinanDetail(id);
+    }
+  },
+
+  async getInfakJinanById(id: string): Promise<InfakJinanRecord | null> {
+    return localStore.getInfakJinanById(id) || null;
+  },
+
+  // BUSS Al-Qur'an
+  async getBussDistributions(onlyPublished = true): Promise<BussDistribution[]> {
+    if (!isSupabaseConfigured || !supabase) {
+      return localStore.getBuss(onlyPublished);
+    }
+    try {
+      const client = getClient();
+      let query = client.from("buss_distributions").select("*").order("year", { ascending: false });
+      if (onlyPublished) query = query.eq("status", "published");
+      const { data, error } = await query;
+      if (error || !data || data.length === 0) {
+        return localStore.getBuss(onlyPublished);
+      }
+      return data as BussDistribution[];
+    } catch {
+      return localStore.getBuss(onlyPublished);
+    }
+  },
+
+  async getPublicBussDistributions(): Promise<PublicBussDistribution[]> {
+    const all = await this.getBussDistributions(true);
+    return all.map(item => ({
+      id: item.id,
+      year: item.year,
+      santri_name: item.santri_name,
+      origin: item.origin,
+      pesantren_name: item.pesantren_name,
+      current_surah: item.current_surah,
+      current_ayat: item.current_ayat,
+      juz: item.juz,
+      display_donor_name: item.show_donor_name ? item.donor_name : "Hamba Allah",
+      photo_urls: item.photo_urls || [],
+      status: item.status,
+    }));
+  },
+
+  // Yatim Berdikari
+  async getYatimActivities(onlyPublished = true): Promise<YatimActivity[]> {
+    if (!isSupabaseConfigured || !supabase) {
+      return localStore.getYatimActivities(onlyPublished);
+    }
+    try {
+      const client = getClient();
+      let query = client.from("yatim_berdikari_activities").select("*").order("activity_date", { ascending: false });
+      if (onlyPublished) query = query.eq("status", "published");
+      const { data, error } = await query;
+      if (error || !data || data.length === 0) {
+        return localStore.getYatimActivities(onlyPublished);
+      }
+      return data as YatimActivity[];
+    } catch {
+      return localStore.getYatimActivities(onlyPublished);
+    }
   },
 
   async getAggregatedStats(): Promise<AggregatedStats> {

@@ -57,23 +57,33 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2.5 text-sm">
               <li>
-                <Link href="/program/infak-alquran" className="hover:text-[var(--gold-300)] transition-colors">
-                  Infak 1 Jt Al-Qur&apos;an Custom Nama
+                <Link href="/program/infak-jinan" className="hover:text-[var(--gold-300)] transition-colors">
+                  Infak Al-Qur&apos;an Jinan
+                </Link>
+              </li>
+              <li>
+                <Link href="/program/buss-quran" className="hover:text-[var(--gold-300)] transition-colors">
+                  Program BUSS Al-Qur&apos;an
                 </Link>
               </li>
               <li>
                 <Link href="/program/geber-masjid" className="hover:text-[var(--gold-300)] transition-colors">
-                  Geber Masjid (Bersih-Bersih)
+                  Geber Masjid (Bersih Masjid)
                 </Link>
               </li>
               <li>
                 <Link href="/program/tasmi-30-juz" className="hover:text-[var(--gold-300)] transition-colors">
-                  Majlis Tasmi&apos; 30 Juz Bil Ghaib
+                  Majlis Tasmi&apos; 30 Juz Bil-Ghoib
+                </Link>
+              </li>
+              <li>
+                <Link href="/program/yatim-berdikari" className="hover:text-[var(--gold-300)] transition-colors">
+                  Program Yatim Berdikari
                 </Link>
               </li>
               <li>
                 <Link href="/data-sebaran" className="hover:text-[var(--gold-300)] transition-colors">
-                  Peta & Data Sebaran Real-Time
+                  Peta &amp; Data Sebaran Real-Time
                 </Link>
               </li>
               <li>
@@ -103,12 +113,12 @@ export default function Footer() {
           {/* Col 4: Contact & Channels */}
           <div>
             <h4 className="text-sm font-semibold uppercase tracking-widest text-[var(--gold-400)] mb-4 font-sans">
-              Layanan Konfirmasi & Kontak
+              Layanan Konfirmasi &amp; Kontak
             </h4>
             <ul className="space-y-3 text-sm text-[var(--cream-200)]/90">
               <li className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-[var(--gold-400)] flex-shrink-0 mt-1" />
-                <span>Indonesia</span>
+                <span>Cirebon, Jawa Barat, Indonesia</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-[var(--gold-400)] flex-shrink-0" />
@@ -116,27 +126,24 @@ export default function Footer() {
                   kontak@sahabataksara.id
                 </a>
               </li>
+              <li className="text-xs text-[var(--sage-300)]">
+                Contact Person: <a href="https://wa.me/6282262170018" target="_blank" rel="noopener noreferrer" className="font-semibold text-[var(--gold-400)] hover:underline">0822-6217-0018</a>
+              </li>
+              <li className="text-xs text-[var(--sage-300)]">
+                Mitra Kami: <span className="text-[var(--cream-100)] font-medium">Madrasah Al-Huffazh Gedongan</span>
+              </li>
             </ul>
 
             <div className="pt-4 mt-4 border-t border-[var(--gold-500)]/15">
               <div className="text-xs text-[var(--gold-300)] mb-2 font-medium">Kanal Media Sosial Resmi:</div>
               <div className="flex gap-3 text-xs">
                 <a
-                  href="https://instagram.com"
+                  href="https://instagram.com/sahabataksara"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-2.5 py-1.5 rounded-lg bg-[var(--green-900)] border border-[var(--gold-500)]/20 hover:border-[var(--gold-400)] text-[var(--cream-100)] flex items-center gap-1 transition-colors"
                 >
-                  <span>Instagram</span>
-                  <ExternalLink className="w-3 h-3 text-[var(--gold-400)]" />
-                </a>
-                <a
-                  href="https://youtube.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-2.5 py-1.5 rounded-lg bg-[var(--green-900)] border border-[var(--gold-500)]/20 hover:border-[var(--gold-400)] text-[var(--cream-100)] flex items-center gap-1 transition-colors"
-                >
-                  <span>YouTube</span>
+                  <span>@Sahabat Aksara</span>
                   <ExternalLink className="w-3 h-3 text-[var(--gold-400)]" />
                 </a>
               </div>

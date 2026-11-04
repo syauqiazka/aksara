@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db/admin-api";
 import { geberSchema } from "@/lib/validation/schemas";
 import { getAdminSession } from "@/lib/auth";
+import { commitUpload, deleteBlobFromStorage } from "@/lib/storage";
 
 export async function GET() {
   const session = await getAdminSession();
@@ -28,6 +29,10 @@ export async function POST(request: Request) {
       photo_urls: validated.photo_urls || [],
     });
 
+    for (const url of result.photo_urls) {
+      if (url) await commitUpload(url);
+    }
+
     revalidatePath("/data-sebaran");
     revalidatePath("/");
 
@@ -47,6 +52,9 @@ export async function PUT(request: Request) {
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
     const validated = geberSchema.parse(data);
+
+    const previousRecord = await db.getGeberById(id);
+
     const result = await db.saveGeber(
       {
         ...validated,
@@ -57,6 +65,21 @@ export async function PUT(request: Request) {
       },
       id
     );
+
+    // Commit any new photos
+    for (const url of result.photo_urls) {
+      if (url) await commitUpload(url);
+    }
+
+    // Clean up removed photos
+    if (previousRecord?.photo_urls) {
+      const removed = previousRecord.photo_urls.filter((oldU) => !result.photo_urls.includes(oldU));
+      for (const oldU of removed) {
+        if (oldU && (oldU.startsWith("http") || oldU.startsWith("/uploads/"))) {
+          await deleteBlobFromStorage(oldU);
+        }
+      }
+    }
 
     revalidatePath("/data-sebaran");
     revalidatePath("/");
@@ -77,13 +100,24 @@ export async function DELETE(request: Request) {
     const id = searchParams.get("id");
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
+    const previousRecord = await db.getGeberById(id);
     const success = await db.deleteGeber(id);
+
+    // Clean up photo blobs upon deletion
+    if (success && previousRecord?.photo_urls) {
+      for (const u of previousRecord.photo_urls) {
+        if (u && (u.startsWith("http") || u.startsWith("/uploads/"))) {
+          await deleteBlobFromStorage(u);
+        }
+      }
+    }
+
     revalidatePath("/data-sebaran");
     revalidatePath("/");
 
     return NextResponse.json({ success });
-  } catch {
-    return NextResponse.json({ error: "Delete failed" }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Delete failed";
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }
-

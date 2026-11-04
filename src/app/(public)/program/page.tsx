@@ -7,7 +7,7 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 export const metadata = {
   title: "Program Lembaga",
   description:
-    "Jelajahi 6 program unggulan Yayasan Sahabat Aksara: Infak 1 Jt Al-Qur'an Custom Nama, Geber Masjid, Majlis Tasmi' 30 Juz, PENA Anak Yatim, Bela Berdikari, dan UMKM Berkah.",
+    "Jelajahi program unggulan Yayasan Sahabat Aksara: Infak Al-Qur'an Jinan, BUSS Al-Qur'an, Geber Masjid, Majlis Tasmi' 30 Juz Bil-Ghoib, Yatim Berdikari, Beasiswa Pelatihan IT Mitra Produktif, Pemberdayaan UMKM, dan Bantuan Tematik Nusantara.",
 };
 
 export default function ProgramPage() {

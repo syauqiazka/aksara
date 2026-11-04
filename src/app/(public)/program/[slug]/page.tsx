@@ -11,7 +11,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const program = programsContent.find((p) => p.slug === slug);
+  const program = programsContent.find((p) => p.slug === slug || p.aliases?.includes(slug));
   if (!program) return { title: "Program Tidak Ditemukan" };
   return {
     title: program.title,
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function ProgramDetailPage({ params }: Props) {
   const { slug } = await params;
-  const program = programsContent.find((p) => p.slug === slug);
+  const program = programsContent.find((p) => p.slug === slug || p.aliases?.includes(slug));
 
   if (!program) {
     notFound();

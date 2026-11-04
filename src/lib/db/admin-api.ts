@@ -1,6 +1,10 @@
+import { localStore } from "./local-store";
+import { isSupabaseConfigured } from "./client";
 import { adminSupabase } from "./admin-client";
 import {
   InfakDistribution,
+  InfakJinanRecord,
+  HafalanUpdate,
   GeberMasjidDistribution,
   Report,
   ThemedCampaign,
@@ -23,6 +27,85 @@ function throwIfError(error: { message: string } | null, operation: string): voi
 }
 
 export const db = {
+  // Infak Al-Qur'an Jinan (Dua Tingkat)
+  async getInfakJinan(onlyPublished = false): Promise<InfakJinanRecord[]> {
+    if (!isSupabaseConfigured || !adminSupabase) {
+      return localStore.getInfakJinan(onlyPublished);
+    }
+    try {
+      const client = getClient();
+      let query = client
+        .from("infak_jinan")
+        .select("*, photos:infak_jinan_photos(*), santri_list:infak_jinan_santri(*, hafalan_updates:santri_hafalan_updates(*))")
+        .order("mushaf_no", { ascending: true });
+      if (onlyPublished) query = query.eq("status", "published");
+      const { data, error } = await query;
+      if (error || !data || data.length === 0) {
+        return localStore.getInfakJinan(onlyPublished);
+      }
+      return data as InfakJinanRecord[];
+    } catch {
+      return localStore.getInfakJinan(onlyPublished);
+    }
+  },
+
+  async getInfakJinanById(id: string): Promise<InfakJinanRecord | null> {
+    return localStore.getInfakJinanById(id) || null;
+  },
+
+  async saveInfakJinan(item: Omit<InfakJinanRecord, "id" | "created_at" | "updated_at">, id?: string): Promise<InfakJinanRecord> {
+    if (!isSupabaseConfigured || !adminSupabase) {
+      if (id) {
+        const existing = localStore.getInfakJinanById(id);
+        if (existing) {
+          Object.assign(existing, item, { updated_at: new Date().toISOString() });
+          return existing;
+        }
+      }
+      return localStore.addInfakJinan(item);
+    }
+
+    try {
+      const client = getClient();
+      const { santri_list: _sl, photos: _ph, ...jinanData } = item;
+      const query = id
+        ? client.from("infak_jinan").update({ ...jinanData, updated_at: new Date().toISOString() }).eq("id", id)
+        : client.from("infak_jinan").insert(jinanData);
+      const { data, error } = await query.select().single();
+      throwIfError(error, id ? "memperbarui data infak jinan" : "menambahkan data infak jinan");
+      return data as InfakJinanRecord;
+    } catch (err) {
+      console.warn("Supabase saveInfakJinan fallback ke localStore:", err);
+      if (id) {
+        const existing = localStore.getInfakJinanById(id);
+        if (existing) {
+          Object.assign(existing, item, { updated_at: new Date().toISOString() });
+          return existing;
+        }
+      }
+      return localStore.addInfakJinan(item);
+    }
+  },
+
+  async deleteInfakJinan(id: string): Promise<boolean> {
+    localStore.deleteInfakJinan(id);
+    if (!isSupabaseConfigured || !adminSupabase) {
+      return true;
+    }
+    try {
+      const client = getClient();
+      const { error } = await client.from("infak_jinan").delete().eq("id", id);
+      throwIfError(error, "menghapus data infak jinan");
+      return true;
+    } catch (err) {
+      console.warn("Supabase deleteInfakJinan fallback ke localStore:", err);
+      return true;
+    }
+  },
+
+  async addSantriHafalanUpdate(santriId: string, update: Omit<HafalanUpdate, "id">): Promise<HafalanUpdate | null> {
+    return localStore.addSantriHafalanUpdate(santriId, update);
+  },
   async getInfakDistributions(onlyPublished = true): Promise<InfakDistribution[]> {
     const client = getClient();
     let query = client.from("infak_distributions").select("*").order("mushaf_no", { ascending: true });

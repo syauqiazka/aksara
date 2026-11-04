@@ -7,7 +7,16 @@ import {
   BankAccount,
   ContactInfo,
   SocialLinks,
-  AggregatedStats
+  AggregatedStats,
+  UploadLedgerEntry,
+  InfakJinanRecord,
+  PublicInfakJinanRecord,
+  InfakJinanSantri,
+  PublicInfakJinanSantri,
+  BussDistribution,
+  PublicBussDistribution,
+  YatimActivity,
+  HafalanUpdate,
 } from './types';
 
 // Mode Demo: hanya memuat data simulasi jika NEXT_PUBLIC_DEMO=true
@@ -347,20 +356,245 @@ const galleryList: GalleryItem[] = [
   }
 ];
 
-let bankAccounts: BankAccount[] = [];
+let bankAccounts: BankAccount[] = [
+  {
+    bank: "Bank BCA",
+    number: "",
+    holder: "Yayasan Ajirasa Aksara Semesta",
+    branch: "Kantor Cabang",
+  },
+];
 
 let contactInfo: ContactInfo = {
-  whatsapp: "",
-  phone: "",
+  whatsapp: "0822-6217-0018",
+  phone: "0822-6217-0018",
   email: "kontak@sahabataksara.id",
-  address: "Jl. Aksara No. 1, Jakarta, Indonesia"
+  address: "Cirebon, Jawa Barat, Indonesia"
 };
 
 let socialLinks: SocialLinks = {
-  instagram: "https://instagram.com/sahabataksara.id",
+  instagram: "https://instagram.com/sahabataksara",
   youtube: "https://youtube.com/@sahabataksara",
   tiktok: "https://tiktok.com/@sahabataksara"
 };
+
+const uploadLedger: UploadLedgerEntry[] = [];
+
+
+const demoInfakJinanList: InfakJinanRecord[] = [
+  {
+    id: "jinan-1",
+    mushaf_no: 1,
+    donor_name: "Inayah Binti Kartoni",
+    show_donor_name: true,
+    donor_origin: "Cirebon",
+    donor_phone: "081234567890",
+    dedication_name: "Alm. Kartoni Bin Sastro",
+    pesantren_name: "Pondok Pesantren Madrasah Al-Huffazh 2 Gedongan",
+    address: "Gedongan, Ender, Pangenan, Cirebon, Jawa Barat",
+    distributed_at: "2026-10-25",
+    maps_url: "https://maps.google.com/?q=-6.8398,108.6657",
+    status: "published",
+    created_at: "2026-10-25T08:00:00Z",
+    updated_at: "2026-11-04T10:00:00Z",
+    photos: [
+      { id: "p1", url: "/images/infak-mushaf-custom.jpg", caption: "Penyerahan Mushaf Jinan Ke-1", sort: 1 }
+    ],
+    santri_count: 2,
+    santri_list: [
+      {
+        id: "santri-1",
+        infak_id: "jinan-1",
+        name: "Muhammad Faiz",
+        phone: "089876543210",
+        sort: 1,
+        status: "published",
+        latest_surah: "Al-Baqarah",
+        latest_ayat: 252,
+        latest_juz: 2,
+        hafalan_updates: [
+          { id: "h1", santri_id: "santri-1", updated_on: "2026-10-25", surah_no: 1, surah_name: "Al-Fatihah", ayat: 7, juz: 1, notes: "Penerimaan mushaf" },
+          { id: "h2", santri_id: "santri-1", updated_on: "2026-11-01", surah_no: 2, surah_name: "Al-Baqarah", ayat: 141, juz: 1, notes: "Khatam Juz 1 Mutqin" },
+          { id: "h3", santri_id: "santri-1", updated_on: "2026-11-04", surah_no: 2, surah_name: "Al-Baqarah", ayat: 252, juz: 2, notes: "Progres Juz 2 lancar" }
+        ]
+      },
+      {
+        id: "santri-2",
+        infak_id: "jinan-1",
+        name: "Ahmad Fadhil",
+        phone: "081298765432",
+        sort: 2,
+        status: "published",
+        latest_surah: "Ali 'Imran",
+        latest_ayat: 50,
+        latest_juz: 3,
+        hafalan_updates: [
+          { id: "h21", santri_id: "santri-2", updated_on: "2026-10-25", surah_no: 2, surah_name: "Al-Baqarah", ayat: 200, juz: 2, notes: "Hafalan awal" },
+          { id: "h22", santri_id: "santri-2", updated_on: "2026-11-03", surah_no: 3, surah_name: "Ali 'Imran", ayat: 50, juz: 3, notes: "Masuk Surah Ali 'Imran" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "jinan-2",
+    mushaf_no: 2,
+    donor_name: "Ahmad Dahlan",
+    show_donor_name: false,
+    donor_origin: "Jakarta Selatan",
+    donor_phone: "081398765432",
+    dedication_name: "Keluarga Besar Sahabat Aksara",
+    pesantren_name: "Pesantren Tahfidz Al-Hikmah",
+    address: "Ciawi, Bogor, Jawa Barat",
+    distributed_at: "2026-10-28",
+    maps_url: "https://maps.google.com/?q=-6.6914,106.8522",
+    status: "published",
+    created_at: "2026-10-28T09:00:00Z",
+    updated_at: "2026-11-03T11:00:00Z",
+    photos: [
+      { id: "p2", url: "/images/tasmi-30-juz-dokumentasi.jpg", caption: "Penyerahan Mushaf Jinan Ke-2", sort: 1 }
+    ],
+    santri_count: 1,
+    santri_list: [
+      {
+        id: "santri-3",
+        infak_id: "jinan-2",
+        name: "Ahmad Rifai",
+        phone: "087711223344",
+        sort: 1,
+        status: "published",
+        latest_surah: "Al-Baqarah",
+        latest_ayat: 286,
+        latest_juz: 3,
+        hafalan_updates: [
+          { id: "h4", santri_id: "santri-3", updated_on: "2026-10-28", surah_no: 2, surah_name: "Al-Baqarah", ayat: 100, juz: 1, notes: "Awal penerimaan" },
+          { id: "h5", santri_id: "santri-3", updated_on: "2026-11-03", surah_no: 2, surah_name: "Al-Baqarah", ayat: 286, juz: 3, notes: "Tuntas Surah Al-Baqarah" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "jinan-3",
+    mushaf_no: 3,
+    donor_name: "Siti Rahmawati",
+    show_donor_name: true,
+    donor_origin: "Bandung",
+    donor_phone: "085612345678",
+    dedication_name: "Ananda Fathir & Keluarga",
+    pesantren_name: "Madrasah Diniyah Nurul Iman",
+    address: "Kramatwatu, Serang, Banten",
+    distributed_at: "2026-11-02",
+    maps_url: "https://maps.google.com/?q=-6.0712,106.1284",
+    status: "published",
+    created_at: "2026-11-02T10:00:00Z",
+    updated_at: "2026-11-02T10:00:00Z",
+    photos: [
+      { id: "p3", url: "/images/infak-mushaf-custom.jpg", caption: "Penyerahan Mushaf Jinan Ke-3", sort: 1 }
+    ],
+    santri_count: 1,
+    santri_list: [
+      {
+        id: "santri-4",
+        infak_id: "jinan-3",
+        name: "Zulfa Azzahra",
+        phone: "081987654321",
+        sort: 1,
+        status: "published",
+        latest_surah: "An-Naba'",
+        latest_ayat: 40,
+        latest_juz: 30,
+        hafalan_updates: [
+          { id: "h6", santri_id: "santri-4", updated_on: "2026-11-02", surah_no: 78, surah_name: "An-Naba'", ayat: 40, juz: 30, notes: "Hafalan Juz 'Amma mutqin" }
+        ]
+      }
+    ]
+  }
+];
+
+const demoBussList: BussDistribution[] = [
+  {
+    id: "buss-1",
+    year: 2026,
+    santri_name: "Muhammad Faiz",
+    origin: "Cirebon",
+    pesantren_name: "Madrasah Al-Huffazh 2 Gedongan",
+    current_surah: "Al-Baqarah (Ayat 252)",
+    current_ayat: 252,
+    juz: 2,
+    donor_name: "Inayah Binti Kartoni",
+    show_donor_name: true,
+    photo_urls: ["/images/founder-ahmad-dahlan.jpg"],
+    status: "published",
+    created_at: "2026-10-25T10:00:00Z"
+  },
+  {
+    id: "buss-2",
+    year: 2026,
+    santri_name: "Ahmad Rifai",
+    origin: "Bogor",
+    pesantren_name: "Pesantren Tahfidz Al-Hikmah",
+    current_surah: "Al-Baqarah (Ayat 286)",
+    current_ayat: 286,
+    juz: 3,
+    donor_name: "Hamba Allah",
+    show_donor_name: false,
+    photo_urls: ["/images/tasmi-30-juz-dokumentasi.jpg"],
+    status: "published",
+    created_at: "2026-10-28T10:00:00Z"
+  },
+  {
+    id: "buss-3",
+    year: 2026,
+    santri_name: "Zulfa Azzahra",
+    origin: "Serang",
+    pesantren_name: "Madrasah Diniyah Nurul Iman",
+    current_surah: "An-Naba' (Ayat 40)",
+    current_ayat: 40,
+    juz: 30,
+    donor_name: "Siti Rahmawati",
+    show_donor_name: true,
+    photo_urls: ["/images/infak-mushaf-custom.jpg"],
+    status: "published",
+    created_at: "2026-11-02T10:00:00Z"
+  }
+];
+
+const demoYatimList: YatimActivity[] = [
+  {
+    id: "yatim-1",
+    year: 2026,
+    activity_name: "Pelatihan Vokasi & Digital Marketing Yatim Mandiri Angkatan 1",
+    organizer: "Yayasan Ajirasa Aksara Semesta bersama Mitra Industri",
+    documentation_urls: ["/images/founder-ahmad-dahlan.jpg"],
+    description: "Pelatihan keterampilan kerja intensif membekali 25 remaja yatim piatu usia produktif dengan keahlian praktis.",
+    activity_date: "2026-10-30",
+    status: "published",
+    created_at: "2026-10-30T10:00:00Z"
+  },
+  {
+    id: "yatim-2",
+    year: 2026,
+    activity_name: "Workshop Karakter Kepemimpinan & Kewirausahaan Remaja Yatim Berdikari",
+    organizer: "Sahabat Aksara Cirebon",
+    documentation_urls: ["/images/tasmi-30-juz-dokumentasi.jpg"],
+    description: "Pembekalan soft skills, keberanian, dan etika profesional untuk merancang kemandirian finansial masa depan.",
+    activity_date: "2026-11-01",
+    status: "published",
+    created_at: "2026-11-01T10:00:00Z"
+  }
+];
+
+const globalForStore = globalThis as unknown as {
+  __infakJinanList?: InfakJinanRecord[];
+  __bussList?: BussDistribution[];
+  __yatimList?: YatimActivity[];
+};
+
+const infakJinanList: InfakJinanRecord[] =
+  globalForStore.__infakJinanList || (globalForStore.__infakJinanList = [...demoInfakJinanList]);
+const bussList: BussDistribution[] =
+  globalForStore.__bussList || (globalForStore.__bussList = [...demoBussList]);
+const yatimList: YatimActivity[] =
+  globalForStore.__yatimList || (globalForStore.__yatimList = [...demoYatimList]);
 
 export const localStore = {
   getInfak: (onlyPublished = true) => {
@@ -502,5 +736,208 @@ export const localStore = {
       totalProvinces: provinces.size,
       totalBeneficiaries
     };
-  }
+  },
+
+  // Upload Ledger
+  addUploadLedger: (entry: Omit<UploadLedgerEntry, 'id' | 'created_at' | 'committed_at'>) => {
+    const item: UploadLedgerEntry = {
+      ...entry,
+      id: `ledg-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      created_at: new Date().toISOString(),
+      committed_at: null,
+    };
+    uploadLedger.push(item);
+    return item;
+  },
+
+  commitUploadLedger: (url: string) => {
+    const item = uploadLedger.find((l) => l.url === url);
+    if (item) {
+      item.status = 'committed';
+      item.committed_at = new Date().toISOString();
+    }
+  },
+
+  deleteUploadLedger: (url: string) => {
+    const item = uploadLedger.find((l) => l.url === url);
+    if (item) {
+      item.status = 'deleted';
+    }
+  },
+
+  getUploadLedgerByHash: (hash: string) => {
+    return uploadLedger.find((l) => l.content_hash === hash && l.status === 'committed') || null;
+  },
+
+  getAllUploadLedger: () => [...uploadLedger],
+
+  // Infak Al-Qur'an Jinan (Dua Tingkat: Donasi -> Santri)
+  getInfakJinan: (onlyPublished = true): InfakJinanRecord[] => {
+    return onlyPublished ? infakJinanList.filter(i => i.status === 'published') : [...infakJinanList];
+  },
+  getPublicInfakJinan: (): PublicInfakJinanRecord[] => {
+    return infakJinanList
+      .filter(i => i.status === 'published')
+      .map(item => {
+        const publishedSantri = (item.santri_list || []).filter(s => s.status === 'published');
+        return {
+          id: item.id,
+          mushaf_no: item.mushaf_no,
+          display_donor_name: item.show_donor_name ? item.donor_name : "Hamba Allah",
+          donor_origin: item.donor_origin,
+          dedication_name: item.dedication_name,
+          pesantren_name: item.pesantren_name,
+          address: item.address,
+          distributed_at: item.distributed_at,
+          maps_url: item.maps_url,
+          status: item.status,
+          photos: item.photos || [],
+          santri_count: publishedSantri.length,
+        };
+      });
+  },
+  getInfakJinanById: (id: string) => infakJinanList.find(i => i.id === id),
+  getPublicInfakJinanDetail: (id: string): { donation: PublicInfakJinanRecord; santri: PublicInfakJinanSantri[] } | null => {
+    const item = infakJinanList.find(i => i.id === id);
+    if (!item || item.status !== 'published') return null;
+    const publishedSantri: PublicInfakJinanSantri[] = (item.santri_list || [])
+      .filter(s => s.status === 'published')
+      .map(s => {
+        const sortedUpdates = [...(s.hafalan_updates || [])].sort(
+          (a, b) => new Date(b.updated_on).getTime() - new Date(a.updated_on).getTime()
+        );
+        const latest = sortedUpdates[0];
+        return {
+          id: s.id,
+          infak_id: s.infak_id,
+          santri_name: s.name,
+          sort: s.sort,
+          status: s.status,
+          latest_surah: latest ? latest.surah_name : (s.latest_surah || "-"),
+          latest_ayat: latest ? latest.ayat : s.latest_ayat,
+          latest_juz: latest ? latest.juz : (s.latest_juz || 1),
+          hafalan_updates: sortedUpdates,
+        };
+      });
+
+    return {
+      donation: {
+        id: item.id,
+        mushaf_no: item.mushaf_no,
+        display_donor_name: item.show_donor_name ? item.donor_name : "Hamba Allah",
+        donor_origin: item.donor_origin,
+        dedication_name: item.dedication_name,
+        pesantren_name: item.pesantren_name,
+        address: item.address,
+        distributed_at: item.distributed_at,
+        maps_url: item.maps_url,
+        status: item.status,
+        photos: item.photos || [],
+        santri_count: publishedSantri.length,
+      },
+      santri: publishedSantri,
+    };
+  },
+  addInfakJinan: (item: Omit<InfakJinanRecord, 'id' | 'created_at' | 'updated_at'>) => {
+    const santriList = item.santri_list || [];
+    const newItem: InfakJinanRecord = {
+      ...item,
+      id: `jinan-${Date.now()}`,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      santri_list: santriList,
+      santri_count: santriList.length,
+    };
+    infakJinanList.unshift(newItem);
+    return newItem;
+  },
+  deleteInfakJinan: (id: string) => {
+    const idx = infakJinanList.findIndex(i => i.id === id);
+    if (idx !== -1) {
+      infakJinanList.splice(idx, 1);
+      return true;
+    }
+    return false;
+  },
+  addSantriToInfak: (infakId: string, santri: Omit<InfakJinanSantri, 'id'>) => {
+    const item = infakJinanList.find(i => i.id === infakId);
+    if (!item) return null;
+    const newSantri: InfakJinanSantri = {
+      ...santri,
+      id: `santri-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      infak_id: infakId,
+      hafalan_updates: santri.hafalan_updates || [],
+    };
+    item.santri_list = item.santri_list || [];
+    item.santri_list.push(newSantri);
+    item.santri_count = item.santri_list.length;
+    item.updated_at = new Date().toISOString();
+    return newSantri;
+  },
+  addSantriHafalanUpdate: (santriId: string, update: Omit<HafalanUpdate, 'id'>) => {
+    for (const donation of infakJinanList) {
+      const santri = (donation.santri_list || []).find(s => s.id === santriId);
+      if (santri) {
+        const newUpdate: HafalanUpdate = {
+          ...update,
+          id: `hafalan-${Date.now()}`,
+          santri_id: santriId,
+        };
+        santri.hafalan_updates = santri.hafalan_updates || [];
+        santri.hafalan_updates.push(newUpdate);
+        santri.latest_surah = newUpdate.surah_name;
+        santri.latest_ayat = newUpdate.ayat;
+        santri.latest_juz = newUpdate.juz;
+        donation.updated_at = new Date().toISOString();
+        return newUpdate;
+      }
+    }
+    return null;
+  },
+
+  // BUSS Al-Qur'an
+  getBuss: (onlyPublished = true): BussDistribution[] => {
+    return onlyPublished ? bussList.filter(b => b.status === 'published') : [...bussList];
+  },
+  getPublicBuss: (): PublicBussDistribution[] => {
+    return bussList
+      .filter(b => b.status === 'published')
+      .map(item => ({
+        id: item.id,
+        year: item.year,
+        santri_name: item.santri_name,
+        origin: item.origin,
+        pesantren_name: item.pesantren_name,
+        current_surah: item.current_surah,
+        current_ayat: item.current_ayat,
+        juz: item.juz,
+        display_donor_name: item.show_donor_name ? item.donor_name : "Hamba Allah",
+        photo_urls: item.photo_urls || [],
+        status: item.status,
+      }));
+  },
+  addBuss: (item: Omit<BussDistribution, 'id' | 'created_at'>) => {
+    const newItem: BussDistribution = {
+      ...item,
+      id: `buss-${Date.now()}`,
+      created_at: new Date().toISOString(),
+    };
+    bussList.unshift(newItem);
+    return newItem;
+  },
+
+  // Yatim Berdikari
+  getYatimActivities: (onlyPublished = true): YatimActivity[] => {
+    return onlyPublished ? yatimList.filter(y => y.status === 'published') : [...yatimList];
+  },
+  addYatimActivity: (item: Omit<YatimActivity, 'id' | 'created_at'>) => {
+    const newItem: YatimActivity = {
+      ...item,
+      id: `yatim-${Date.now()}`,
+      created_at: new Date().toISOString(),
+    };
+    yatimList.unshift(newItem);
+    return newItem;
+  },
+
 };

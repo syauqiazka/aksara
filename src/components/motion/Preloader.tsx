@@ -6,141 +6,445 @@ import gsap from "gsap";
 export default function Preloader() {
   const [visible, setVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const topCurtainRef = useRef<HTMLDivElement>(null);
-  const bottomCurtainRef = useRef<HTMLDivElement>(null);
-  const circleRef = useRef<SVGCircleElement>(null);
+  const curtainRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    // Show only on first visit in the current session
-    const hasVisited = sessionStorage.getItem("sahabat_aksara_visited");
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // SVG Elements
+  const outerRingRef = useRef<SVGCircleElement>(null);
+  const innerRingRef = useRef<SVGCircleElement>(null);
+  const bookRef = useRef<SVGPathElement>(null);
+  const globeRef = useRef<SVGGElement>(null);
+  const palmsRef = useRef<SVGGElement>(null);
+  const sproutRef = useRef<SVGGElement>(null);
 
-    if (hasVisited || prefersReducedMotion) {
+  // Typography Elements
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const acronymRef = useRef<HTMLDivElement>(null);
+  const tagRef = useRef<HTMLParagraphElement>(null);
+
+  const timelineRef = useRef<gsap.core.Timeline | null>(null);
+
+  const handleComplete = () => {
+    setVisible(false);
+    try {
+      sessionStorage.setItem("sahabat_aksara_visited", "true");
+    } catch {
+      // ignore
+    }
+
+    // Shift focus to main content without scroll jump
+    setTimeout(() => {
+      const mainContent =
+        document.getElementById("main-content") || document.querySelector("main");
+      if (mainContent) {
+        mainContent.setAttribute("tabindex", "-1");
+        mainContent.focus({ preventScroll: true });
+      }
+    }, 50);
+  };
+
+  const handleSkip = () => {
+    if (timelineRef.current) {
+      timelineRef.current.kill();
+    }
+    if (curtainRef.current) {
+      gsap.to(curtainRef.current, {
+        yPercent: -100,
+        duration: 0.3,
+        ease: "power2.inOut",
+        onComplete: handleComplete,
+      });
+    } else {
+      handleComplete();
+    }
+  };
+
+  // Phase 1: Determine visibility based on sessionStorage
+  useEffect(() => {
+    let hasVisited = false;
+    try {
+      hasVisited = Boolean(sessionStorage.getItem("sahabat_aksara_visited"));
+    } catch {
+      hasVisited = false;
+    }
+
+    if (hasVisited) {
       return;
     }
 
     setVisible(true);
-    sessionStorage.setItem("sahabat_aksara_visited", "true");
+    try {
+      sessionStorage.setItem("sahabat_aksara_visited", "true");
+    } catch {
+      // ignore
+    }
+  }, []);
 
+  // Phase 2: Once visible and DOM elements are mounted, run GSAP animation
+  useEffect(() => {
+    if (!visible) return;
+
+    let prefersReducedMotion = false;
+    if (typeof window !== "undefined" && window.matchMedia) {
+      prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    }
+
+    // If user prefers reduced motion: 300ms gentle fade without transform
+    if (prefersReducedMotion) {
+      const timer = setTimeout(() => {
+        if (containerRef.current) {
+          gsap.to(containerRef.current, {
+            opacity: 0,
+            duration: 0.3,
+            onComplete: handleComplete,
+          });
+        } else {
+          handleComplete();
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+
+    // Full 3.0s timeline with GSAP
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
-        onComplete: () => {
-          setVisible(false);
-        },
+        onComplete: handleComplete,
       });
+      timelineRef.current = tl;
 
-      // 1. Draw gold ring
-      if (circleRef.current) {
-        tl.fromTo(
-          circleRef.current,
-          { strokeDashoffset: 380 },
-          { strokeDashoffset: 0, duration: 0.9, ease: "power2.inOut" }
-        );
-      }
+      // Initial States
+      if (outerRingRef.current) gsap.set(outerRingRef.current, { strokeDashoffset: 560 });
+      if (innerRingRef.current) gsap.set(innerRingRef.current, { strokeDashoffset: 510 });
+      if (bookRef.current) gsap.set(bookRef.current, { opacity: 0, scale: 0.85, transformOrigin: "50% 50%" });
+      if (globeRef.current) gsap.set(globeRef.current, { opacity: 0, scale: 0.7, transformOrigin: "50% 50%" });
+      if (palmsRef.current) gsap.set(palmsRef.current, { opacity: 0, y: 15 });
+      if (sproutRef.current) gsap.set(sproutRef.current, { opacity: 0, scaleY: 0, transformOrigin: "50% 100%" });
+      if (titleRef.current) gsap.set(titleRef.current, { opacity: 0, y: 12 });
+      if (acronymRef.current) gsap.set(acronymRef.current, { opacity: 0, letterSpacing: "0.35em" });
+      if (tagRef.current) gsap.set(tagRef.current, { opacity: 0 });
 
-      // 2. Reveal text & insignia
-      if (contentRef.current) {
-        tl.fromTo(
-          contentRef.current,
-          { opacity: 0, scale: 0.9, y: 15 },
-          { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: "back.out(1.4)" },
-          "-=0.3"
-        );
-      }
+      // 1. Double Gold Rings Draw (0.0s -> 0.85s)
+      tl.to(
+        outerRingRef.current,
+        {
+          strokeDashoffset: 0,
+          duration: 0.85,
+          ease: "power2.inOut",
+        },
+        0
+      );
 
-      // 3. Pause for readability
-      tl.to({}, { duration: 0.4 });
+      tl.to(
+        innerRingRef.current,
+        {
+          strokeDashoffset: 0,
+          duration: 0.8,
+          ease: "power2.inOut",
+        },
+        0.1
+      );
 
-      // 4. Split curtains vertically
-      tl.to(contentRef.current, { opacity: 0, y: -20, duration: 0.3, ease: "power2.in" });
+      // 2. Logo Elements Sequential Reveal: Tangan, Buku, Globe, Tunas (0.5s -> 1.5s)
+      tl.to(
+        palmsRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          ease: "back.out(1.5)",
+        },
+        0.5
+      );
 
-      if (topCurtainRef.current && bottomCurtainRef.current) {
-        tl.to(
-          topCurtainRef.current,
-          { yPercent: -100, duration: 0.7, ease: "power3.inOut" },
-          "-=0.1"
-        );
-        tl.to(
-          bottomCurtainRef.current,
-          { yPercent: 100, duration: 0.7, ease: "power3.inOut" },
-          "<"
-        );
-      }
+      tl.to(
+        bookRef.current,
+        {
+          opacity: 0.45,
+          scale: 1,
+          duration: 0.55,
+          ease: "power2.out",
+        },
+        0.65
+      );
+
+      tl.to(
+        globeRef.current,
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 0.5,
+          ease: "back.out(1.4)",
+        },
+        0.8
+      );
+
+      tl.to(
+        sproutRef.current,
+        {
+          opacity: 1,
+          scaleY: 1,
+          duration: 0.5,
+          ease: "elastic.out(1, 0.6)",
+        },
+        1.0
+      );
+
+      // 3. Brand Identity & Acronym AKSARA Reveal (1.3s -> 2.15s)
+      tl.to(
+        titleRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          ease: "power2.out",
+        },
+        1.3
+      );
+
+      tl.to(
+        acronymRef.current,
+        {
+          opacity: 1,
+          letterSpacing: "0.22em",
+          duration: 0.6,
+          ease: "power3.out",
+        },
+        1.5
+      );
+
+      tl.to(
+        tagRef.current,
+        {
+          opacity: 1,
+          duration: 0.4,
+          ease: "power2.out",
+        },
+        1.7
+      );
+
+      // 4. Elegantly Fade Content (2.15s -> 2.3s)
+      tl.to(
+        contentRef.current,
+        {
+          opacity: 0,
+          y: -15,
+          duration: 0.25,
+          ease: "power2.in",
+        },
+        2.15
+      );
+
+      // 5. Green Curtain Wipe Up (2.3s -> 3.0s = exactly 3.0s total)
+      tl.to(
+        curtainRef.current,
+        {
+          yPercent: -100,
+          duration: 0.7,
+          ease: "power4.inOut",
+        },
+        2.3
+      );
     }, containerRef);
 
-    return () => ctx.revert();
-  }, []);
+    return () => {
+      ctx.revert();
+      if (timelineRef.current) timelineRef.current.kill();
+    };
+  }, [visible]);
 
   if (!visible) return null;
 
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-[9999] pointer-events-auto flex items-center justify-center overflow-hidden"
+      className="fixed inset-0 z-[99999] flex items-center justify-center overflow-hidden"
       role="status"
-      aria-label="Memuat Yayasan Sahabat Aksara"
+      aria-live="polite"
+      aria-label="Animasi Pembuka Yayasan Sahabat Aksara"
     >
-      {/* Top half curtain */}
+      {/* Skip Button - 44px touch target, positioned top-right */}
+      <button
+        onClick={handleSkip}
+        type="button"
+        aria-label="Lewati animasi intro"
+        className="fixed top-5 right-5 sm:top-7 sm:right-7 z-[100000] min-w-[44px] min-h-[44px] px-4 py-2 rounded-full bg-[var(--green-900)]/70 hover:bg-[var(--green-900)] border border-[var(--gold-500)]/40 hover:border-[var(--gold-400)] text-[var(--gold-300)] hover:text-[var(--gold-200)] text-xs font-semibold tracking-wider transition-all backdrop-blur-md shadow-lg flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
+      >
+        <span>Lewati</span>
+        <span aria-hidden="true" className="text-sm">✕</span>
+      </button>
+
+      {/* Main Full-Screen Green Curtain (Wipe Up) */}
       <div
-        ref={topCurtainRef}
-        className="absolute top-0 left-0 right-0 h-1/2 bg-[var(--green-950)] border-b border-[var(--gold-500)]/30 z-10"
-      />
-      {/* Bottom half curtain */}
-      <div
-        ref={bottomCurtainRef}
-        className="absolute bottom-0 left-0 right-0 h-1/2 bg-[var(--green-950)] border-t border-[var(--gold-500)]/30 z-10"
-      />
+        ref={curtainRef}
+        className="absolute inset-0 bg-[var(--green-950)] flex items-center justify-center z-10"
+      >
+        {/* Subtle Islamic Star Pattern Texture */}
+        <div className="absolute inset-0 bg-islamic-stars opacity-15 pointer-events-none" />
 
-      {/* Central insignia and logo drawing */}
-      <div ref={contentRef} className="relative z-20 flex flex-col items-center text-center p-6">
-        <div className="relative w-28 h-28 flex items-center justify-center mb-4">
-          <svg className="w-28 h-28 -rotate-90" viewBox="0 0 120 120">
-            {/* Background ring */}
-            <circle
-              cx="60"
-              cy="60"
-              r="54"
-              fill="none"
-              stroke="rgba(212, 175, 55, 0.2)"
-              strokeWidth="2"
-            />
-            {/* Drawing gold ring */}
-            <circle
-              ref={circleRef}
-              cx="60"
-              cy="60"
-              r="54"
-              fill="none"
-              stroke="var(--gold-400)"
-              strokeWidth="2.5"
-              strokeDasharray="380"
-              strokeDashoffset="380"
-              strokeLinecap="round"
-            />
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="font-serif text-3xl font-bold text-gold-gradient tracking-widest">
-              SA
-            </span>
-          </div>
-        </div>
-
-        <h1 className="font-serif text-xl sm:text-2xl font-bold text-[var(--cream-50)] tracking-wide">
-          Sahabat Aksara
-        </h1>
-        <p className="text-xs uppercase tracking-[0.25em] text-[var(--gold-400)] mt-1 font-sans">
-          Satu Mushaf, Sejuta Pahala Abadi
-        </p>
-
-        <button
-          onClick={() => setVisible(false)}
-          className="mt-6 text-[11px] text-[var(--sage-300)] hover:text-[var(--gold-300)] underline underline-offset-4 focus:outline-none"
+        {/* Central Logo & Inscription */}
+        <div
+          ref={contentRef}
+          className="relative z-20 flex flex-col items-center text-center px-4 max-w-md w-full"
         >
-          Lewati Intro &rarr;
-        </button>
+          {/* SVG Animated Emblem (Double Rings + Palms + Mushaf + Globe + Sprout) */}
+          <div className="relative w-40 h-40 sm:w-44 sm:h-44 flex items-center justify-center mb-6">
+            <svg
+              className="w-full h-full drop-shadow-2xl"
+              viewBox="0 0 200 200"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              {/* 1. Double Gold Concentric Rings */}
+              <circle
+                ref={outerRingRef}
+                cx="100"
+                cy="100"
+                r="88"
+                stroke="var(--gold-400)"
+                strokeWidth="2"
+                strokeDasharray="560"
+                strokeDashoffset="560"
+                strokeLinecap="round"
+                className="opacity-95"
+              />
+              <circle
+                ref={innerRingRef}
+                cx="100"
+                cy="100"
+                r="81"
+                stroke="var(--gold-500)"
+                strokeWidth="1.2"
+                strokeDasharray="510"
+                strokeDashoffset="510"
+                strokeLinecap="round"
+                className="opacity-60"
+              />
+
+              {/* 2. Open Book / Mushaf Silhouette (Background) */}
+              <path
+                ref={bookRef}
+                d="M 52 118 Q 100 134 100 148 Q 100 134 148 118 Q 152 82 100 96 Q 48 82 52 118 Z"
+                fill="url(#goldSheen)"
+                stroke="var(--gold-400)"
+                strokeWidth="1.2"
+                className="opacity-40"
+              />
+
+              {/* 3. Globe / Bumi (Tengah) */}
+              <g ref={globeRef} className="origin-center">
+                <circle
+                  cx="100"
+                  cy="114"
+                  r="26"
+                  fill="var(--green-900)"
+                  stroke="var(--gold-400)"
+                  strokeWidth="1.8"
+                />
+                <ellipse
+                  cx="100"
+                  cy="114"
+                  rx="14"
+                  ry="26"
+                  stroke="var(--gold-500)"
+                  strokeWidth="1"
+                  strokeOpacity="0.75"
+                />
+                <line
+                  x1="74"
+                  y1="114"
+                  x2="126"
+                  y2="114"
+                  stroke="var(--gold-500)"
+                  strokeWidth="1"
+                  strokeOpacity="0.75"
+                />
+                <path
+                  d="M 80 102 Q 100 107 120 102"
+                  stroke="var(--gold-500)"
+                  strokeWidth="0.8"
+                  strokeOpacity="0.6"
+                />
+                <path
+                  d="M 80 126 Q 100 121 120 126"
+                  stroke="var(--gold-500)"
+                  strokeWidth="0.8"
+                  strokeOpacity="0.6"
+                />
+              </g>
+
+              {/* 4. Dua Telapak Tangan yang Memangku (Palms Cradling the Globe) */}
+              <g ref={palmsRef}>
+                <path
+                  d="M 54 116 C 58 138, 76 156, 98 160 C 82 154, 68 140, 64 122 Z"
+                  fill="var(--gold-400)"
+                  className="opacity-90"
+                />
+                <path
+                  d="M 146 116 C 142 138, 124 156, 102 160 C 118 154, 132 140, 136 122 Z"
+                  fill="var(--gold-400)"
+                  className="opacity-90"
+                />
+                <path
+                  d="M 68 142 Q 100 166 132 142"
+                  stroke="var(--gold-400)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+              </g>
+
+              {/* 5. Tunas Muda Bertumbuh (Sprout of Hope) */}
+              <g ref={sproutRef}>
+                <path
+                  d="M 100 88 L 100 66"
+                  stroke="var(--gold-300)"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M 100 74 C 90 70, 84 58, 88 52 C 94 56, 98 64, 100 70 Z"
+                  fill="var(--gold-300)"
+                />
+                <path
+                  d="M 100 70 C 102 64, 106 56, 112 52 C 116 58, 110 70, 100 74 Z"
+                  fill="var(--gold-300)"
+                />
+                <circle cx="100" cy="62" r="3" fill="var(--gold-200)" />
+              </g>
+
+              {/* Gradient definitions */}
+              <defs>
+                <linearGradient id="goldSheen" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="var(--gold-300)" stopOpacity="0.3" />
+                  <stop offset="50%" stopColor="var(--gold-500)" stopOpacity="0.6" />
+                  <stop offset="100%" stopColor="var(--gold-600)" stopOpacity="0.2" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+
+          {/* Typography */}
+          <h1
+            ref={titleRef}
+            className="font-serif text-2xl sm:text-3xl font-bold text-[var(--cream-50)] tracking-wide"
+          >
+            Sahabat Aksara
+          </h1>
+
+          <div
+            ref={acronymRef}
+            className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] text-[var(--gold-400)] mt-2 font-mono"
+          >
+            A • K • S • A • R • A
+          </div>
+
+          <p
+            ref={tagRef}
+            className="text-[11px] uppercase tracking-[0.16em] text-[var(--sage-300)] mt-2 font-sans"
+          >
+            Spiritual &bull; Sosial &bull; Pendidikan &bull; Teknologi
+          </p>
+        </div>
       </div>
     </div>
   );
 }
-

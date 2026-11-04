@@ -2,13 +2,15 @@ import { db } from "@/lib/db/api";
 import DataSebaranView from "@/components/sections/DataSebaranView";
 
 export const metadata = {
-  title: "Data Sebaran Donasi: Al-Qur'an & Geber Masjid",
+  title: "Data Sebaran Donasi: Infak Jinan, BUSS Al-Qur'an, & Yatim Berdikari",
   description:
-    "Peta dan tabel sebaran transparan infak Al-Qur'an custom nama dan aksi Geber Masjid di seluruh Indonesia.",
+    "Data sebaran transparan program Infak Al-Qur'an Jinan, Beasiswa BUSS Al-Qur'an, dan kegiatan Yatim Berdikari Yayasan Sahabat Aksara.",
 };
 
 export default async function DataSebaranPage() {
-  const infakData = await db.getInfakDistributions(true);
+  const infakJinan = await db.getPublicInfakJinan();
+  const bussData = await db.getPublicBussDistributions();
+  const yatimData = await db.getYatimActivities(true);
   const geberData = await db.getGeberDistributions(true);
   const stats = await db.getAggregatedStats();
 
@@ -25,7 +27,7 @@ export default async function DataSebaranPage() {
             Data Sebaran & Peta Penyaluran Amanah
           </h1>
           <p className="mt-6 text-base sm:text-lg text-[var(--cream-100)]/90 max-w-2xl mx-auto leading-relaxed">
-            Setiap mushaf bernomor urut dan aksi bersih-bersih masjid diverifikasi secara berkala untuk menjamin amanah para donatur tersampaikan tepat sasaran.
+            Setiap mushaf bernomor urut, penerima beasiswa santri, serta kegiatan pembinaan yatim diverifikasi transparan dan diperbarui secara berkala.
           </p>
         </div>
       </section>
@@ -33,7 +35,9 @@ export default async function DataSebaranPage() {
       {/* Main Interactive Table & Map Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
         <DataSebaranView
-          initialInfak={infakData}
+          initialInfakJinan={infakJinan}
+          initialBuss={bussData}
+          initialYatim={yatimData}
           initialGeber={geberData}
           stats={stats}
         />
@@ -41,4 +45,3 @@ export default async function DataSebaranPage() {
     </div>
   );
 }
-

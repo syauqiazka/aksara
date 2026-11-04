@@ -13,7 +13,7 @@ export default function BankAccountsList({ initialAccounts }: { initialAccounts:
     setTimeout(() => setCopiedIndex(null), 2500);
   };
 
-  if (!initialAccounts || initialAccounts.length === 0) {
+  if (!initialAccounts || initialAccounts.length === 0 || initialAccounts.every((a) => !a.number)) {
     return (
       <div className="max-w-2xl mx-auto p-8 rounded-3xl bg-[var(--green-950)] text-[var(--cream-50)] border border-[var(--gold-500)]/30 text-center shadow-lg">
         <div className="w-12 h-12 rounded-2xl bg-[var(--green-900)] text-[var(--gold-400)] flex items-center justify-center mx-auto mb-4 border border-[var(--gold-500)]/30">
@@ -23,7 +23,7 @@ export default function BankAccountsList({ initialAccounts }: { initialAccounts:
           Informasi rekening segera diumumkan
         </h4>
         <p className="text-sm text-[var(--cream-200)]/80 mt-2 max-w-md mx-auto leading-relaxed">
-          Penyaluran transfer infak saat ini dikoordinasikan langsung bersama pengurus yayasan demi transparansi dan akuntabilitas pencatatan amanah.
+          Bank BCA a.n. Yayasan Ajirasa Aksara Semesta. Penyaluran dan konfirmasi transfer infak saat ini dikoordinasikan langsung bersama pengurus yayasan melalui layanan WhatsApp atau email resmi demi transparansi pencatatan amanah.
         </p>
       </div>
     );

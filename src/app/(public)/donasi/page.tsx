@@ -216,6 +216,26 @@ export default async function DonasiPage() {
           ))}
         </div>
       </section>
+
+      {/* 5. Mitra Sinergi Dakwah */}
+      <section className="py-16 bg-[var(--cream-100)] px-4 sm:px-6 lg:px-8 border-t border-[var(--cream-200)]">
+        <div className="max-w-4xl mx-auto text-center space-y-6">
+          <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--gold-700)]">
+            Sinergi Lembaga
+          </span>
+          <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[var(--ink-900)]">
+            Mitra Kami
+          </h2>
+          <div className="p-6 rounded-2xl bg-[var(--cream-50)] border border-[var(--gold-500)]/30 max-w-md mx-auto shadow-sm">
+            <h3 className="font-serif text-xl font-bold text-[var(--green-900)]">
+              Madrasah Al-Huffazh Gedongan
+            </h3>
+            <p className="text-xs text-[var(--ink-600)] mt-1.5">
+              Pondok Pesantren Pembinaan Kitab Kuning &amp; Tahfidz Al-Qur&apos;an 30 Juz &bull; Cirebon, Jawa Barat
+            </p>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

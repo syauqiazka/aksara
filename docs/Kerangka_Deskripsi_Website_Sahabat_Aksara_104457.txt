@@ -1,0 +1,138 @@
+WEBSITE SAHABAT AKSARA
+(Warna Website Kombinasi Hijau dan Gold)
+Ada 5 Menu Utama Website
+Menu Tentang Kami (Profil, Visi & Misi, Makna Filosofis Nama) 
+Menu Program Lembaga
+Menu Portofolio Produk
+Menu Data Sebaran Donasi (Bentuk seperti table yang nnti bisa diinput oleh admin)
+Laporan Penyaluran Program (Contoh Laporan seperti Yayasan Sahabat Yatim Indonesia) dan nanti bisa diinpu oleh admin
+Info Donasi & Dokumentasi Program
+PROFIL
+Sahabat Aksara
+Yayasan Ajirasa Akasara Semesta (Sahabat Aksara) adalah lembaga nirlaba/sosial yang berkhidmat untuk berkontribusi menghadirkan kebaikan dan kemanfaatan yang berkelanjutan bagi masyarakat melalui aksi pilar Spiritual, Sosial, Pendidikan, dan Teknologi. Resmi berdiri pada tanggal 22 Oktober 2026 dan telah memiliki dasar hukum yang kuat dalam Akta Pendirian Nomor 195 tanggal 15 Januari 2024, yang telah disahkan melalui Keputusan Menteri Hukum dan Hak Asasi Manusia (Kemenkumham) Republik Indonesia Nomor AHU-0002692.AH.01.04. Tahun 2026 dengan NPWP 827382389. Kami percaya bahwa keberkahan Al-Qur'an dan kemajuan teknologi dapat berjalan berdampingan untuk melahirkan generasi yang cerdas, berakhlak mulia, serta mandiri.
+Kisah & Latar Belakang Lembaga
+Yayasan Ajirasa Aksara Semesta ini didirikan oleh Ahmad Dahlan putra daerah asal Cirebon Jawa Barat pada akhir tahun 2026. Seorang yang terlahir dari keluarga yang sangat sederhana, yang sangat intens dalam bidang keagamaan, sosial dan pendidikan. Berawal dari proses kegundahan serta muhasabah terhadap kondisi kehidupan keluarga dan sekitarnya, yang mana banyak sekali keluarga yang sangat membutuhkan uluran tangan dermawan untuk bisa hijrah dan berubah kearah yang lebih baik lagi, terutama dalam aspek keagamaan, sosial, pendidikan dan teknologi. Founder sendiri sejak kecil ditempa dengan gaya kehidupan yang mengajarkan untuk semangat berjuang dan hidup prihatin, Hidup dalam lingkaran daerah minim teknologi dan sangat tertinggal dari daerah-daerah lainnya yang ada di Indonesia yang tentunya menambah ghiroh semangat juang pantang menyerah untuk mempersembahkan yang terbaik bagi daerahnya dan umumnya untuk negeri Indonesia, beliau merupakan alumni dari Pondok Pesantren Madrasah Al-Huffazh 2 Gedongan Cirebon. Yakni pesantren dengan fokus gemblengan pendidikan keagamaan kitab kuning serta hafalan Al-Qur'an 30 Juz, beliau memiliki tekad kuat untuk mendedikasikan hidupnya pada syiar Al-Qur'an, Pendidikan dan sosial kemasyarakatan.
+Perjalannan hidupnya tidaklah mudah, sempat putus sekolah setelah lulus dari jenjang SMP dikarenakan faktor keterbatasan ekonomi, namun karena semangat juang yang begitu tinggi serta tekad untuk merubah kehidupan keluarga, hal ini dibuktikan melalui kegigihan dalam melanjutkan pendidikan dengan menempuh jalur alternative Pendidikan Kesetaraan Paket C, hal ini mengajarkan bahwa keterbatasan atau perbedaan jalur pendidikan bukanlah penghalang untuk terus belajar, berkarya, dan memberikan dampak luas bagi ummat. Pengalaman hidup lulusan Sarjana Ilmu Al-Qur’an dan Tafsir Institut PTIQ Jakarta inilah yang menjadi fondasi utama lahirnya Yayasan Ajirasa Aksara Semesta: sebuah gerakan kebaikan yang inklusif, merangkul semua kalangan, dengan semangat  melek ilmu teknologi dengan fokus pondasi utama Al-Qur’an.
+Fokus Pilar Kegiatan Lembaga
+Donasi Infak 1 Jt Mushaf al-Qur’an Tahun 2027 dengan model custom lembaga untuk pesantren Penghafal al-Qura’an seluuh Indonesia. Menyalurkan dan membagikan Al-Qur'an ke berbagai daerah, madrasah, pesantren, serta masyarakat yang membutuhkan guna memberantas buta aksara Al-Qur'an serta semangat syiar mengaji
+Pemeliharaan & Imarah Masjid
+Menjaga, merawat, dan menghidupkan fungsi masjid sebagai pusat peradaban, ibadah, dan kegiatan keagamaan masyarakat.
+Pemberdayaan Sosial Kemasyarakatan
+Hadir mengulurkan tangan bagi yatim, dhuafa, serta masyarakat terdampak bencana melalui berbagai program bantuan kemanusiaan dan kepedulian sosial.
+Dukungan Program Pendidikan & Pembinaan Karakter
+Mendukung akses pendidikan yang berkualitas, serta memfasilitasi pembelajaran berbasis Al-Qur'an dan nilai-nilai keislaman.
+Teknologi Aplikasi & Inovasi Digital
+Mengintegrasikan kemajuan teknologi ke dalam dakwah dan tata kelola sosial, melatih generasi muda agar terampil di bidang teknologi, serta mengembangkan aplikasi yang mendukung kemudahan beribadah dan beramal.
+VISI & MISI
+VISI
+"Menjadi lembaga yayasan yang berdesikasi dalam menjaga &  memuliakan Al-Qur'an, memakmurkan masjid, serta memberdayakan masyarakat melalui pendidikan, aksi sosial, dan inovasi teknologi digital yang berkelanjutan."
+B. MISI
+1. Bidang Keagamaan & Al-Qur'an
+Membumikan Al-Qur'an: Melaksanakan program distribusi/infak Mushaf Al-Qur'an secara meluas dan tepat sasaran ke pelosok, pesantren, serta masjid yang membutuhkan.
+Mencetak Generasi Qur'ani: Menyelenggarakan dan mendukung kegiatan Tasmi’ Al-Qur'an 30 Juz Bil-Ghoib (menderaskan dan menyimak hafalan) guna memelihara keotentikan dan kualitas hafalan para hufaz. 
+Memakmurkan Masjid: Menjaga, merawat, dan memelihara sarana fisik serta kebersihan masjid, sekaligus mengaktifkan fungsi masjid sebagai pusat keagamaan dan peradaban umat.
+2. Bidang Pendidikan
+Pemerataan Akses Pendidikan: Menyelenggarakan program pelatihan keterampilan gratis bagi anak-anak serta generasi muda berprestasi/kurang mampu. Membangun program pembelajaran Al-Qur'an, karakter (akhlak), serta literasi modern untuk membentuk generasi beriman dan berketerampilan tinggi.
+3. Bidang Sosial & Kemanusiaan
+Kepedulian Sosial: Menggalang dan menyalurkan bantuan kemanusiaan, santunan anak yatim/duafa, serta berkontribusi dalam tanggal bencana alam.
+Pemberdayaan Masyarakat: Mendorong kemandirian ekonomi umat melalui program bakti sosial dan pendampingan kesejahteraan warga setempat.
+4. Bidang Inovasi Digital & Teknologi
+Digitalisasi Dakwah & Pendidikan: Mengembangkan dan menyediakan aplikasi/perangkat lunak dalam aplikasi dan edukatif secara gratis yang mudah diakses oleh Satuan Pendidikan dan masyarakat umum.
+Teknologi untuk Ummat: Memanfaatkan kemajuan teknologi informasi untuk mempermudah akses belajar Al-Qur'an, manajemen masjid, dan transparansi penyaluran bantuan sosial.
+MAKNA FILOSOFIS  NAMA 
+Kata Aksara
+Kata “A” bermakna : Al-Qur'an sebagai pedoman dan pondasi awal kehidupan dan kegiatan lembaga 
+Kata “K” bermakna Kemanusiaan atau sosial yakni kepedulian terhadap sesama dan pemberdayaan masyarakat.
+Kata “S” bermakna Sinergi aksi kontribusi nyata dalam berkolaborasi untuk kemaslahatan dan kemajuan umat
+Kata “A” bermakna Akhlak (Keagamaan): Landasan nilai moral, etika, dan spiritual dalam setiap gerakan.
+Kata “R” bermakna Riset (Pendidikan): Pengembangan ilmu pengetahuan berbasis pada kebutuhan bidang pendidikan
+Kata “A” bermakna Aplikasi (Teknologi): Penerapan teknologi tepat guna untuk menjawab tantangan zaman dalam setiap aspek kehidupan
+Logo
+Filosofi Logo Yayasan Ajirasa Aksara Semesta menampilkan harmoni antara simbolisme alam, kepedulian manusia, ilmu pengetahuan, dan nilai-nilai luhur ketuhanan. 
+Setiap elemen visual diciptakan untuk mencerminkan visi dan misi yayasan dalamk membangun peradaban yang berakhlak, cerdas, peduli, dan berkemajuan.
+1. Makna Elemen Visual Logo Dua Telapak Tangan yang Memangku Globe/Bumi:   Makna: Mencerminkan kasih sayang, perlindungan, kepedulian, dan tanggung jawab manusia sebagai pengelola (khalifah) di bumi. Yayasan hadir untuk merangkul seluruh lapisanN masyarakat dan menjaga kelestarian semesta.  
+2. Siluet Buku / Lembaran Terbuka (Latar Belakang Globe):   Makna: Melambangkan sumber ilmu pengetahuan, kebenaran, dan wawasan yang luas. Buku yang terbuka menyimbolkan keterbukaan pikiran, semangat belajar tanpa batas, serta kitab suci sebagai pedoman hidup.  
+Tunas / Tanaman yang Tumbuh dari Atas Bumi:   Makna: Menyimpan simbol pertumbuhan, regenerasi, keberlanjutan, dan harapan. Yayasan berkomitmen untuk menumbuhkan potensi generasi muda agar berdampak positif bagi dunia.   
+Bentuk Sudut & Garis Modern/Geometris pada Lembaran:   Makna: Representasi dari struktur, keteraturan, inovasi, serta perkembangan era modern dan teknologi digital.
+Makna Warna LogoWarna Emas (Gold):   Melambangkan kejayaan, keagungan, mutu/kualitas unggul, kemuliaan akhlak, dan kemakmuran yang ingin dicapai bersama.   
+Warna Hijau Tua (Emerald Green) pada Latar:   Melambangkan kedamaian, keseimbangan, pertumbuhan, keasrian alam semesta, serta identitas kedalaman nilai-nilai spiritual
+4. PROGRAM LEMBAGA
+A. Program Infak Al-Qur’an Jinan (Jelajah Langsung Infak Al-Qur’an Sampai ke Tangan)
+Salah satu pahala yang akan mengalir abadi adalah Amal Jariyah, seperti donasi infak al-Qur’an untuk Pesantren Penghafal Al-Qur’an seluruh Indonesia, Program Infak 1 Jt Al-Qur’an Jinan memastikan amanah infak dari donator tersampaikan dengan amanah langsung ke tangan para santri Penghafal aAl-Qur’an, disertai juga dengan data sebaran donasi infak, yang memungkinkan para donator bisa melihat langsung sebaran keterangan tempat dan wilayah lengkap dengan nama santri penerima, progress jumlah hafalan qur’an yang update secara bulanan serta dokumentasi kegitan, Mari kita bersama menebar cahaya ilmu dan iman serta pahala abadi dengan ikut berkontribusi dalam program Infak 1 Jt al-Qur’an Jinan  sebesar Rp. 100.000,- dengan custom nama donator, keluarga atau lembaga untuk sebarkan ke Pesantren dan Masjid seluruh Indonesia. Setiap huruf yang dibaca dari mushaf yang Anda infakkan akan menjadi pahala jariyah yang terus mengalir, bahkan setelah kita tiada.
+“Program BUSS Al-Qur’an (Bantuan Uang Saku Santri Penghafal Al-Qur’an)”
+Program bantuan uang saku/beasiswa untuk santri penghafal Al-Qur'an (BUSS Qur’an) merupakan skema apresiasi dan dukungan Lembaga melalui para dermawan dan donator yang menyisihkan sebagian rezekinya kepada para santri penghafal al-Qur’an yang sebelumnya pernah menerima Infak Mushaf al-Qur’an. Besaran dana bervariasi, dari mulai program Buss ekonomi sebesar Rp. 150.000,-, Program Buss Bisnis Sebesar Rp. 300.000,- dan program Buss Eksekutif sebesar Rp. 500.000,-. 
+Tujuan utamanya adalah memberikan jalan motivasi dan semangat serta dukungan dalam proses menghafal al-Qur’an serta memastikan kelangsungan belajar para santri agar fokus menghafal Al-Qur'an dan mengantarkan pendidikan formal tanpa terkendala biaya hidup/Pendidikan sampai  dengan tujuan akhir 
+ “Gerakan Bersih Masjid (Geber Masjid).”
+Masjid bukan hanya sekadar tempat menunaikan ibadah sholat, melainkan pusat peradaban, pembinaan umat, dan simbol kebersamaan masyarakat Muslim. Masjid yang bersih, suci, rapi, dan nyaman merupakan wujud kepedulian bersama serta landasan khusyuknya setiap ibadah yang dijalankan.
+Mari bergabung dengan kami dengan berkontribusi nyata melalui Gerakan Bersih-Bersih Masjid, untuk bergotong-royong merawat, menjaga, menumbuhkan semangat keimanan kepada Allah SWT, sekaligus mempererat tali silaturahmi antar jamaah.
+“Majlis Tasmi al-Qur’an 30 Juz Bil-Ghoib”
+Majlis Tasmi’ 30 Juz Bil-Ghoib  adalah program ikhtiar penguatan hafalan Al-Qur'an secara utuh (sekaligus/berkelanjutan dalam satu tatanan waktu) tanpa melihat mushaf yang dibacakan pada penghafal al-Qur’an secara estafet dalam kurun 1 hari khatam. Program ini juga sekaligus dukungan doa untuk negeri Indinesia. Program ini dirancang untuk menguji kelancaran, ketepatan tajwid, fasahah, serta ketahanan mental dan fisik para hafidz/hafidzah (penghafal Al-Qur'an). Dukungan penuh terhadap gerakan ini menjadi investasi peradaban untuk mencetak generasi Rabbani yang jujur, tangguh, dan menjaga kemurnian Al-Qur'an di dalam dada.
+“Program Yatim Berdikari ” 
+Merupakan program selain santunan yakni dengan pemberdayaan berkelanjutan yang dirancang khusus untuk membekali anak-anak yatim dan piatu khususnya usia remaja hingga usia produktif dengan keterampilan praktis (hard skills) dan karakter keberanian (soft skills).
+Kami percaya bahwa memberi bantuan materi belaka hanya menyelesaikan masalah sesaat. Melalui program pelatihan ini, kami berikhtiar memutus rantai ketergantungan dan kemiskinan dengan memberikan "kail", bukan sekadar "ikan", sehingga mereka mampu berkarya meraih kemandirian finansial, dan merancang masa depan yang cerah. 
+“Beasiswa Pelatihan IT Mitra Produktif”
+Program Pembinaan intensif bagi Mitra yang dirancang untuk mencetak talenta unggul yang tidak hanya menguasai teori, tetapi juga mampu melahirkan karya nyata yang inovatif dan berdaya guna.
+Melalui pendekatan Project-Based Learning, setiap penerima beasiswa (awardee) akan mendapatkan diarahkan untuk mengikuti pelatihan khusus terkait kurikulum praktis, bimbingan langsung dari mentor industri, serta fasilitas penuh untuk merancang, mengeksekusi, dan menyelesaikan sebuah proyek karya akhir baik berupa produk teknologi, desain/UI UX, karya seni, maupun solusi bisnis sosial. Program ini diakhiri dengan Exhibition & Demo Day sebagai ajang publikasi dan peluncuran karya penerima beasiswa yang nanti penerima manfaatnya akann kembali ke masyarakat dan sekolah.
+“Program Dukungan Pembinaan dan Pemberdayaan UMKM”
+Program ini dirancang untuk mendampingi serta memperkuat daya saing para pelaku Usaha Mikro, Kecil, dan Menengah (UMKM) dalam menghadapi tantangan pasar. Melalui pendekatan terpadu mencakup pelatihan manajemen keuangan, modernisasi alat usaha, pendampingan legalitas/perizinan, hingga digitalisasi pemasaran program ini bertujuan meningkatkan produktivitas, memperluas jangkauan pasar, serta mendorong kemandirian ekonomi masyarakat berbasis komunitas serta dukungan financial dengan akad hibah atau pinjaman tanpa bunga dengan syarat dan ketentuan berlaku.
+“Program Bantuan Tematik Nusantara"
+Program bantuan ini merupakan respon dari setiap kondisi terkini yang sekiranya membutuhkan uluran tangan para dermawan, dari mulai bencana alam, bencana sosial, pembangunan, Pendidikan dan lain sebagaian yang bersifat tematik dan dalam batas waktu tertentu saja
+5. PORTOFOLIO 
+A. Aplikasi KajianQu 
+Aplikasi KajianQu adalah aplikasi Islami komprehensif yang dirancang khusus untuk para huffazh (penghafal al-Qur'an), penuntut ilmu, serta umat Muslim yang ingin memperbaiki kualitas bacaan (tilawah) dan memperdalam pemahaman agama melalui kajian kitab kuning.
+Menggabungkan teknologi kecerdasan buatan (AI-assisted voice recognition untuk koreksi bacaan) dengan metode muraja'ah teruji serta perpustakaan digital kitab klasik, aplikasi ini menjadi solusi all-in-one bagi perjalanan spiritual dan intelektual Anda.
+B. Aplikasi Bank Saku Digital 
+Merupakan aplikasi playstore  android yang berisi system tabungan sekolah dengan model M-Banking internal sekolah yang bisa diakses online dimanapun dan kapanpun, aplikasi ini mempunyai fitur seperti fitur debit kredit serta rekening koran, tersedia fitur rekomendasi kesehetan finansial, terdapat juga fitur untuk pembayaran rutin sekolah seperti SPP, Daftar Ulang, Uang Gedung dan lainnya sesuai dengan kebutuhan sekolah serta terdapat juga fitur daftar target investasi didalamnya. Kami menyediakan juga website tambahan sebagai penunjang pecatatan keuangan sekolah
+ 
+Aplikasi DiaryQu 
+Aplikasi yang berfungsi sebagai media catatan sehari-hari dari agenda kegiatan, pencatatan pemasukan dan pengeluaran keuangan harian, daftar ceklis kegiatan hari ini beserta besaran rewardnya, dilengkapi fitur kepala rumah tangga sebagai monitoring utama terhadap anggota keluarga, ada fitur live lokasi anggota sehingga memungkinkan mengetahui posisi terkini semua anggota keluarga yang terdaftar dalam aplikasi DiaryQu.
+D. Aplikasi E-AbsensiQu 
+E-AbsensiQu adalah solusi digital modern berbasis aplikasi  mobile android yang tersedia pada plyastore yang dirancang khusus untuk mempermudah instansi, perusahaan, sekolah, atau organisasi dalam mengelola kehadiran karyawan maupun anggota secara akurat, real-time, dan efisien. Dengan memaksimalkan pemanfaatan teknologi berbasis lokasi (GPS), pengenalan wajah (facial recognition), serta integrasi cloud agar proses pencatatan kehadiran dapat dilakukan di mana saja secara aman dan transparan.
+E. Aplikasi DKM MasjidQu
+adalah solusi berbasis digital yang dirancang khusus untuk mempermudah pengurus Dewan Kemakmuran Masjid (DKM) dalam mengelola administrasi, keuangan, kegiatan dakwah, serta mempererat komunikasi dengan jamaah secara transparan dan efisien. Dengan mengintegrasikan teknologi modern ke dalam tata kelola masjid, aplikasi ini hadir untuk mewujudkan manajemen masjid yang profesional, akuntabel, dan berbasis jamaah.
+F. Aplikasi SapawargaQu 
+Aplikasi Manajemen Perumahan dan Keuangan adalah platform digital terintegrasi yang dirancang khusus untuk membantu pengelola kawasan hunian (Developer, Badan Pengelola, atau Pengurus RT/RW/Cluster) dalam mengelola data warga, administrasi properti, pemeliharaan fasilitas, serta pencatatan dan pelaporan keuangan secara real-time, transparan, dan akurat.
+Sistem ini menjembatani komunikasi antara pengelola dan penghuni sekaligus menghilangkan proses manual yang rentan terhadap human error atau ketidaktransparanan dana.
+6. DATA SEBARAN DONASI
+A. Data Sebaran Infak 1 Jt Al-Qur’an Jinan (Isi Tabel sebagai berikut)
+- Nomor urut
+- Nama Donatur
+- Asal
+- Nomor Hp (Hanya muncul pada admin)
+- Donasi Mushaf Ke-
+- Dedikasi atas nama
+- Pesantren Tujuan
+- Tanggal Penyaluran
+- Alamat
+- Link Google Map
+- Nama Santri Penerima
+- HP (Muncul diwebsite umum, namun dengan tulisan “Terlampir” saja)
+- Surat & Ayat Hafalan
+- Juz
+- Dokumentasi
+Data Sebaran Buss Al-Qur’an (Isi Tabel sebagai berikut)
+Pilihan Tahun
+Nomor Urut
+Nama Santri
+Asal
+Pesantren
+Surat & Ayat Terkini
+Juz
+Nama Donatur
+Dokumentasi Kegiatan
+Data Sebaran Yatim Berdikari (Isi Tabel sebagai berikut)
+Tahun
+Nama Kegiatan
+Penyelenggara
+Klik lihat dokumentasi Kegiatan
+INFO DONASI  & Dokumentasi Program
+Rekening Yayasan Bank BCA a.n Yayasan Ajirasa Aksara Semesta
+Contac Person 0822-6217-0018
+Media Sosial IG @Sahabat Aksara
+Dokumentasi Program
+Mitra Kami Madrasah Al-Huffazh Gedongan
+Donasi Tematik (Terkait Bencana Alam Terkini)
+Semisal Gempa Bumi di NTT
+Karhutla Kalimantan
+Erupsi Krakatau Selat Sunda
+Banjir Aceh

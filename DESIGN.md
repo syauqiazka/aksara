@@ -133,21 +133,30 @@ Aturan: `letter-spacing` judul display −0.02em; eyebrow berupa teks polos tanp
 Setiap halaman membuka dengan **momen sinematik**, lalu turun ke ritme membaca yang tenang.
 
 ### Beranda
-1. **Hero (gelap, layar penuh)** — logo emas "menggambar diri" (cincin ganda → tangan → globe → tunas), judul display "Satu mushaf, sejuta pahala abadi." (tagline resmi docx), sub-copy singkat, CTA ganda (Donasi · Lihat Sebaran). Latar: pola geometri parallax + partikel debu emas halus.
-2. **Marquee nilai** — A-K-S-A-R-A (singkatan nama) berjalan pelan; klik/hover menjelaskan makna tiap huruf.
+1. **Hero (gelap, layar penuh)** — logo emas "menggambar diri" (cincin ganda → tangan → globe → tunas), judul display "Menebar Cahaya Al-Qur'an, Memakmurkan Rumah Allah di Pelosok Negeri", sub-copy singkat, CTA ganda (Donasi · Lihat Sebaran). Latar: pola geometri parallax + partikel debu emas halus.
+2. **Marquee nilai** — A-K-S-A-R-A (Al-Qur'an, Kemanusiaan, Sinergi, Akhlak, Riset, Aplikasi) berjalan pelan; klik/hover menjelaskan makna tiap huruf.
 3. **Angka dampak** — mushaf tersalurkan, masjid dibersihkan, provinsi terjangkau (dari database).
 4. **Empat pilar** — Spiritual, Sosial, Pendidikan, Teknologi (pinned section: tiap pilar masuk bergantian).
-5. **Program unggulan** — Infak 1 Jt Al-Qur'an (foto mockup mushaf), Geber Masjid, Tasmi' 30 Juz (foto dokumentasi).
+5. **Program unggulan** — Infak Al-Qur'an Jinan (Rp 100.000 / mushaf), BUSS Al-Qur'an, Geber Masjid, Tasmi' 30 Juz Bil-Ghoib.
 6. **Peta sebaran** (pratinjau) → CTA ke halaman Data Sebaran.
-7. **Kisah founder** (cuplikan) dengan foto di bingkai mihrab.
+7. **Kisah & latar belakang lembaga** (cuplikan profil Ahmad Dahlan) dengan foto di bingkai mihrab.
 8. **Laporan terbaru** (3 kartu) + **dokumentasi** (galeri).
-9. **CTA donasi** besar + rekening.
+9. **CTA donasi** besar + rekening resmi.
 
 ### Tentang Kami
-Profil → Kisah founder (scrollytelling: foto sticky di kiri, paragraf bergantian di kanan, timeline perjuangan: pesantren → putus sekolah → Paket C → PTIQ Jakarta → yayasan) → Fokus pilar → Visi (satu kutipan layar penuh, kata-demi-kata menyala saat scroll) → Misi (4 bidang, accordion/tab) → **Makna Filosofis Nama** (A-K-S-A-R-A, interaktif) → **Makna Logo** (logo besar dengan titik-titik hotspot: tangan, globe, tunas, lembaran, warna).
+Profil → Kisah & latar belakang lembaga (scrollytelling: foto sticky di kiri, paragraf bergantian di kanan, timeline perjuangan: MA Al-Huffazh 2 Gedongan Cirebon → Paket C → Institut PTIQ Jakarta → yayasan) → Fokus pilar → Visi (layar penuh, berdedikasi memuliakan Al-Qur'an & memakmurkan masjid) → Misi (4 bidang) → **Makna Filosofis Nama** (A-K-S-A-R-A, interaktif) → **Makna Logo** (logo besar dengan titik-titik hotspot: tangan memangku globe, siluet buku terbuka, tunas bertumbuh, bentuk geometris, warna emas & hijau zamrud).
 
 ### Program Lembaga
-Daftar 6 program (Infak Al-Qur'an, Geber Masjid, Tasmi' 30 Juz, PENA Anak Yatim, Bela Berdikari, UMKM). Scroll horizontal ber-pin pada desktop; tumpukan vertikal di mobile. Detail tiap program punya halaman sendiri dengan hero foto, penjelasan, cara berpartisipasi, dan laporan terkait.
+Daftar 8 program resmi:
+1. Infak Al-Qur'an Jinan (Rp 100.000 / mushaf custom nama)
+2. Program BUSS Al-Qur'an (Rp 150rb / 300rb / 500rb)
+3. Geber Masjid (Gerakan Bersih Masjid)
+4. Majlis Tasmi' Al-Qur'an 30 Juz Bil-Ghoib
+5. Program Yatim Berdikari
+6. Beasiswa Pelatihan IT Mitra Produktif
+7. Program Dukungan Pembinaan & Pemberdayaan UMKM
+8. Program Bantuan Tematik Nusantara
+Scroll horizontal ber-pin pada desktop; tumpukan vertikal di mobile. Detail tiap program punya halaman sendiri dengan hero foto, penjelasan, cara berpartisipasi, dan laporan terkait.
 
 ### Portofolio Produk
 Enam aplikasi (KajianQu, Bank Saku Digital, DiaryQu, E-AbsensiQu, DKM MasjidQu, SapawargaQu) sebagai kartu besar dengan mockup perangkat; tilt 3D halus mengikuti kursor; tombol Play Store bila ada. Placeholder mockup dibuat dari SVG/CSS sampai screenshot asli tersedia — **jangan pakai gambar karangan yang menyesatkan**.

@@ -1,10 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Save, AlertCircle } from "lucide-react";
-import ImageUploader from "@/components/admin/ImageUploader";
+import {
+  ArrowLeft,
+  Save,
+  Plus,
+  AlertCircle,
+  Copy,
+} from "lucide-react";
+import Select from "@/components/ui/Select";
+import Input from "@/components/ui/Input";
+import { InfakJinanRecord, InfakJinanSantri } from "@/lib/db/types";
+import { QURAN_SURAHS, getSuggestedJuz, validateAyatNumber } from "@/lib/quran-surahs";
 
 export default function AdminEditInfakPage() {
   const router = useRouter();
@@ -14,64 +23,94 @@ export default function AdminEditInfakPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const [record, setRecord] = useState<InfakJinanRecord | null>(null);
 
   const [formData, setFormData] = useState({
     mushaf_no: "",
     donor_name: "",
     show_donor_name: false,
-    recipient_name: "",
-    recipient_type: "pesantren",
-    province: "",
-    city: "",
-    district: "",
-    lat: "",
-    lng: "",
+    donor_origin: "",
+    donor_phone: "",
+    dedication_name: "",
+    pesantren_name: "",
+    address: "",
     distributed_at: "",
-    quantity: "1",
-    photo_url: "",
-    notes: "",
-    status: "published",
+    maps_url: "",
+    status: "published" as "published" | "draft",
   });
 
-  useEffect(() => {
+  // State untuk quick update hafalan santri
+  const [selectedSantriId, setSelectedSantriId] = useState<string>("");
+  const [updateDate, setUpdateDate] = useState<string>(new Date().toISOString().split("T")[0]);
+  const [updateSurahNo, setUpdateSurahNo] = useState<number>(2);
+  const [updateAyat, setUpdateAyat] = useState<number>(252);
+  const [updateJuz, setUpdateJuz] = useState<number>(2);
+  const [updateNotes, setUpdateNotes] = useState<string>("");
+
+  const loadData = useCallback(async () => {
     if (!id) return;
-    const loadItem = async () => {
-      try {
-        const res = await fetch("/api/admin/infak");
-        const list = await res.json();
-        const found = list.find((item: { id: string }) => item.id === id);
-        if (found) {
-          setFormData({
-            mushaf_no: found.mushaf_no.toString(),
-            donor_name: found.donor_name,
-            show_donor_name: Boolean(found.show_donor_name),
-            recipient_name: found.recipient_name,
-            recipient_type: found.recipient_type,
-            province: found.province,
-            city: found.city,
-            district: found.district,
-            lat: found.lat ? found.lat.toString() : "",
-            lng: found.lng ? found.lng.toString() : "",
-            distributed_at: found.distributed_at,
-            quantity: found.quantity ? found.quantity.toString() : "1",
-            photo_url: found.photo_url || "",
-            notes: found.notes || "",
-            status: found.status,
-          });
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/infak");
+      const list: InfakJinanRecord[] = await res.json();
+      const found = list.find((i) => i.id === id);
+      if (found) {
+        setRecord(found);
+        setFormData({
+          mushaf_no: found.mushaf_no.toString(),
+          donor_name: found.donor_name,
+          show_donor_name: Boolean(found.show_donor_name),
+          donor_origin: found.donor_origin,
+          donor_phone: found.donor_phone || "",
+          dedication_name: found.dedication_name,
+          pesantren_name: found.pesantren_name,
+          address: found.address,
+          distributed_at: found.distributed_at,
+          maps_url: found.maps_url || "",
+          status: found.status,
+        });
+
+        if (found.santri_list && found.santri_list.length > 0) {
+          setSelectedSantriId(found.santri_list[0].id);
         }
-      } catch {
-        setError("Gagal memuat data penyaluran");
-      } finally {
-        setLoading(false);
       }
-    };
-    loadItem();
+    } catch {
+      setError("Gagal memuat detail data dari server");
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const handleSurahOrAyatChange = (surahNo: number, ayat: number) => {
+    setUpdateSurahNo(surahNo);
+    setUpdateAyat(ayat);
+    setUpdateJuz(getSuggestedJuz(surahNo, ayat));
+  };
+
+  const handleCopyLastUpdate = (santri: InfakJinanSantri) => {
+    if (santri.hafalan_updates && santri.hafalan_updates.length > 0) {
+      const last = santri.hafalan_updates[santri.hafalan_updates.length - 1];
+      setUpdateSurahNo(last.surah_no);
+      setUpdateAyat(last.ayat);
+      setUpdateJuz(last.juz);
+      setUpdateNotes(last.notes || "");
+      setSuccess(`Nilai terakhir santri "${santri.name}" disalin. Silakan sesuaikan ayat &amp; tanggal.`);
+    } else {
+      setError("Belum ada riwayat sebelumnya untuk santri ini.");
+    }
+  };
+
+  const handleSaveDonation = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setError(null);
+    setSuccess(null);
 
     try {
       const res = await fetch("/api/admin/infak", {
@@ -81,258 +120,439 @@ export default function AdminEditInfakPage() {
           id,
           ...formData,
           mushaf_no: parseInt(formData.mushaf_no, 10),
-          quantity: parseInt(formData.quantity, 10),
-          lat: formData.lat ? parseFloat(formData.lat) : null,
-          lng: formData.lng ? parseFloat(formData.lng) : null,
-          photo_url: formData.photo_url || null,
-          notes: formData.notes || null,
+          donor_phone: formData.donor_phone || null,
+          maps_url: formData.maps_url || null,
+          photos: record?.photos || [],
+          santri_list: record?.santri_list || [],
         }),
       });
 
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Gagal memperbarui data");
-      }
+      if (!res.ok) throw new Error(data.error || "Gagal memperbarui donasi");
 
-      router.push("/admin/infak");
+      setSuccess("Data donasi berhasil diperbarui.");
       router.refresh();
-    } catch (err: unknown) {
+      loadData();
+    } catch (err) {
       setError(err instanceof Error ? err.message : "Terjadi kesalahan");
+    } finally {
       setSaving(false);
+    }
+  };
+
+  const handleAddHafalanUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+
+    const val = validateAyatNumber(updateSurahNo, updateAyat);
+    if (!val.valid) {
+      setError(val.message || "Ayat tidak valid");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/admin/infak/santri/hafalan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          santriId: selectedSantriId,
+          updated_on: updateDate,
+          surah_no: updateSurahNo,
+          ayat: updateAyat,
+          juz: updateJuz,
+          notes: updateNotes || null,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Gagal menambah update hafalan");
+
+      setSuccess("Update hafalan bulanan santri berhasil disimpan.");
+      setUpdateNotes("");
+      loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Gagal menambah update hafalan");
     }
   };
 
   if (loading) {
     return (
-      <div className="p-12 text-center text-xs text-[var(--ink-400)]">
-        Memuat data...
+      <div className="max-w-4xl mx-auto p-12 text-center text-xs text-[var(--ink-500)]">
+        Memuat detail donasi mushaf...
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      <div className="flex items-center gap-3">
+    <div className="max-w-4xl mx-auto space-y-8 pb-16">
+      <div className="flex items-center justify-between pb-4 border-b border-[var(--cream-200)]">
         <Link
           href="/admin/infak"
-          className="p-2 rounded-xl bg-[var(--cream-100)] border border-[var(--cream-200)] hover:bg-[var(--cream-200)] text-[var(--ink-900)]"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--ink-600)] hover:text-[var(--ink-900)] transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
+          <span>Kembali ke Daftar Donasi</span>
         </Link>
-        <div>
-          <h1 className="font-serif text-2xl font-bold text-[var(--ink-900)]">
-            Ubah Data Penyaluran Mushaf #{formData.mushaf_no}
-          </h1>
-          <p className="text-xs text-[var(--ink-600)] mt-0.5">
-            Perbarui detail donatur, lembaga penerima, atau status publikasi.
-          </p>
-        </div>
+        <span className="text-xs font-mono font-bold text-[var(--green-900)]">
+          Mushaf #{formData.mushaf_no}
+        </span>
       </div>
 
       {error && (
-        <div className="p-4 rounded-2xl bg-[var(--danger)]/15 border border-[var(--danger)]/30 text-xs text-[var(--danger)] flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+        <div
+          role="alert"
+          className="p-4 rounded-xl bg-red-50 border border-red-200 text-xs text-red-900 flex items-center gap-2"
+        >
+          <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="p-8 rounded-3xl bg-[var(--cream-100)] border border-[var(--cream-200)] space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-xs font-semibold uppercase text-[var(--ink-900)] mb-2">
-              Nomor Urut Mushaf *
-            </label>
-            <input
-              type="number"
-              required
-              min="1"
-              value={formData.mushaf_no}
-              onChange={(e) => setFormData({ ...formData, mushaf_no: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold uppercase text-[var(--ink-900)] mb-2">
-              Jumlah Mushaf *
-            </label>
-            <input
-              type="number"
-              required
-              min="1"
-              value={formData.quantity}
-              onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
-            />
-          </div>
+      {success && (
+        <div
+          role="status"
+          className="p-4 rounded-xl bg-[var(--green-50)] border border-[var(--green-200)] text-xs text-[var(--green-900)] font-medium"
+        >
+          {success}
         </div>
+      )}
 
+      {/* FORM 1: EDIT DONASI */}
+      <div className="bg-[var(--cream-50)] rounded-3xl border border-[var(--cream-200)] p-6 sm:p-8 shadow-sm space-y-6">
         <div>
-          <label className="block text-xs font-semibold uppercase text-[var(--ink-900)] mb-2">
-            Nama Donatur / Atas Nama (Cover Mushaf) *
-          </label>
-          <input
-            type="text"
-            required
-            value={formData.donor_name}
-            onChange={(e) => setFormData({ ...formData, donor_name: e.target.value })}
-            className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
-          />
+          <h1 className="font-serif text-2xl font-bold text-[var(--green-950)]">
+            Edit Data Donasi Mushaf #{formData.mushaf_no}
+          </h1>
+          <p className="text-xs text-[var(--ink-600)] mt-1">
+            Ubah identitas pewakaf, pesantren tujuan, dedikasi, atau status publikasi.
+          </p>
         </div>
 
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)]">
-          <input
-            type="checkbox"
-            id="show_donor"
-            checked={formData.show_donor_name}
-            onChange={(e) => setFormData({ ...formData, show_donor_name: e.target.checked })}
-            className="w-4 h-4 text-[var(--green-800)] rounded"
-          />
-          <label htmlFor="show_donor" className="text-xs text-[var(--ink-900)] font-medium">
-            Tampilkan nama donatur ke publik (bila tidak dicentang, akan tampil sebagai &quot;Hamba Allah&quot;)
-          </label>
-        </div>
+        <form onSubmit={handleSaveDonation} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
+                Mushaf Ke- *
+              </label>
+              <Input
+                type="number"
+                required
+                value={formData.mushaf_no}
+                onChange={(e) => setFormData({ ...formData, mushaf_no: e.target.value })}
+              />
+            </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
+                Nama Donatur *
+              </label>
+              <Input
+                type="text"
+                required
+                value={formData.donor_name}
+                onChange={(e) => setFormData({ ...formData, donor_name: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
+                Asal Wilayah *
+              </label>
+              <Input
+                type="text"
+                required
+                value={formData.donor_origin}
+                onChange={(e) => setFormData({ ...formData, donor_origin: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
+                Nomor HP Donatur (ADMIN SAJA)
+              </label>
+              <Input
+                type="text"
+                value={formData.donor_phone}
+                onChange={(e) => setFormData({ ...formData, donor_phone: e.target.value })}
+              />
+            </div>
+
+            <div className="flex items-center gap-2 pt-6">
+              <input
+                type="checkbox"
+                id="show_name"
+                checked={formData.show_donor_name}
+                onChange={(e) => setFormData({ ...formData, show_donor_name: e.target.checked })}
+                className="w-4 h-4 rounded text-[var(--green-800)] cursor-pointer"
+              />
+              <label htmlFor="show_name" className="text-xs text-[var(--ink-800)] cursor-pointer">
+                Tampilkan nama donatur di publik (bukan &quot;Hamba Allah&quot;)
+              </label>
+            </div>
+          </div>
+
           <div>
-            <label className="block text-xs font-semibold uppercase text-[var(--ink-900)] mb-2">
-              Lembaga Penerima *
+            <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
+              Dedikasi Atas Nama *
             </label>
-            <input
+            <Input
               type="text"
               required
-              value={formData.recipient_name}
-              onChange={(e) => setFormData({ ...formData, recipient_name: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
+              value={formData.dedication_name}
+              onChange={(e) => setFormData({ ...formData, dedication_name: e.target.value })}
             />
           </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
+                Pesantren Tujuan *
+              </label>
+              <Input
+                type="text"
+                required
+                value={formData.pesantren_name}
+                onChange={(e) => setFormData({ ...formData, pesantren_name: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
+                Tanggal Penyaluran *
+              </label>
+              <Input
+                type="date"
+                required
+                value={formData.distributed_at}
+                onChange={(e) => setFormData({ ...formData, distributed_at: e.target.value })}
+              />
+            </div>
+          </div>
+
           <div>
-            <label className="block text-xs font-semibold uppercase text-[var(--ink-900)] mb-2">
-              Tipe Penerima *
+            <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
+              Alamat Lengkap Pesantren *
             </label>
-            <select
-              value={formData.recipient_type}
-              onChange={(e) => setFormData({ ...formData, recipient_type: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
+            <Input
+              type="text"
+              required
+              value={formData.address}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
+                Tautan Google Maps
+              </label>
+              <Input
+                type="url"
+                value={formData.maps_url}
+                onChange={(e) => setFormData({ ...formData, maps_url: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
+                Status *
+              </label>
+              <Select
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value as "published" | "draft" })}
+                options={[
+                  { value: "published", label: "Published" },
+                  { value: "draft", label: "Draft" },
+                ]}
+              />
+            </div>
+          </div>
+
+          <div className="pt-2 text-right">
+            <button
+              type="submit"
+              disabled={saving}
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-semibold bg-[var(--green-800)] text-[var(--cream-50)] hover:bg-[var(--green-700)] transition-colors shadow-sm disabled:opacity-50"
             >
-              <option value="pesantren">Pesantren</option>
-              <option value="masjid">Masjid</option>
-              <option value="madrasah">Madrasah</option>
-              <option value="lainnya">Lainnya</option>
-            </select>
+              <Save className="w-4 h-4 text-[var(--gold-400)]" />
+              <span>{saving ? "Menyimpan..." : "Simpan Perubahan Donasi"}</span>
+            </button>
           </div>
+        </form>
+      </div>
+
+      {/* FORM 2: QUICK UPDATE PROGRES HAFALAN SANTRI */}
+      <div className="bg-[var(--cream-50)] rounded-3xl border border-[var(--cream-200)] p-6 sm:p-8 shadow-sm space-y-6">
+        <div className="border-b border-[var(--cream-200)] pb-4">
+          <h2 className="font-serif text-xl font-bold text-[var(--green-950)]">
+            Input Pembaruan Hafalan Santri Bulanan
+          </h2>
+          <p className="text-xs text-[var(--ink-600)] mt-1">
+            Tambah catatan capaian surah &amp; ayat baru untuk santri penerima mushaf ini.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div>
-            <label className="block text-xs font-semibold uppercase text-[var(--ink-900)] mb-2">
-              Provinsi *
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.province}
-              onChange={(e) => setFormData({ ...formData, province: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
-            />
+        {record?.santri_list && record.santri_list.length > 0 ? (
+          <form onSubmit={handleAddHafalanUpdate} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
+                  Pilih Santri *
+                </label>
+                <Select
+                  value={selectedSantriId}
+                  onChange={(e) => setSelectedSantriId(e.target.value)}
+                  options={record.santri_list.map((s) => ({
+                    value: s.id,
+                    label: `${s.name} (Hafalan Terakhir: ${s.latest_surah || "-"})`,
+                  }))}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
+                  Tanggal Pembaruan *
+                </label>
+                <Input
+                  type="date"
+                  required
+                  value={updateDate}
+                  onChange={(e) => setUpdateDate(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Quick button Salin update bulan lalu */}
+            {selectedSantriId && (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const s = record.santri_list.find((x) => x.id === selectedSantriId);
+                    if (s) handleCopyLastUpdate(s);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border border-[var(--cream-300)] bg-[var(--cream-100)] text-[var(--ink-800)] text-[11px] font-semibold hover:bg-[var(--cream-200)] transition-colors"
+                >
+                  <Copy className="w-3.5 h-3.5 text-[var(--gold-700)]" />
+                  <span>Salin update bulan lalu</span>
+                </button>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+              <div>
+                <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
+                  Surah Terkini *
+                </label>
+                <Select
+                  value={updateSurahNo.toString()}
+                  onChange={(e) => handleSurahOrAyatChange(parseInt(e.target.value, 10), updateAyat)}
+                  options={QURAN_SURAHS.map((q) => ({
+                    value: q.number.toString(),
+                    label: `${q.number}. ${q.nameLatin} (${q.totalAyat} ayat)`,
+                  }))}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
+                  Ayat Terkini *
+                </label>
+                <Input
+                  type="number"
+                  min={1}
+                  required
+                  value={updateAyat}
+                  onChange={(e) => handleSurahOrAyatChange(updateSurahNo, parseInt(e.target.value, 10) || 1)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
+                  Juz (Otomatis &bull; Bisa Edit) *
+                </label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={30}
+                  required
+                  value={updateJuz}
+                  onChange={(e) => setUpdateJuz(parseInt(e.target.value, 10) || 1)}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
+                Catatan Pengasuh (Opsional)
+              </label>
+              <Input
+                type="text"
+                value={updateNotes}
+                onChange={(e) => setUpdateNotes(e.target.value)}
+                placeholder="Misal: Ujian tasmi' mutqin juz 2, tajwid lancar"
+              />
+            </div>
+
+            <div className="pt-2 text-right">
+              <button
+                type="submit"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-semibold bg-[var(--green-900)] text-[var(--cream-50)] hover:bg-[var(--green-800)] transition-colors shadow-sm"
+              >
+                <Plus className="w-4 h-4 text-[var(--gold-400)]" />
+                <span>Simpan Update Hafalan</span>
+              </button>
+            </div>
+          </form>
+        ) : (
+          <p className="text-xs text-[var(--ink-600)] italic">
+            Donasi ini belum memiliki santri penerima.
+          </p>
+        )}
+
+        {/* Tabel Santri Saat Ini */}
+        {record?.santri_list && record.santri_list.length > 0 && (
+          <div className="pt-6 border-t border-[var(--cream-200)] space-y-3">
+            <h3 className="font-serif text-sm font-bold text-[var(--ink-900)]">
+              Riwayat Santri Terdaftar Pada Mushaf #{formData.mushaf_no}
+            </h3>
+
+            <div className="overflow-x-auto rounded-2xl border border-[var(--cream-200)] bg-[var(--cream-50)]">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[var(--green-950)] text-[var(--cream-50)] text-[11px] uppercase">
+                  <tr>
+                    <th className="py-2.5 px-3">No.</th>
+                    <th className="py-2.5 px-4">Nama Santri</th>
+                    <th className="py-2.5 px-3">HP (Admin)</th>
+                    <th className="py-2.5 px-4">Surat &amp; Ayat</th>
+                    <th className="py-2.5 px-3">Juz</th>
+                    <th className="py-2.5 px-3 text-center">Total Riwayat</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--cream-200)]">
+                  {record.santri_list.map((s, idx) => (
+                    <tr key={s.id} className="hover:bg-[var(--cream-100)]">
+                      <td className="py-3 px-3 font-mono">{idx + 1}</td>
+                      <td className="py-3 px-4 font-semibold text-[var(--green-950)]">{s.name}</td>
+                      <td className="py-3 px-3 font-mono text-[var(--ink-600)]">{s.phone || "-"}</td>
+                      <td className="py-3 px-4 font-medium">{s.latest_surah || "-"} {s.latest_ayat ? `(${s.latest_ayat})` : ""}</td>
+                      <td className="py-3 px-3 font-bold text-[var(--gold-700)]">Juz {s.latest_juz || "-"}</td>
+                      <td className="py-3 px-3 text-center">
+                        <span className="px-2 py-0.5 rounded-full bg-[var(--cream-200)] text-[var(--ink-700)] font-bold text-[10px]">
+                          {s.hafalan_updates?.length || 0} catatan
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-
-          <div>
-            <label className="block text-xs font-semibold uppercase text-[var(--ink-900)] mb-2">
-              Kota / Kabupaten *
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.city}
-              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold uppercase text-[var(--ink-900)] mb-2">
-              Kecamatan *
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.district}
-              onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-xs font-semibold uppercase text-[var(--ink-900)] mb-2">
-              Tanggal Penyaluran *
-            </label>
-            <input
-              type="date"
-              required
-              value={formData.distributed_at}
-              onChange={(e) => setFormData({ ...formData, distributed_at: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold uppercase text-[var(--ink-900)] mb-2">
-              Status Publikasi *
-            </label>
-            <select
-              value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
-            >
-              <option value="published">Published (Tampil di Publik)</option>
-              <option value="draft">Draft (Simpan Sementara)</option>
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <ImageUploader
-            label="Foto Serah Terima / Dokumentasi (Opsional)"
-            value={formData.photo_url}
-            onChange={(url) => setFormData({ ...formData, photo_url: url })}
-            helperText="Upload foto serah terima ke santri/pesantren. Disimpan di Vercel Blob."
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold uppercase text-[var(--ink-900)] mb-2">
-            Catatan Lapangan & Penyerahan
-          </label>
-          <textarea
-            rows={3}
-            value={formData.notes}
-            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
-          />
-        </div>
-
-        <div className="flex justify-end gap-3 pt-4 border-t border-[var(--cream-200)]">
-          <Link
-            href="/admin/infak"
-            className="px-6 py-2.5 rounded-full text-xs font-semibold text-[var(--ink-600)] hover:bg-[var(--cream-200)]"
-          >
-            Batal
-          </Link>
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-6 py-2.5 rounded-full text-xs font-semibold bg-gold-gradient text-[var(--green-950)] hover:brightness-110 shadow-md flex items-center gap-2"
-          >
-            <Save className="w-4 h-4" />
-            <span>{saving ? "Menyimpan Perubahan..." : "Simpan Perubahan"}</span>
-          </button>
-        </div>
-      </form>
+        )}
+      </div>
     </div>
   );
 }
-

@@ -32,7 +32,7 @@ export default function TentangPage() {
         </div>
       </section>
 
-      {/* 2. KISAH & LATAR BELAKANG FOUNDER (Scrollytelling Layout) */}
+      {/* 2. KISAH & LATAR BELAKANG LEMBAGA (Scrollytelling Layout) */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           {/* Sticky Left: Founder Portrait */}
@@ -69,7 +69,7 @@ export default function TentangPage() {
           <div className="lg:col-span-7 space-y-8">
             <div>
               <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--gold-700)]">
-                Kisah & Latar Belakang Perjuangan
+                Kisah &amp; Latar Belakang Lembaga
               </span>
               <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[var(--ink-900)] mt-1">
                 Menempa Asa Dari Bilik Pesantren Hingga Lahirnya Sahabat Aksara

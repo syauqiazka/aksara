@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db/admin-api";
 import { reportSchema } from "@/lib/validation/schemas";
 import { getAdminSession } from "@/lib/auth";
+import { commitUpload, deleteBlobFromStorage } from "@/lib/storage";
 
 export async function GET() {
   const session = await getAdminSession();
@@ -28,6 +29,13 @@ export async function POST(request: Request) {
       pdf_url: null,
     });
 
+    if (result.cover_url) {
+      await commitUpload(result.cover_url);
+    }
+    for (const gUrl of result.gallery_urls) {
+      if (gUrl) await commitUpload(gUrl);
+    }
+
     revalidatePath("/laporan");
     revalidatePath("/");
 
@@ -47,6 +55,8 @@ export async function PUT(request: Request) {
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
     const validated = reportSchema.parse(data);
+    const previousRecord = await db.getReportById(id);
+
     const result = await db.saveReport(
       {
         ...validated,
@@ -57,6 +67,22 @@ export async function PUT(request: Request) {
       },
       id
     );
+
+    if (result.cover_url) {
+      await commitUpload(result.cover_url);
+    }
+    for (const gUrl of result.gallery_urls) {
+      if (gUrl) await commitUpload(gUrl);
+    }
+
+    // Clean up replaced cover
+    if (
+      previousRecord?.cover_url &&
+      previousRecord.cover_url !== result.cover_url &&
+      (previousRecord.cover_url.startsWith("http") || previousRecord.cover_url.startsWith("/uploads/"))
+    ) {
+      await deleteBlobFromStorage(previousRecord.cover_url);
+    }
 
     revalidatePath("/laporan");
     revalidatePath("/");
@@ -77,13 +103,29 @@ export async function DELETE(request: Request) {
     const id = searchParams.get("id");
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
+    const previousRecord = await db.getReportById(id);
     const success = await db.deleteReport(id);
+
+    if (success && previousRecord) {
+      if (
+        previousRecord.cover_url &&
+        (previousRecord.cover_url.startsWith("http") || previousRecord.cover_url.startsWith("/uploads/"))
+      ) {
+        await deleteBlobFromStorage(previousRecord.cover_url);
+      }
+      for (const gUrl of previousRecord.gallery_urls) {
+        if (gUrl && (gUrl.startsWith("http") || gUrl.startsWith("/uploads/"))) {
+          await deleteBlobFromStorage(gUrl);
+        }
+      }
+    }
+
     revalidatePath("/laporan");
     revalidatePath("/");
 
     return NextResponse.json({ success });
-  } catch {
-    return NextResponse.json({ error: "Delete failed" }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Delete failed";
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }
-

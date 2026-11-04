@@ -41,7 +41,7 @@ export default function HeroShowcase({ totalMushaf, totalMasjid }: HeroShowcaseP
 
           {/* Subtitle */}
           <p className="text-sm sm:text-base lg:text-lg text-[var(--cream-100)]/90 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-sans">
-            Menghubungkan niat jariyah para muhsinin dengan santri tahfidz dan masjid pedalaman melalui program <strong>Infak 1 Juta Mushaf Custom Nama</strong>, <strong>Geber Bersih Masjid</strong>, serta beasiswa huffazh bersanad.
+            Menghubungkan niat jariyah para muhsinin dengan santri tahfidz dan masjid pedalaman melalui program <strong>Infak Al-Qur&apos;an Jinan</strong> (Rp 100.000 / mushaf custom nama), <strong>Program BUSS Al-Qur&apos;an</strong>, <strong>Geber Bersih Masjid</strong>, serta beasiswa tahfidz bersanad.
           </p>
 
           {/* Trust points list */}
@@ -105,10 +105,10 @@ export default function HeroShowcase({ totalMushaf, totalMasjid }: HeroShowcaseP
                   Program Utama
                 </div>
                 <div className="font-serif font-bold text-lg text-[var(--cream-50)] leading-snug">
-                  Infak 1 Jt Al-Qur&apos;an Custom Nama
+                  Infak Al-Qur&apos;an Jinan
                 </div>
                 <p className="text-xs text-[var(--cream-200)] mt-0.5">
-                  Menerangi jalan para santri tahfidz di berbagai pelosok kepulauan Indonesia.
+                  Rp 100.000 / mushaf custom nama &bull; Langsung sampai ke tangan santri pelosok.
                 </p>
               </div>
             </div>

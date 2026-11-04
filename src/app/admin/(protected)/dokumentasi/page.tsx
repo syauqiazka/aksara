@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Select from "@/components/ui/Select";
 import Image from "next/image";
 import { PlusCircle, Search, Trash2, Edit, Eye, EyeOff, X, Image as ImageIcon, CheckCircle2 } from "lucide-react";
 import { GalleryItem } from "@/lib/db/types";
 import ImageUploader from "@/components/admin/ImageUploader";
+import { uploadPendingFileOnSave, deleteOldBlobAfterUpdate } from "@/lib/upload-helper";
 
 export default function AdminGalleryPage() {
   const [items, setItems] = useState<GalleryItem[]>([]);
@@ -14,6 +16,7 @@ export default function AdminGalleryPage() {
 
   // Modal form states
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [editingItem, setEditingItem] = useState<GalleryItem | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -79,11 +82,19 @@ export default function AdminGalleryPage() {
     e.preventDefault();
     setSubmitting(true);
     setFeedback(null);
+    let uploadRollback = null;
 
     try {
+      let finalImg = formData.image_url;
+      if (selectedFile) {
+        const { url, rollback, commit } = await uploadPendingFileOnSave(selectedFile);
+        uploadRollback = rollback;
+        finalImg = url || formData.image_url;
+      }
+
       const url = "/api/admin/gallery";
       const method = editingItem ? "PUT" : "POST";
-      const body = editingItem ? { id: editingItem.id, ...formData } : formData;
+      const body = editingItem ? { id: editingItem.id, ...formData, image_url: finalImg } : { ...formData, image_url: finalImg };
 
       const res = await fetch(url, {
         method,
@@ -96,15 +107,21 @@ export default function AdminGalleryPage() {
         throw new Error(resData.error || "Gagal menyimpan dokumentasi.");
       }
 
+      if (editingItem && editingItem.image_url !== finalImg) {
+        await deleteOldBlobAfterUpdate(editingItem.image_url, finalImg);
+      }
+
       setFeedback({
         type: "success",
         message: editingItem
           ? `Dokumentasi "${formData.title}" berhasil diperbarui.`
           : `Dokumentasi "${formData.title}" berhasil ditambahkan.`,
       });
+      setSelectedFile(null);
       closeModal();
       fetchData();
     } catch (err: unknown) {
+      if (uploadRollback) await uploadRollback();
       const msg = err instanceof Error ? err.message : "Terjadi kesalahan saat menyimpan.";
       setFeedback({ type: "error", message: msg });
     } finally {
@@ -344,21 +361,19 @@ export default function AdminGalleryPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-[var(--ink-700)] mb-1">
-                    Nama Program *
-                  </label>
-                  <select
+                  <Select
+                    label="Nama Program"
+                    required
                     value={formData.program}
                     onChange={(e) => setFormData({ ...formData, program: e.target.value })}
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-[var(--cream-200)] focus:ring-2 focus:ring-[var(--gold-500)] focus:outline-none"
                   >
-                    <option value="Infak Al-Qur'an">Infak Al-Qur'an</option>
+                    <option value="Infak Al-Qur'an">{"Infak Al-Qur'an"}</option>
                     <option value="Geber Masjid">Geber Masjid</option>
-                    <option value="Tasmi' Al-Qur'an">Tasmi' Al-Qur'an</option>
+                    <option value="Tasmi' Al-Qur'an">{"Tasmi' Al-Qur'an"}</option>
                     <option value="Pena Yatim">Pena Yatim</option>
                     <option value="Bela Berdikari">Bela Berdikari</option>
                     <option value="Bantuan Tanggap Bencana">Bantuan Tanggap Bencana</option>
-                  </select>
+                  </Select>
                 </div>
 
                 <div>
@@ -380,6 +395,8 @@ export default function AdminGalleryPage() {
                 required
                 value={formData.image_url}
                 onChange={(url) => setFormData({ ...formData, image_url: url })}
+                file={selectedFile}
+                onFileChange={setSelectedFile}
                 helperText="Upload foto dokumentasi resolusi tinggi. URL akan disimpan di Supabase."
               />
 
@@ -397,19 +414,16 @@ export default function AdminGalleryPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[var(--ink-700)] mb-1">
-                  Status Publikasi
-                </label>
-                <select
+                <Select
+                  label="Status Publikasi"
                   value={formData.status}
                   onChange={(e) =>
                     setFormData({ ...formData, status: e.target.value as "published" | "draft" })
                   }
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-[var(--cream-200)] focus:ring-2 focus:ring-[var(--gold-500)] focus:outline-none"
                 >
                   <option value="published">Publikasikan (Published)</option>
                   <option value="draft">Simpan Sebagai Draf (Draft)</option>
-                </select>
+                </Select>
               </div>
 
               <div className="pt-3 border-t border-[var(--cream-200)] flex items-center justify-end gap-3">

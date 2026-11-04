@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { db } from "@/lib/db/api";
 import { BankAccount, ContactInfo } from "@/lib/db/types";
-import { Settings, Save, CheckCircle2 } from "lucide-react";
+import { Settings, Save, CheckCircle2, HardDrive, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export default function AdminSettingsPage() {
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
@@ -42,6 +43,30 @@ export default function AdminSettingsPage() {
         <p className="text-xs sm:text-sm text-[var(--ink-600)] mt-1">
           Perbarui nomor rekening donasi resmi, kontak WhatsApp, dan alamat lembaga.
         </p>
+      </div>
+
+            {/* Storage Maintenance Card */}
+      <div className="p-5 rounded-3xl bg-[var(--cream-100)] border border-[var(--cream-200)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-2xl bg-[var(--green-900)] text-[var(--gold-400)] flex items-center justify-center shrink-0">
+            <HardDrive className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-serif text-sm font-bold text-[var(--ink-900)]">
+              Penyimpanan & File Media
+            </h3>
+            <p className="text-xs text-[var(--ink-600)]">
+              Pindai dan bersihkan file foto yatim yang tidak lagi terhubung ke data yayasan.
+            </p>
+          </div>
+        </div>
+        <Link
+          href="/admin/pengaturan/storage"
+          className="px-4 py-2 rounded-full border border-[var(--cream-300)] text-xs font-semibold text-[var(--ink-800)] hover:bg-[var(--cream-200)] transition-colors flex items-center justify-center gap-1.5 shrink-0"
+        >
+          <span>Buka Pembersih Storage</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
       </div>
 
       {saved && (

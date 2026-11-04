@@ -1,13 +1,24 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { UploadCloud, Image as ImageIcon, X, Loader2, Link2, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  UploadCloud,
+  Image as ImageIcon,
+  X,
+  Link2,
+  CheckCircle2,
+  AlertCircle,
+  FileCheck,
+} from "lucide-react";
+import { compressImageClient } from "@/lib/client-image-compression";
 
 interface ImageUploaderProps {
   label?: string;
-  value: string;
-  onChange: (url: string) => void;
+  value?: string; // existing image URL
+  onChange?: (url: string) => void;
+  file?: File | null; // local pending file (Upload on Save)
+  onFileChange?: (file: File | null) => void;
   placeholder?: string;
   helperText?: string;
   required?: boolean;
@@ -15,59 +26,78 @@ interface ImageUploaderProps {
 
 export default function ImageUploader({
   label = "Upload Foto",
-  value,
+  value = "",
   onChange,
+  file = null,
+  onFileChange,
   placeholder = "Pilih file gambar atau drag & drop ke sini",
   helperText,
   required = false,
 }: ImageUploaderProps) {
   const [isDragging, setIsDragging] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadNotice, setUploadNotice] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [mode, setMode] = useState<"upload" | "url">("upload");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewUrlRef = useRef<string | null>(null);
 
-  const handleFileProcess = async (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      setErrorMessage("Harap pilih file gambar (JPG, PNG, WebP, GIF)");
-      return;
+  // Revoke object URL on unmount or change
+  const setCleanPreview = (newUrl: string | null) => {
+    if (previewUrlRef.current && previewUrlRef.current.startsWith("blob:")) {
+      URL.revokeObjectURL(previewUrlRef.current);
     }
-    if (file.size > 8 * 1024 * 1024) {
-      setErrorMessage("Ukuran gambar terlalu besar (maksimal 8MB)");
-      return;
-    }
+    previewUrlRef.current = newUrl;
+    setPreviewUrl(newUrl);
+  };
 
-    setUploading(true);
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current && previewUrlRef.current.startsWith("blob:")) {
+        URL.revokeObjectURL(previewUrlRef.current);
+      }
+    };
+  }, []);
+
+  // Update preview when file changes or value changes
+  useEffect(() => {
+    if (file) {
+      const objUrl = URL.createObjectURL(file);
+      setCleanPreview(objUrl);
+    } else if (value) {
+      setCleanPreview(value);
+    } else {
+      setCleanPreview(null);
+    }
+  }, [file, value]);
+
+  const handleFileProcess = async (rawFile: File) => {
     setErrorMessage(null);
-    setUploadNotice(null);
+
+    // 1. Validation
+    if (!rawFile.type.startsWith("image/")) {
+      setErrorMessage("Harap pilih file gambar (JPG, PNG, atau WebP)");
+      return;
+    }
+    if (rawFile.size > 5 * 1024 * 1024) {
+      setErrorMessage("Ukuran gambar melebihi batas maksimal 5 MB");
+      return;
+    }
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
+      // 2. Client-side WebP compression (max 2000px, target <= 300KB)
+      const compressed = await compressImageClient(rawFile);
 
-      const res = await fetch("/api/admin/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Gagal mengunggah gambar");
+      // 3. Store in client state WITHOUT uploading yet (Upload on Save)
+      if (onFileChange) {
+        onFileChange(compressed);
       }
-
-      onChange(data.url);
-      if (data.provider === "vercel-blob") {
-        setUploadNotice("Berhasil diunggah ke Vercel Blob");
-      } else {
-        setUploadNotice(data.message || "Tersimpan di penyimpanan lokal");
+      if (onChange) {
+        onChange(""); // Clear external URL since local file takes precedence
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Terjadi kesalahan upload";
+      const msg = err instanceof Error ? err.message : "Gagal memproses gambar";
       setErrorMessage(msg);
-    } finally {
-      setUploading(false);
     }
   };
 
@@ -95,26 +125,36 @@ export default function ImageUploader({
     }
   };
 
+  const handleClear = () => {
+    setCleanPreview(null);
+    if (onFileChange) onFileChange(null);
+    if (onChange) onChange("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    setErrorMessage(null);
+  };
+
+  const activeDisplay = previewUrl || value;
+
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="block text-xs font-semibold text-[var(--ink-700)]">
+        <label className="block text-xs font-semibold text-[var(--ink-900)]">
           {label} {required && <span className="text-red-500">*</span>}
         </label>
         <button
           type="button"
           onClick={() => setMode(mode === "upload" ? "url" : "upload")}
-          className="text-[11px] text-[var(--gold-600)] hover:underline flex items-center gap-1 font-medium"
+          className="text-[11px] font-medium text-[var(--gold-700)] hover:underline flex items-center gap-1"
         >
           {mode === "upload" ? (
             <>
               <Link2 className="w-3 h-3" />
-              <span>Gunakan URL Luar</span>
+              <span>Gunakan URL Eksternal</span>
             </>
           ) : (
             <>
               <UploadCloud className="w-3 h-3" />
-              <span>Upload dari Storage</span>
+              <span>Pilih File Gambar</span>
             </>
           )}
         </button>
@@ -123,127 +163,124 @@ export default function ImageUploader({
       {mode === "url" ? (
         <div className="space-y-2">
           <input
-            type="text"
+            type="url"
             value={value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder="https://... atau /images/..."
-            className="w-full px-3.5 py-2 text-xs rounded-xl border border-[var(--cream-200)] focus:ring-2 focus:ring-[var(--gold-500)] focus:outline-none font-mono"
+            onChange={(e) => {
+              if (onChange) onChange(e.target.value);
+              if (onFileChange) onFileChange(null);
+            }}
+            placeholder="https://example.com/foto-kegiatan.jpg"
+            className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-xs text-[var(--ink-900)] focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)] font-mono"
           />
-          {value && (
-            <div className="relative h-28 w-full rounded-xl overflow-hidden border border-[var(--cream-200)] bg-[var(--green-950)]">
-              <Image src={value} alt="Preview" fill className="object-contain" unoptimized />
-            </div>
-          )}
+          <p className="text-[11px] text-[var(--ink-600)]">
+            Masukkan tautan langsung gambar yang dapat diakses publik.
+          </p>
         </div>
       ) : (
-        <div>
-          {/* Active Image Preview */}
-          {value ? (
-            <div className="relative rounded-2xl overflow-hidden border border-[var(--cream-200)] bg-[var(--green-950)]/90 p-2 group">
-              <div className="relative h-44 w-full rounded-xl overflow-hidden">
-                <Image src={value} alt="Preview" fill className="object-contain" unoptimized />
+        <div className="space-y-3">
+          {activeDisplay ? (
+            <div className="relative rounded-2xl border-2 border-[var(--cream-200)] bg-[var(--cream-100)] p-3 flex items-center gap-4">
+              <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-[var(--green-950)] flex-shrink-0 border border-[var(--gold-500)]/30">
+                <Image
+                  src={activeDisplay}
+                  alt="Pratinjau Foto"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
               </div>
-              <div className="mt-2 flex items-center justify-between px-2 text-[11px] text-[var(--cream-100)]">
-                <span className="truncate max-w-[260px] font-mono text-[10px] opacity-80">{value}</span>
-                <div className="flex items-center gap-2">
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--ink-900)] truncate">
+                  {file ? (
+                    <>
+                      <FileCheck className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                      <span className="truncate">{file.name}</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                      <span className="truncate">Foto Tersimpan</span>
+                    </>
+                  )}
+                </div>
+
+                <div className="text-[11px] text-[var(--ink-600)] mt-0.5">
+                  {file ? (
+                    <span className="text-emerald-700 font-medium">
+                      Siap diunggah saat data disimpan ({(file.size / 1024).toFixed(0)} KB)
+                    </span>
+                  ) : (
+                    <span className="truncate block font-mono text-[10px] text-[var(--ink-400)]">
+                      {value}
+                    </span>
+                  )}
+                </div>
+
+                <div className="mt-2 flex items-center gap-3">
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    disabled={uploading}
-                    className="px-2.5 py-1 rounded-lg bg-[var(--gold-500)] text-[var(--green-950)] font-bold text-[10px] hover:brightness-110"
+                    className="text-[11px] font-semibold text-[var(--gold-700)] hover:underline"
                   >
                     Ganti Foto
                   </button>
+                  <span className="text-[var(--cream-300)]">&bull;</span>
                   <button
                     type="button"
-                    onClick={() => {
-                      onChange("");
-                      setUploadNotice(null);
-                    }}
-                    className="p-1 text-red-300 hover:text-red-100 rounded-lg hover:bg-red-500/20"
-                    title="Hapus Foto"
+                    onClick={handleClear}
+                    className="text-[11px] font-semibold text-red-600 hover:underline flex items-center gap-1"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3 h-3" />
+                    <span>Hapus</span>
                   </button>
                 </div>
               </div>
             </div>
           ) : (
-            /* Drag and Drop Zone */
             <div
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-6 text-center transition-all ${
+              className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all ${
                 isDragging
-                  ? "border-[var(--gold-500)] bg-[var(--gold-50)]/30 scale-[1.01]"
-                  : "border-[var(--cream-200)] hover:border-[var(--gold-400)] bg-[var(--cream-50)]/50 hover:bg-[var(--cream-100)]/40"
+                  ? "border-[var(--gold-500)] bg-[var(--gold-500)]/10"
+                  : "border-[var(--cream-300)] hover:border-[var(--gold-400)] bg-[var(--cream-50)]"
               }`}
             >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleInputChange}
-                className="hidden"
-              />
-
-              <div className="flex flex-col items-center justify-center space-y-2">
-                <div className="p-3 rounded-full bg-[var(--gold-100)] text-[var(--gold-700)]">
-                  {uploading ? (
-                    <Loader2 className="w-6 h-6 animate-spin text-[var(--gold-600)]" />
-                  ) : (
-                    <UploadCloud className="w-6 h-6" />
-                  )}
-                </div>
-
-                <div className="text-xs">
-                  <span className="font-semibold text-[var(--ink-900)]">
-                    {uploading ? "Sedang mengunggah..." : "Klik untuk upload"}
-                  </span>{" "}
-                  {!uploading && (
-                    <span className="text-[var(--ink-500)]">atau tarik (drag & drop) gambar ke sini</span>
-                  )}
-                </div>
-
-                <p className="text-[10px] text-[var(--ink-400)]">
-                  Mendukung JPG, PNG, WebP, GIF (Maks. 8MB) &bull; Otomatis tersimpan ke Vercel Blob
-                </p>
+              <div className="w-12 h-12 rounded-full bg-[var(--cream-100)] flex items-center justify-center mx-auto mb-3 text-[var(--green-800)]">
+                <UploadCloud className="w-6 h-6" />
+              </div>
+              <div className="text-xs font-semibold text-[var(--ink-900)] mb-1">
+                {placeholder}
+              </div>
+              <div className="text-[11px] text-[var(--ink-600)]">
+                Maks. 5 MB &bull; Otomatis dikompres ke WebP saat formulir disimpan
               </div>
             </div>
           )}
 
-          {/* Hidden input for replace action when value exists */}
-          {value && (
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleInputChange}
-              className="hidden"
-            />
-          )}
-        </div>
-      )}
-
-      {/* Notices & Errors */}
-      {uploadNotice && (
-        <div className="flex items-center gap-1.5 text-[11px] text-[var(--green-800)] font-medium bg-[var(--green-50)] px-3 py-1.5 rounded-lg border border-[var(--green-200)]">
-          <CheckCircle2 className="w-3.5 h-3.5 text-green-600 flex-shrink-0" />
-          <span>{uploadNotice}</span>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleInputChange}
+            className="hidden"
+          />
         </div>
       )}
 
       {errorMessage && (
-        <div className="flex items-center gap-1.5 text-[11px] text-red-700 font-medium bg-red-50 px-3 py-1.5 rounded-lg border border-red-200">
-          <AlertCircle className="w-3.5 h-3.5 text-red-600 flex-shrink-0" />
+        <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
           <span>{errorMessage}</span>
         </div>
       )}
 
-      {helperText && <p className="text-[10px] text-[var(--ink-400)]">{helperText}</p>}
+      {helperText && !errorMessage && (
+        <p className="text-[11px] text-[var(--ink-600)]">{helperText}</p>
+      )}
     </div>
   );
 }
-
