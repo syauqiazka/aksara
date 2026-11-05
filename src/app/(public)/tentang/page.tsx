@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import Image from "next/image";
 import { organizationContent } from "@/content/organization";
 import InteractiveLogoHotspots from "@/components/sections/InteractiveLogoHotspots";
@@ -5,10 +6,25 @@ import Button from "@/components/ui/Button";
 import PageHeader from "@/components/ui/PageHeader";
 import { Quote, HeartHandshake, ShieldCheck } from "lucide-react";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Tentang Kami & Makna Filosofis Logo",
   description:
     "Profil Yayasan Sahabat Aksara, kisah inspiratif founder Ahmad Dahlan, visi-misi, pilar peradaban, serta bedah filosofi nama dan logo yayasan.",
+  alternates: {
+    canonical: "/tentang",
+  },
+  openGraph: {
+    title: "Tentang Kami & Makna Filosofis Logo | Yayasan Sahabat Aksara",
+    description:
+      "Profil Yayasan Sahabat Aksara, visi-misi 4 pilar dakwah, serta bedah filosofi nama dan logo yayasan.",
+    url: "/tentang",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Tentang Kami & Makna Filosofis Logo | Yayasan Sahabat Aksara",
+    description: "Profil Yayasan Sahabat Aksara, visi-misi 4 pilar dakwah, serta bedah filosofi nama dan logo yayasan.",
+    images: ["/images/founder-ahmad-dahlan.jpg"],
+  },
 };
 
 export default function TentangPage() {

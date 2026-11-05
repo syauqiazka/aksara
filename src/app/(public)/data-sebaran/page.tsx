@@ -2,19 +2,39 @@ import { db } from "@/lib/db/api";
 import DataSebaranView from "@/components/sections/DataSebaranView";
 import PageHeader from "@/components/ui/PageHeader";
 import StatCounter from "@/components/motion/StatCounter";
+import { Metadata } from "next";
 
-export const metadata = {
-  title: "Data Sebaran Donasi: Infak Jinan, BUSS Al-Qur'an, & Yatim Berdikari",
+export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: "Data Sebaran Donasi: Infak Jinan, BUSS Al-Qur'an, & Geber Masjid",
   description:
-    "Data sebaran transparan program Infak Al-Qur'an Jinan, Beasiswa BUSS Al-Qur'an, dan kegiatan Yatim Berdikari Yayasan Sahabat Aksara.",
+    "Transparansi penyaluran mushaf Al-Qur'an Jinan bernomor urut unik, penerima beasiswa BUSS, serta aksi Geber Masjid pedalaman Yayasan Sahabat Aksara.",
+  alternates: {
+    canonical: "/data-sebaran",
+  },
+  openGraph: {
+    title: "Data Sebaran Donasi & Peta Penyaluran Amanah | Sahabat Aksara",
+    description:
+      "Pantau sebaran wakaf Al-Qur'an dan pemakmuran masjid di seluruh pelosok nusantara secara real-time dan akuntabel.",
+    url: "/data-sebaran",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Data Sebaran Donasi & Peta Penyaluran Amanah | Sahabat Aksara",
+    description: "Pantau sebaran wakaf Al-Qur'an dan pemakmuran masjid di pelosok nusantara secara transparan.",
+    images: ["/images/infak-mushaf-custom.jpg"],
+  },
 };
 
 export default async function DataSebaranPage() {
-  const infakJinan = await db.getPublicInfakJinan();
-  const bussData = await db.getPublicBussDistributions();
-  const yatimData = await db.getYatimActivities(true);
-  const geberData = await db.getGeberDistributions(true);
-  const stats = await db.getAggregatedStats();
+  const [infakJinan, bussData, yatimData, geberData, stats] = await Promise.all([
+    db.getPublicInfakJinan(),
+    db.getPublicBussDistributions(),
+    db.getYatimActivities(true),
+    db.getGeberDistributions(true),
+    db.getAggregatedStats(),
+  ]);
 
   // Hitung total santri dari seluruh record donasi jinan
   const totalSantriJinan = infakJinan.reduce((acc, curr) => acc + (curr.santri_count || 0), 0);

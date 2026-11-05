@@ -54,13 +54,13 @@ test.describe("Admin Bank Account Management & Public Visibility E2E", () => {
 
     // 6. Kunjungi halaman /donasi publik
     await page.goto("/donasi");
-    await expect(page.getByText(testBankName)).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText(testAccountNumber)).toBeVisible();
+    await expect(page.getByText(testBankName).first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(testAccountNumber).first()).toBeVisible();
     await expect(page.getByText(testHolderName).first()).toBeVisible();
-    await expect(page.getByText(testBranchName)).toBeVisible();
+    await expect(page.getByText(testBranchName).first()).toBeVisible();
 
     // 7. Kunjungi Homepage dan verifikasi kartu rekening
     await page.goto("/");
-    await expect(page.getByText(testAccountNumber)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(testAccountNumber).first()).toBeVisible({ timeout: 10000 });
   });
 });

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { Metadata } from "next";
 import { programsContent } from "@/content/programs";
 import Button from "@/components/ui/Button";
 import PageHeader from "@/components/ui/PageHeader";
@@ -10,13 +11,35 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({ params }: Props) {
+export async function generateStaticParams() {
+  return programsContent.map((p) => ({ slug: p.slug }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const program = programsContent.find((p) => p.slug === slug || p.aliases?.includes(slug));
   if (!program) return { title: "Program Tidak Ditemukan" };
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sahabataksara.id";
+  const image = program.heroImage.startsWith("http") ? program.heroImage : `${siteUrl}${program.heroImage}`;
+
   return {
     title: `${program.title} | Program Yayasan Sahabat Aksara`,
     description: program.shortDesc,
+    alternates: {
+      canonical: `/program/${program.slug}`,
+    },
+    openGraph: {
+      title: `${program.title} | Pilar ${program.pillar}`,
+      description: program.shortDesc,
+      url: `/program/${program.slug}`,
+      images: [{ url: image }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: program.title,
+      description: program.shortDesc,
+      images: [image],
+    },
   };
 }
 
@@ -28,8 +51,36 @@ export default async function ProgramDetailPage({ params }: Props) {
     notFound();
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sahabataksara.id";
+  const serviceSchema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: program.title,
+    description: program.shortDesc,
+    provider: {
+      "@type": "NGO",
+      name: "Yayasan Sahabat Aksara",
+      url: siteUrl,
+      logo: `${siteUrl}/images/logo-sahabat-aksara.jpg`,
+    },
+    areaServed: "Indonesia",
+    serviceType: `Pilar ${program.pillar}`,
+    offers: program.pricePerUnit
+      ? {
+          "@type": "Offer",
+          price: program.pricePerUnit,
+          priceCurrency: "IDR",
+          availability: "https://schema.org/InStock",
+        }
+      : undefined,
+  };
+
   return (
     <div className="flex flex-col w-full bg-[var(--cream-50)] text-[var(--ink-900)]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
+      />
       {/* 1. Page Header Terpadu */}
       <PageHeader
         eyebrow={`Pilar: ${program.pillar}`}

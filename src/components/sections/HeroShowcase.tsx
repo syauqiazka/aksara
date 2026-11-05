@@ -4,9 +4,6 @@ import Image from "next/image";
 import {
   HeartHandshake,
   MapPin,
-  ShieldCheck,
-  CheckCircle2,
-  Award,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 
@@ -40,22 +37,6 @@ export default function HeroShowcase(_props?: HeroShowcaseProps) {
           <p className="text-sm sm:text-base lg:text-lg text-[var(--cream-100)]/90 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-sans">
             Menghubungkan niat jariyah para muhsinin dengan santri tahfidz dan masjid pedalaman melalui program <strong>Infak Al-Qur&apos;an Jinan</strong> (Rp 100.000 / mushaf custom nama), <strong>Program BUSS Al-Qur&apos;an</strong>, <strong>Geber Bersih Masjid</strong>, serta beasiswa tahfidz bersanad.
           </p>
-
-          {/* Trust points list */}
-          <div className="flex flex-wrap justify-center lg:justify-start gap-4 text-xs text-[var(--cream-200)] pt-1">
-            <div className="flex items-center gap-1.5 bg-[var(--green-900)]/60 px-3 py-1.5 rounded-lg border border-[var(--gold-500)]/20">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[var(--gold-400)]" />
-              <span>Cetak Nama Pewakaf di Cover</span>
-            </div>
-            <div className="flex items-center gap-1.5 bg-[var(--green-900)]/60 px-3 py-1.5 rounded-lg border border-[var(--gold-500)]/20">
-              <ShieldCheck className="w-3.5 h-3.5 text-[var(--gold-400)]" />
-              <span>Standar Kemenag RI (QPP)</span>
-            </div>
-            <div className="flex items-center gap-1.5 bg-[var(--green-900)]/60 px-3 py-1.5 rounded-lg border border-[var(--gold-500)]/20">
-              <Award className="w-3.5 h-3.5 text-[var(--gold-400)]" />
-              <span>Berita Acara & GPS Terbuka</span>
-            </div>
-          </div>
 
           {/* Action CTAs */}
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">

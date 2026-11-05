@@ -1,13 +1,30 @@
+import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { programsContent } from "@/content/programs";
 import PageHeader from "@/components/ui/PageHeader";
 import { ArrowRight, CheckCircle2, BookOpen, Heart, GraduationCap } from "lucide-react";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "8 Program Aksi Lembaga | Yayasan Sahabat Aksara",
   description:
     "Jelajahi program unggulan Yayasan Sahabat Aksara: Infak Al-Qur'an Jinan, BUSS Al-Qur'an, Geber Masjid, Majlis Tasmi' 30 Juz Bil-Ghoib, Yatim Berdikari, Beasiswa Pelatihan IT Mitra Produktif, Pemberdayaan UMKM, dan Bantuan Tematik Nusantara.",
+  alternates: {
+    canonical: "/program",
+  },
+  openGraph: {
+    title: "8 Program Aksi Nyata Berbasis Empat Pilar | Sahabat Aksara",
+    description:
+      "Dari wakaf mushaf Al-Qur'an dan pemakmuran rumah Allah hingga beasiswa santri tahfidz dan kemandirian ekonomi dhuafa.",
+    url: "/program",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "8 Program Aksi Nyata Berbasis Empat Pilar | Sahabat Aksara",
+    description:
+      "Jelajahi program unggulan Yayasan Sahabat Aksara: Infak Al-Qur'an Jinan, BUSS Al-Qur'an, Geber Masjid, dan beasiswa tahfidz.",
+    images: ["/images/infak-mushaf-custom.jpg"],
+  },
 };
 
 export default function ProgramPage() {

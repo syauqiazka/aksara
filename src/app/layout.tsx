@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fraunces, Plus_Jakarta_Sans, Amiri } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/ui/Navbar";
@@ -27,8 +27,18 @@ const amiri = Amiri({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  themeColor: "#051c14",
+  colorScheme: "light",
+  width: "device-width",
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://sahabataksara.id"),
+  alternates: {
+    canonical: "/",
+  },
   title: {
     default: "Yayasan Sahabat Aksara: Menebar Cahaya Al-Qur'an & Inovasi Teknologi",
     template: "%s | Yayasan Sahabat Aksara",
@@ -46,8 +56,20 @@ export const metadata: Metadata = {
     "Sedekah Jariyah",
     "Pemberdayaan Umat",
   ],
-  authors: [{ name: "Yayasan Sahabat Aksara" }],
+  authors: [{ name: "Yayasan Sahabat Aksara", url: "https://sahabataksara.id" }],
   creator: "Yayasan Sahabat Aksara",
+  publisher: "Yayasan Ajirasa Aksara Semesta",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   openGraph: {
     type: "website",
     locale: "id_ID",
@@ -64,6 +86,14 @@ export const metadata: Metadata = {
         alt: "Logo Yayasan Sahabat Aksara",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Yayasan Sahabat Aksara: Menebar Cahaya Al-Qur'an & Inovasi Teknologi",
+    description:
+      "Lembaga nirlaba yang berkhidmat dalam 4 pilar: Spiritual, Sosial, Pendidikan, dan Teknologi untuk peradaban umat mandiri.",
+    images: ["/images/logo-sahabat-aksara.jpg"],
+    creator: "@SahabatAksara",
   },
   icons: {
     icon: [
@@ -82,17 +112,76 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sahabataksara.id";
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "NGO",
-    "name": "Yayasan Sahabat Aksara",
-    "alternateName": "Yayasan Ajirasa Aksara Semesta",
-    "url": "https://sahabataksara.id",
-    "logo": "https://sahabataksara.id/images/logo-sahabat-aksara.jpg",
-    "description": "Lembaga nirlaba dengan 4 pilar: Spiritual, Sosial, Pendidikan, dan Teknologi.",
-    "slogan": "Keberkahan Al-Qur'an dan kemajuan teknologi untuk melahirkan generasi yang cerdas, berakhlak mulia, serta mandiri.",
-    "areaServed": "Indonesia",
-    "nonprofitStatus": "Nonprofit501c3"
+    "@graph": [
+      {
+        "@type": ["NGO", "Organization"],
+        "@id": `${siteUrl}/#organization`,
+        "name": "Yayasan Sahabat Aksara",
+        "alternateName": ["Yayasan Ajirasa Aksara Semesta", "Sahabat Aksara"],
+        "url": siteUrl,
+        "logo": {
+          "@type": "ImageObject",
+          "url": `${siteUrl}/images/logo-sahabat-aksara.jpg`,
+          "width": 1024,
+          "height": 1024,
+        },
+        "image": `${siteUrl}/images/logo-sahabat-aksara.jpg`,
+        "description": "Yayasan Ajirasa Aksara Semesta (Sahabat Aksara) adalah lembaga nirlaba dalam 4 pilar: Spiritual, Sosial, Pendidikan, dan Teknologi.",
+        "slogan": "Keberkahan Al-Qur'an dan kemajuan teknologi untuk melahirkan generasi yang cerdas, berakhlak mulia, serta mandiri.",
+        "founder": {
+          "@type": "Person",
+          "name": "Ahmad Dahlan",
+          "jobTitle": "Pendiri & Pembina Yayasan"
+        },
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Cirebon",
+          "addressRegion": "Jawa Barat",
+          "addressCountry": "ID"
+        },
+        "contactPoint": [
+          {
+            "@type": "ContactPoint",
+            "telephone": "+62-822-6217-0018",
+            "contactType": "Customer Service",
+            "areaServed": "ID",
+            "availableLanguage": ["id", "ar"]
+          }
+        ],
+        "sameAs": [
+          "https://instagram.com/sahabataksara",
+          "https://wa.me/6282262170018"
+        ],
+        "areaServed": "Indonesia",
+        "knowsAbout": [
+          "Infak Al-Qur'an Jinan",
+          "Beasiswa BUSS Al-Qur'an",
+          "Geber Gerakan Bersih Masjid",
+          "Majlis Tasmi 30 Juz Bil-Ghoib",
+          "Kemandirian Yatim Berdikari",
+          "Pengembangan Aplikasi Dakwah"
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${siteUrl}/#website`,
+        "url": siteUrl,
+        "name": "Yayasan Sahabat Aksara",
+        "description": "Portal Resmi Yayasan Sahabat Aksara: Transparansi Penyaluran Infak Mushaf & Program Dakwah Nusantara",
+        "publisher": {
+          "@id": `${siteUrl}/#organization`
+        },
+        "inLanguage": "id-ID",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": `${siteUrl}/data-sebaran?q={search_term_string}`,
+          "query-input": "required name=search_term_string"
+        }
+      }
+    ]
   };
 
   return (

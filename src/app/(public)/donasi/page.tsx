@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { db } from "@/lib/db/api";
@@ -5,20 +6,36 @@ import { Phone, Mail, ShieldCheck, ImageIcon, Calendar, ArrowRight, HeartHandsha
 import BankAccountsList from "@/components/sections/BankAccountsList";
 import PageHeader from "@/components/ui/PageHeader";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Info Donasi & Rekening Resmi | Yayasan Sahabat Aksara",
   description:
     "Rekening resmi infak Yayasan Sahabat Aksara, konfirmasi donasi via WhatsApp, kampanye tanggap bencana tematik, dan panduan wakaf mushaf jariyah.",
+  alternates: {
+    canonical: "/donasi",
+  },
+  openGraph: {
+    title: "Kanal Donasi & Rekening Resmi | Yayasan Sahabat Aksara",
+    description:
+      "Salurkan wakaf mushaf Al-Qur'an Jinan dan sedekah jariyah melalui rekening bank resmi Yayasan Ajirasa Aksara Semesta.",
+    url: "/donasi",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Kanal Donasi & Rekening Resmi | Yayasan Sahabat Aksara",
+    description: "Salurkan wakaf mushaf Al-Qur'an Jinan dan sedekah jariyah melalui rekening bank resmi.",
+    images: ["/images/infak-mushaf-custom.jpg"],
+  },
 };
 
 export default async function DonasiPage() {
-  const bankAccounts = await db.getBankAccounts();
-  const campaigns = await db.getThemedCampaigns();
-  const contact = await db.getContactInfo();
-  const gallery = await db.getGalleryItems();
+  const [bankAccounts, campaigns, contact, gallery] = await Promise.all([
+    db.getBankAccounts(),
+    db.getThemedCampaigns(),
+    db.getContactInfo(),
+    db.getGalleryItems(),
+  ]);
 
   return (
     <div className="flex flex-col w-full bg-[var(--cream-50)] text-[var(--ink-900)]">

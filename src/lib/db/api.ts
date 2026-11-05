@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { isSupabaseConfigured, supabase } from "./client";
 import { localStore } from "./local-store";
 import {
@@ -34,21 +35,21 @@ function throwIfError(error: { message: string } | null, operation: string): voi
 }
 
 export const db = {
-  async getInfakDistributions(onlyPublished = true): Promise<InfakDistribution[]> {
+  getInfakDistributions: cache(async (onlyPublished = true): Promise<InfakDistribution[]> => {
     const client = getClient();
     let query = client.from("infak_distributions").select("*").order("mushaf_no", { ascending: true });
     if (onlyPublished) query = query.eq("status", "published");
     const { data, error } = await query;
     throwIfError(error, "memuat data infak");
     return (data ?? []) as InfakDistribution[];
-  },
+  }),
 
-  async getInfakById(id: string): Promise<InfakDistribution | null> {
+  getInfakById: cache(async (id: string): Promise<InfakDistribution | null> => {
     const client = getClient();
     const { data, error } = await client.from("infak_distributions").select("*").eq("id", id).maybeSingle();
     throwIfError(error, "memuat detail infak");
     return (data as InfakDistribution | null) ?? null;
-  },
+  }),
 
   async saveInfak(item: Omit<InfakDistribution, "id" | "created_at" | "updated_at">, id?: string): Promise<InfakDistribution> {
     const client = getClient();
@@ -68,21 +69,21 @@ export const db = {
     return Boolean(data?.length);
   },
 
-  async getGeberDistributions(onlyPublished = true): Promise<GeberMasjidDistribution[]> {
+  getGeberDistributions: cache(async (onlyPublished = true): Promise<GeberMasjidDistribution[]> => {
     const client = getClient();
     let query = client.from("geber_masjid_distributions").select("*").order("activity_date", { ascending: false });
     if (onlyPublished) query = query.eq("status", "published");
     const { data, error } = await query;
     throwIfError(error, "memuat data Geber Masjid");
     return (data ?? []) as GeberMasjidDistribution[];
-  },
+  }),
 
-  async getGeberById(id: string): Promise<GeberMasjidDistribution | null> {
+  getGeberById: cache(async (id: string): Promise<GeberMasjidDistribution | null> => {
     const client = getClient();
     const { data, error } = await client.from("geber_masjid_distributions").select("*").eq("id", id).maybeSingle();
     throwIfError(error, "memuat detail Geber Masjid");
     return (data as GeberMasjidDistribution | null) ?? null;
-  },
+  }),
 
   async saveGeber(item: Omit<GeberMasjidDistribution, "id" | "created_at" | "updated_at">, id?: string): Promise<GeberMasjidDistribution> {
     const client = getClient();
@@ -102,28 +103,28 @@ export const db = {
     return Boolean(data?.length);
   },
 
-  async getReports(onlyPublished = true): Promise<Report[]> {
+  getReports: cache(async (onlyPublished = true): Promise<Report[]> => {
     const client = getClient();
     let query = client.from("reports").select("*").order("period_start", { ascending: false });
     if (onlyPublished) query = query.eq("status", "published");
     const { data, error } = await query;
     throwIfError(error, "memuat laporan");
     return (data ?? []) as Report[];
-  },
+  }),
 
-  async getReportBySlug(slug: string): Promise<Report | null> {
+  getReportBySlug: cache(async (slug: string): Promise<Report | null> => {
     const client = getClient();
     const { data, error } = await client.from("reports").select("*").eq("slug", slug).maybeSingle();
     throwIfError(error, "memuat laporan berdasarkan slug");
     return (data as Report | null) ?? null;
-  },
+  }),
 
-  async getReportById(id: string): Promise<Report | null> {
+  getReportById: cache(async (id: string): Promise<Report | null> => {
     const client = getClient();
     const { data, error } = await client.from("reports").select("*").eq("id", id).maybeSingle();
     throwIfError(error, "memuat detail laporan");
     return (data as Report | null) ?? null;
-  },
+  }),
 
   async saveReport(item: Omit<Report, "id" | "created_at" | "updated_at">, id?: string): Promise<Report> {
     const client = getClient();
@@ -143,21 +144,21 @@ export const db = {
     return Boolean(data?.length);
   },
 
-  async getThemedCampaigns(): Promise<ThemedCampaign[]> {
+  getThemedCampaigns: cache(async (): Promise<ThemedCampaign[]> => {
     const client = getClient();
     const { data, error } = await client.from("themed_campaigns").select("*").order("created_at", { ascending: false });
     throwIfError(error, "memuat kampanye tematik");
     return (data ?? []) as ThemedCampaign[];
-  },
+  }),
 
-  async getGalleryItems(): Promise<GalleryItem[]> {
+  getGalleryItems: cache(async (): Promise<GalleryItem[]> => {
     const client = getClient();
     const { data, error } = await client.from("gallery_items").select("*").eq("status", "published").order("date", { ascending: false });
     throwIfError(error, "memuat galeri");
     return (data ?? []) as GalleryItem[];
-  },
+  }),
 
-  async getBankAccounts(): Promise<BankAccount[]> {
+  getBankAccounts: cache(async (): Promise<BankAccount[]> => {
     if (!isSupabaseConfigured || !supabase) {
       return localStore.getBankAccounts();
     }
@@ -171,7 +172,7 @@ export const db = {
     } catch {
       return localStore.getBankAccounts();
     }
-  },
+  }),
 
   async updateBankAccounts(accounts: BankAccount[]): Promise<void> {
     localStore.updateBankAccounts(accounts);
@@ -191,7 +192,7 @@ export const db = {
     }
   },
 
-  async getContactInfo(): Promise<ContactInfo> {
+  getContactInfo: cache(async (): Promise<ContactInfo> => {
     if (!isSupabaseConfigured || !supabase) {
       return localStore.getContactInfo();
     }
@@ -205,7 +206,7 @@ export const db = {
     } catch {
       return localStore.getContactInfo();
     }
-  },
+  }),
 
   async updateContactInfo(info: ContactInfo): Promise<void> {
     localStore.updateContactInfo(info);
@@ -225,7 +226,7 @@ export const db = {
     }
   },
 
-  async getSocialLinks(): Promise<SocialLinks> {
+  getSocialLinks: cache(async (): Promise<SocialLinks> => {
     if (!isSupabaseConfigured || !supabase) {
       return localStore.getSocialLinks();
     }
@@ -239,7 +240,7 @@ export const db = {
     } catch {
       return localStore.getSocialLinks();
     }
-  },
+  }),
 
   async updateSocialLinks(links: SocialLinks): Promise<void> {
     localStore.updateSocialLinks(links);
@@ -261,7 +262,7 @@ export const db = {
 
 
     // Infak Al-Qur'an Jinan (Dua Tingkat: Donasi -> Santri)
-  async getInfakJinan(onlyPublished = true): Promise<InfakJinanRecord[]> {
+  getInfakJinan: cache(async (onlyPublished = true): Promise<InfakJinanRecord[]> => {
     if (!isSupabaseConfigured || !supabase) {
       return localStore.getInfakJinan(onlyPublished);
     }
@@ -277,9 +278,9 @@ export const db = {
     } catch {
       return localStore.getInfakJinan(onlyPublished);
     }
-  },
+  }),
 
-  async getPublicInfakJinan(): Promise<PublicInfakJinanRecord[]> {
+  getPublicInfakJinan: cache(async (): Promise<PublicInfakJinanRecord[]> => {
     // Zero-Exposure: Raw phone numbers (donor_phone, santri_phone) are NEVER returned in public view
     if (!isSupabaseConfigured || !supabase) {
       return localStore.getPublicInfakJinan();
@@ -294,9 +295,9 @@ export const db = {
     } catch {
       return localStore.getPublicInfakJinan();
     }
-  },
+  }),
 
-  async getPublicInfakJinanDetail(id: string): Promise<{ donation: PublicInfakJinanRecord; santri: PublicInfakJinanSantri[] } | null> {
+  getPublicInfakJinanDetail: cache(async (id: string): Promise<{ donation: PublicInfakJinanRecord; santri: PublicInfakJinanSantri[] } | null> => {
     if (!isSupabaseConfigured || !supabase) {
       return localStore.getPublicInfakJinanDetail(id);
     }
@@ -357,14 +358,14 @@ export const db = {
     } catch {
       return localStore.getPublicInfakJinanDetail(id);
     }
-  },
+  }),
 
-  async getInfakJinanById(id: string): Promise<InfakJinanRecord | null> {
+  getInfakJinanById: cache(async (id: string): Promise<InfakJinanRecord | null> => {
     return localStore.getInfakJinanById(id) || null;
-  },
+  }),
 
   // BUSS Al-Qur'an
-  async getBussDistributions(onlyPublished = true): Promise<BussDistribution[]> {
+  getBussDistributions: cache(async (onlyPublished = true): Promise<BussDistribution[]> => {
     if (!isSupabaseConfigured || !supabase) {
       return localStore.getBuss(onlyPublished);
     }
@@ -380,10 +381,10 @@ export const db = {
     } catch {
       return localStore.getBuss(onlyPublished);
     }
-  },
+  }),
 
-  async getPublicBussDistributions(): Promise<PublicBussDistribution[]> {
-    const all = await this.getBussDistributions(true);
+  getPublicBussDistributions: cache(async (): Promise<PublicBussDistribution[]> => {
+    const all = await db.getBussDistributions(true);
     return all.map(item => ({
       id: item.id,
       year: item.year,
@@ -397,10 +398,10 @@ export const db = {
       photo_urls: item.photo_urls || [],
       status: item.status,
     }));
-  },
+  }),
 
   // Yatim Berdikari
-  async getYatimActivities(onlyPublished = true): Promise<YatimActivity[]> {
+  getYatimActivities: cache(async (onlyPublished = true): Promise<YatimActivity[]> => {
     if (!isSupabaseConfigured || !supabase) {
       return localStore.getYatimActivities(onlyPublished);
     }
@@ -416,13 +417,13 @@ export const db = {
     } catch {
       return localStore.getYatimActivities(onlyPublished);
     }
-  },
+  }),
 
-  async getAggregatedStats(): Promise<AggregatedStats> {
+  getAggregatedStats: cache(async (): Promise<AggregatedStats> => {
     const [infak, geber, reports] = await Promise.all([
-      this.getInfakDistributions(true),
-      this.getGeberDistributions(true),
-      this.getReports(true),
+      db.getInfakDistributions(true),
+      db.getGeberDistributions(true),
+      db.getReports(true),
     ]);
 
     const totalMushaf = infak.reduce((total, item) => total + (item.quantity || 1), 0);
@@ -441,5 +442,5 @@ export const db = {
       totalProvinces: provinces.size,
       totalBeneficiaries,
     };
-  },
+  }),
 };

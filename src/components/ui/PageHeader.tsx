@@ -22,8 +22,32 @@ export default function PageHeader({
   breadcrumbs,
   actions,
 }: PageHeaderProps) {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sahabataksara.id";
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Beranda",
+        item: siteUrl,
+      },
+      ...breadcrumbs.map((crumb, idx) => ({
+        "@type": "ListItem",
+        position: idx + 2,
+        name: crumb.label,
+        ...(crumb.href ? { item: `${siteUrl}${crumb.href}` } : {}),
+      })),
+    ],
+  };
+
   return (
     <section className="relative pt-32 pb-16 sm:pb-20 bg-[var(--green-950)] text-[var(--cream-50)] border-b border-[var(--gold-500)]/20 overflow-hidden">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
       {/* Background Ambient Glow */}
       <div className="absolute -top-32 right-10 w-80 h-80 bg-[var(--green-800)]/30 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-32 left-10 w-80 h-80 bg-[var(--gold-500)]/10 rounded-full blur-3xl pointer-events-none" />

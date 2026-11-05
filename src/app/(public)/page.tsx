@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -19,12 +20,38 @@ import HeroShowcase from "@/components/sections/HeroShowcase";
 import IndonesiaMap from "@/components/sections/IndonesiaMap";
 import Button from "@/components/ui/Button";
 
+export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: "Yayasan Sahabat Aksara: Menebar Cahaya Al-Qur'an & Inovasi Teknologi",
+  description:
+    "Yayasan Ajirasa Aksara Semesta (Sahabat Aksara) berkhidmat dalam 4 pilar: Spiritual, Sosial, Pendidikan, dan Teknologi. Program Infak Al-Qur'an Jinan Rp 100.000 custom nama, BUSS Al-Qur'an, Geber Masjid, dan beasiswa santri mandiri.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "Yayasan Sahabat Aksara: Menebar Cahaya Al-Qur'an & Inovasi Teknologi",
+    description:
+      "Lembaga nirlaba yang berkhidmat dalam 4 pilar utama: Spiritual, Sosial, Pendidikan, dan Teknologi untuk membangun peradaban umat yang mulia dan mandiri.",
+    url: "/",
+    images: [{ url: "/images/logo-sahabat-aksara.jpg" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Yayasan Sahabat Aksara: Menebar Cahaya Al-Qur'an & Inovasi Teknologi",
+    description: "Lembaga nirlaba yang berkhidmat dalam 4 pilar: Spiritual, Sosial, Pendidikan, dan Teknologi.",
+    images: ["/images/logo-sahabat-aksara.jpg"],
+  },
+};
+
 export default async function HomePage() {
-  const stats = await db.getAggregatedStats();
-  const jinanList = await db.getPublicInfakJinan();
-  const reports = await db.getReports(true);
+  const [stats, jinanList, reports, bankAccounts] = await Promise.all([
+    db.getAggregatedStats(),
+    db.getPublicInfakJinan(),
+    db.getReports(true),
+    db.getBankAccounts(),
+  ]);
   const latestReport = reports[0];
-  const bankAccounts = await db.getBankAccounts();
   const primaryBank = bankAccounts.find((b) => b.number && b.number.trim().length > 0) || bankAccounts[0];
 
   return (

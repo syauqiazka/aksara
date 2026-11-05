@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { Metadata } from "next";
 import { db } from "@/lib/db/api";
 import { ArrowLeft, Users, Download } from "lucide-react";
 import Button from "@/components/ui/Button";
@@ -11,13 +12,41 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({ params }: Props) {
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+  const reports = await db.getReports(true);
+  return reports.map((r) => ({ slug: r.slug }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const report = await db.getReportBySlug(slug);
   if (!report) return { title: "Laporan Tidak Ditemukan" };
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sahabataksara.id";
+  const image = report.cover_url
+    ? (report.cover_url.startsWith("http") ? report.cover_url : `${siteUrl}${report.cover_url}`)
+    : `${siteUrl}/images/logo-sahabat-aksara.jpg`;
+
   return {
     title: `${report.title} | Laporan Sahabat Aksara`,
     description: report.summary,
+    alternates: {
+      canonical: `/laporan/${slug}`,
+    },
+    openGraph: {
+      title: report.title,
+      description: report.summary,
+      url: `/laporan/${slug}`,
+      type: "article",
+      images: [{ url: image }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: report.title,
+      description: report.summary,
+      images: [image],
+    },
   };
 }
 
@@ -29,8 +58,39 @@ export default async function LaporanDetailPage({ params }: Props) {
     notFound();
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sahabataksara.id";
+  const reportSchema = {
+    "@context": "https://schema.org",
+    "@type": "Report",
+    headline: report.title,
+    description: report.summary,
+    image: report.cover_url
+      ? (report.cover_url.startsWith("http") ? report.cover_url : `${siteUrl}${report.cover_url}`)
+      : `${siteUrl}/images/logo-sahabat-aksara.jpg`,
+    datePublished: report.created_at,
+    dateModified: report.updated_at || report.created_at,
+    author: {
+      "@type": "Organization",
+      name: "Yayasan Sahabat Aksara",
+      url: siteUrl,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Yayasan Sahabat Aksara",
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteUrl}/images/logo-sahabat-aksara.jpg`,
+      },
+    },
+    mainEntityOfPage: `${siteUrl}/laporan/${slug}`,
+  };
+
   return (
     <div className="flex flex-col w-full bg-[var(--cream-50)] text-[var(--ink-900)]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(reportSchema) }}
+      />
       {/* 1. Page Header Terpadu */}
       <PageHeader
         eyebrow={`Periode: ${formatTanggal(report.period_start)} s/d ${formatTanggal(report.period_end)} | Program ${report.program.replace("_", " ")}`}

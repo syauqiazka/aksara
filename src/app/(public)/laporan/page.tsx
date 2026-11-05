@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { formatTanggal } from "@/lib/format-date";
@@ -6,10 +7,27 @@ import { Calendar, Users, FileText, ArrowRight, ShieldCheck } from "lucide-react
 import PageHeader from "@/components/ui/PageHeader";
 import Badge from "@/components/ui/Badge";
 
-export const metadata = {
+export const revalidate = 60;
+
+export const metadata: Metadata = {
   title: "Laporan Penyaluran & Audit Terbuka | Yayasan Sahabat Aksara",
   description:
     "Laporan pertanggungjawaban terbuka dan transparan kegiatan penyaluran wakaf mushaf Al-Qur'an, Geber Masjid, dan program dakwah Yayasan Sahabat Aksara.",
+  alternates: {
+    canonical: "/laporan",
+  },
+  openGraph: {
+    title: "Laporan Penyaluran & Akuntabilitas Publik | Sahabat Aksara",
+    description:
+      "Akses laporan audit program, jumlah penerima manfaat, dan alokasi dana amanah donasi Yayasan Sahabat Aksara.",
+    url: "/laporan",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Laporan Penyaluran & Akuntabilitas Publik | Sahabat Aksara",
+    description: "Akses laporan audit program, jumlah penerima manfaat, dan alokasi dana amanah donasi.",
+    images: ["/images/logo-sahabat-aksara.jpg"],
+  },
 };
 
 export default async function LaporanPage() {

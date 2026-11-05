@@ -1,15 +1,30 @@
+import { Metadata } from "next";
 import Image from "next/image";
 import { db } from "@/lib/db/api";
 import PageHeader from "@/components/ui/PageHeader";
 import { ImageIcon, Calendar } from "lucide-react";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Galeri Dokumentasi Program | Yayasan Sahabat Aksara",
   description:
     "Arsip dokumentasi visual serah terima mushaf Al-Qur'an, kegiatan Geber Bersih Masjid, majlis tasmi' 30 juz, dan santunan yatim Yayasan Sahabat Aksara.",
+  alternates: {
+    canonical: "/dokumentasi",
+  },
+  openGraph: {
+    title: "Galeri Dokumentasi Program & Aksi Nyata | Yayasan Sahabat Aksara",
+    description:
+      "Dokumentasi fotografi kegiatan dakwah, wakaf Qur'an, dan aksi kemanusiaan Yayasan Sahabat Aksara.",
+    url: "/dokumentasi",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Galeri Dokumentasi Program & Aksi Nyata | Yayasan Sahabat Aksara",
+    description: "Dokumentasi fotografi kegiatan dakwah, wakaf Qur'an, dan aksi kemanusiaan Yayasan Sahabat Aksara.",
+    images: ["/images/tasmi-30-juz-dokumentasi.jpg"],
+  },
 };
 
 export default async function DokumentasiPage() {

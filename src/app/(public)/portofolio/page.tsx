@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import { portfolioContent } from "@/content/portfolio";
 import PageHeader from "@/components/ui/PageHeader";
 import {
@@ -11,10 +12,25 @@ import {
   Layers,
 } from "lucide-react";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Portofolio Produk Teknologi Dakwah | Yayasan Sahabat Aksara",
   description:
     "Ekosistem 6 aplikasi digital: KajianQu, Bank Saku Digital, DiaryQu, E-AbsensiQu, DKM MasjidQu, dan SapawargaQu yang dikembangkan oleh Yayasan Sahabat Aksara.",
+  alternates: {
+    canonical: "/portofolio",
+  },
+  openGraph: {
+    title: "Ekosistem 6 Piranti Lunak Dakwah Sahabat Aksara",
+    description:
+      "Inovasi teknologi nirlaba untuk transparansi kas masjid, monitoring santri tahfidz, dan edukasi finansial syariah.",
+    url: "/portofolio",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Portofolio Produk Teknologi Dakwah | Yayasan Sahabat Aksara",
+    description: "Ekosistem 6 aplikasi digital nirlaba dikembangkan oleh Yayasan Sahabat Aksara.",
+    images: ["/images/logo-sahabat-aksara.jpg"],
+  },
 };
 
 const iconMap: Record<string, React.ElementType> = {

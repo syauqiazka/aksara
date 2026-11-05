@@ -48,6 +48,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily",
       priority: 0.9,
     },
+    {
+      url: `${baseUrl}/dokumentasi`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
   ];
 
   // Dynamic program routes
@@ -58,8 +64,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  // Dynamic report routes
-  const reports = await db.getReports(true);
+  // Dynamic report routes & jinan routes
+  const [reports, jinan] = await Promise.all([
+    db.getReports(true),
+    db.getPublicInfakJinan(),
+  ]);
+
   const reportRoutes: MetadataRoute.Sitemap = reports.map((r) => ({
     url: `${baseUrl}/laporan/${r.slug}`,
     lastModified: new Date(r.updated_at || r.created_at),
@@ -67,6 +77,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticRoutes, ...programRoutes, ...reportRoutes];
+  const jinanRoutes: MetadataRoute.Sitemap = jinan.map((j) => ({
+    url: `${baseUrl}/data-sebaran/infak-jinan/${j.id}`,
+    lastModified: new Date(j.distributed_at || new Date()),
+    changeFrequency: "weekly",
+    priority: 0.7,
+  }));
+
+  return [...staticRoutes, ...programRoutes, ...reportRoutes, ...jinanRoutes];
 }
 

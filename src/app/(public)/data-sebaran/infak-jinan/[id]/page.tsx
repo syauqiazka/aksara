@@ -8,6 +8,8 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+export const revalidate = 60;
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
   const data = await db.getPublicInfakJinanDetail(id);
@@ -19,12 +21,28 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const { donation } = data;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sahabataksara.id";
+  const photo = donation.photos?.[0]?.url
+    ? (donation.photos[0].url.startsWith("http") ? donation.photos[0].url : `${siteUrl}${donation.photos[0].url}`)
+    : `${siteUrl}/images/infak-mushaf-custom.jpg`;
+
   return {
     title: `Mushaf Ke-${donation.mushaf_no} (${donation.display_donor_name}) | Data Sebaran Sahabat Aksara`,
     description: `Detail transparansi penyaluran Mushaf Ke-${donation.mushaf_no} dari ${donation.display_donor_name} untuk santri di ${donation.pesantren_name}.`,
+    alternates: {
+      canonical: `/data-sebaran/infak-jinan/${id}`,
+    },
     openGraph: {
       title: `Mushaf Ke-${donation.mushaf_no} (${donation.display_donor_name})`,
       description: `Transparansi progres hafalan santri penerima Mushaf Ke-${donation.mushaf_no} di ${donation.pesantren_name}.`,
+      url: `/data-sebaran/infak-jinan/${id}`,
+      images: [{ url: photo }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `Mushaf Ke-${donation.mushaf_no} (${donation.display_donor_name})`,
+      description: `Verifikasi amanah mushaf santri di ${donation.pesantren_name}.`,
+      images: [photo],
     },
   };
 }
