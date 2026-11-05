@@ -150,4 +150,34 @@ test.describe("Pengaturan Animasi Splash / Intro Logo ±5 Detik & Selalu Muncul 
     }
     await expect(page.getByText("tes").first()).toBeVisible();
   });
+
+  test("7. Navigasi internal via link menu TIDAK memunculkan kembali splash screen", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const preloader = page.locator('div[aria-label="Animasi Pembuka Yayasan Sahabat Aksara"]');
+    await expect(preloader).toBeVisible();
+
+    // Skip initial splash
+    await page.getByRole("button", { name: /Lewati/i }).click();
+    await expect(preloader).not.toBeVisible({ timeout: 2000 });
+
+    // Click link to Tentang Kami in Navbar
+    const tentangLink = page.locator("nav[aria-label='Navigasi Utama'] a[href='/tentang']");
+    await tentangLink.click();
+    await page.waitForURL("**/tentang");
+
+    // Preloader MUST NOT appear on client navigation!
+    await expect(preloader).not.toBeVisible();
+    await expect(page.locator("main h1")).toContainText(/Profil|Khidmat/i);
+
+    // Click link to Program in Navbar
+    const programLink = page.locator("nav[aria-label='Navigasi Utama'] a[href='/program']");
+    await programLink.click();
+    await page.waitForURL("**/program");
+
+    // Preloader MUST NOT appear on second client navigation either!
+    await expect(preloader).not.toBeVisible();
+    await expect(page.locator("main h1")).toContainText(/Program|Khidmat/i);
+  });
 });

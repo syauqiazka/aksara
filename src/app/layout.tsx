@@ -6,6 +6,7 @@ import Footer from "@/components/ui/Footer";
 import SmoothScroll from "@/components/motion/SmoothScroll";
 import CustomCursor from "@/components/motion/CustomCursor";
 import PageTransition from "@/components/motion/PageTransition";
+import Preloader from "@/components/motion/Preloader";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -65,8 +66,14 @@ export const metadata: Metadata = {
     ],
   },
   icons: {
-    icon: "/images/logo-sahabat-aksara.jpg",
-    apple: "/images/logo-sahabat-aksara.jpg",
+    icon: [
+      { url: "/icon.png", sizes: "192x192", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.ico" },
+    ],
+    apple: [
+      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
 };
 
@@ -97,6 +104,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen flex flex-col bg-[var(--cream-50)] text-[var(--ink-900)] antialiased selection:bg-[var(--gold-500)] selection:text-[var(--green-950)]">
+        <Preloader />
         <SmoothScroll>
           <CustomCursor />
           <Navbar />

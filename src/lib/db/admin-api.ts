@@ -40,7 +40,7 @@ export const db = {
         .order("mushaf_no", { ascending: true });
       if (onlyPublished) query = query.eq("status", "published");
       const { data, error } = await query;
-      if (error || !data || data.length === 0) {
+      if (error || !data) {
         return localStore.getInfakJinan(onlyPublished);
       }
       return data as InfakJinanRecord[];

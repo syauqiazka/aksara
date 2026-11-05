@@ -37,28 +37,28 @@ export default async function HomePage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 divide-y lg:divide-y-0 lg:divide-x divide-[var(--gold-500)]/15">
             <div className="pt-4 lg:pt-0 lg:px-6 first:pt-0 first:px-0">
               <StatCounter
-                end={stats.totalMushaf > 0 ? stats.totalMushaf : 100}
+                end={stats.totalMushaf}
                 label="Mushaf Al-Qur'an Tersalurkan"
                 sublabel="Target Gerakan 1 Juta Mushaf Jinan"
               />
             </div>
             <div className="pt-4 lg:pt-0 lg:px-6">
               <StatCounter
-                end={stats.totalMasjid > 0 ? stats.totalMasjid : 12}
+                end={stats.totalMasjid}
                 label="Masjid Dibersihkan"
                 sublabel="Aksi Nyata Geber Masjid Pelosok"
               />
             </div>
             <div className="pt-4 lg:pt-0 lg:px-6">
               <StatCounter
-                end={stats.totalProvinces > 0 ? stats.totalProvinces : 4}
+                end={stats.totalProvinces}
                 label="Provinsi Terjangkau"
                 sublabel="Jejak Penyaluran Nusantara"
               />
             </div>
             <div className="pt-4 lg:pt-0 lg:px-6">
               <StatCounter
-                end={stats.totalBeneficiaries > 0 ? stats.totalBeneficiaries : 1200}
+                end={stats.totalBeneficiaries}
                 label="Penerima Manfaat"
                 sublabel="Santri Tahfidz, Dhuafa & Jamaah"
               />

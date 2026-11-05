@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { db } from "@/lib/db/api";
-import { Phone, Mail, ShieldCheck, ImageIcon, Calendar, ArrowRight } from "lucide-react";
+import { Phone, Mail, ShieldCheck, ImageIcon, Calendar, ArrowRight, HeartHandshake } from "lucide-react";
 import BankAccountsList from "@/components/sections/BankAccountsList";
 import PageHeader from "@/components/ui/PageHeader";
 
@@ -100,77 +100,101 @@ export default async function DonasiPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {campaigns.map((camp) => {
-              const progress = Math.min(
-                Math.round((camp.collected_idr / (camp.target_idr || 1)) * 100),
-                100
-              );
-              return (
-                <div
-                  key={camp.id}
-                  className="bg-[var(--cream-50)] rounded-3xl p-8 border border-[var(--cream-200)] shadow-sm hover:shadow-xl transition-all flex flex-col justify-between"
-                >
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold uppercase tracking-wider text-[var(--terracotta-500)]">
-                        {camp.disaster_type}, {camp.location}
-                      </span>
-                      <span
-                        className={`text-xs px-3 py-1 rounded-full font-bold ${
-                          camp.status === "aktif"
-                            ? "bg-[var(--green-800)] text-[var(--gold-300)]"
-                            : "bg-[var(--cream-200)] text-[var(--ink-600)]"
-                        }`}
+          {campaigns.length === 0 ? (
+            <div className="p-16 rounded-3xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-center max-w-lg mx-auto space-y-3">
+              <HeartHandshake className="w-12 h-12 text-[var(--ink-400)] opacity-40 mx-auto" />
+              <h3 className="font-serif text-xl font-bold text-[var(--ink-900)]">
+                Belum Ada Kampanye Tematik Aktif
+              </h3>
+              <p className="text-sm text-[var(--ink-600)] leading-relaxed font-sans">
+                Saat ini seluruh alokasi diarahkan pada program reguler. Posko donasi tematik bencana akan dibuka segera saat terjadi situasi darurat di pelosok nusantara.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {campaigns.map((camp) => {
+                const progress = Math.min(
+                  Math.round((camp.collected_idr / (camp.target_idr || 1)) * 100),
+                  100
+                );
+                return (
+                  <div
+                    key={camp.id}
+                    className="bg-[var(--cream-50)] rounded-3xl p-6 sm:p-8 border border-[var(--cream-200)] shadow-sm hover:shadow-xl transition-all flex flex-col justify-between"
+                  >
+                    <div className="space-y-4">
+                      {camp.cover_url && (
+                        <div className="relative aspect-16/9 rounded-2xl overflow-hidden border border-[var(--cream-200)] shadow-xs">
+                          <Image
+                            src={camp.cover_url}
+                            alt={camp.title}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, 550px"
+                          />
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold uppercase tracking-wider text-[var(--terracotta-500)]">
+                          {camp.disaster_type}, {camp.location}
+                        </span>
+                        <span
+                          className={`text-xs px-3 py-1 rounded-full font-bold ${
+                            camp.status === "aktif"
+                              ? "bg-[var(--green-800)] text-[var(--gold-300)]"
+                              : "bg-[var(--cream-200)] text-[var(--ink-600)]"
+                          }`}
+                        >
+                          {camp.status === "aktif" ? "Sedang Berjalan" : "Penyaluran Selesai"}
+                        </span>
+                      </div>
+
+                      <h3 className="font-serif text-2xl font-bold text-[var(--ink-900)]">
+                        {camp.title}
+                      </h3>
+
+                      <p className="text-sm text-[var(--ink-600)] leading-relaxed font-sans">
+                        {camp.description}
+                      </p>
+
+                      {/* Progress Bar */}
+                      <div className="space-y-2 pt-2">
+                        <div className="flex items-center justify-between text-xs font-semibold">
+                          <span className="text-[var(--green-800)] font-mono">
+                            Terkumpul: Rp {camp.collected_idr.toLocaleString("id-ID")}
+                          </span>
+                          <span className="text-[var(--ink-600)] font-mono">
+                            Target: Rp {camp.target_idr.toLocaleString("id-ID")}
+                          </span>
+                        </div>
+                        <div className="w-full h-3 rounded-full bg-[var(--cream-200)] overflow-hidden">
+                          <div
+                            className="h-full bg-gold-gradient rounded-full transition-all duration-500"
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                        <div className="text-right text-[11px] font-bold text-[var(--gold-700)]">
+                          {progress}% Terpenuhi
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-6">
+                      <a
+                        href={`https://wa.me/${contact.whatsapp ? contact.whatsapp.replace(/[^0-9]/g, "") : "6282262170018"}?text=Saya%20ingin%20berdonasi%20untuk%20kampanye:%20${encodeURIComponent(camp.title)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full py-3 rounded-full text-center text-xs font-bold bg-[var(--green-800)] text-[var(--cream-50)] hover:bg-[var(--green-700)] transition-colors shadow-sm block"
                       >
-                        {camp.status === "aktif" ? "Sedang Berjalan" : "Penyaluran Selesai"}
-                      </span>
-                    </div>
-
-                    <h3 className="font-serif text-2xl font-bold text-[var(--ink-900)]">
-                      {camp.title}
-                    </h3>
-
-                    <p className="text-sm text-[var(--ink-600)] leading-relaxed font-sans">
-                      {camp.description}
-                    </p>
-
-                    {/* Progress Bar */}
-                    <div className="space-y-2 pt-2">
-                      <div className="flex items-center justify-between text-xs font-semibold">
-                        <span className="text-[var(--green-800)] font-mono">
-                          Terkumpul: Rp {camp.collected_idr.toLocaleString("id-ID")}
-                        </span>
-                        <span className="text-[var(--ink-600)] font-mono">
-                          Target: Rp {camp.target_idr.toLocaleString("id-ID")}
-                        </span>
-                      </div>
-                      <div className="w-full h-3 rounded-full bg-[var(--cream-200)] overflow-hidden">
-                        <div
-                          className="h-full bg-gold-gradient rounded-full transition-all duration-500"
-                          style={{ width: `${progress}%` }}
-                        />
-                      </div>
-                      <div className="text-right text-[11px] font-bold text-[var(--gold-700)]">
-                        {progress}% Terpenuhi
-                      </div>
+                        Salurkan Bantuan untuk Kampanye Ini
+                      </a>
                     </div>
                   </div>
-
-                  <div className="pt-6">
-                    <a
-                      href={`https://wa.me/${contact.whatsapp ? contact.whatsapp.replace(/[^0-9]/g, "") : "6282262170018"}?text=Saya%20ingin%20berdonasi%20untuk%20kampanye:%20${encodeURIComponent(camp.title)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full py-3 rounded-full text-center text-xs font-bold bg-[var(--green-800)] text-[var(--cream-50)] hover:bg-[var(--green-700)] transition-colors shadow-sm block"
-                    >
-                      Salurkan Bantuan untuk Kampanye Ini
-                    </a>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 

@@ -34,21 +34,21 @@ export default async function DataSebaranPage() {
         <div className="max-w-[1400px] mx-auto grid grid-cols-2 lg:grid-cols-4 gap-6 divide-y lg:divide-y-0 lg:divide-x divide-[var(--gold-500)]/15">
           <div className="pt-2 lg:pt-0 lg:px-6 first:pt-0 first:px-0">
             <StatCounter
-              end={infakJinan.length > 0 ? infakJinan.length : 100}
+              end={infakJinan.length}
               label="Mushaf Al-Qur'an"
               sublabel="Tercatat Nomor Urut Unik"
             />
           </div>
           <div className="pt-2 lg:pt-0 lg:px-6">
             <StatCounter
-              end={totalSantriJinan > 0 ? totalSantriJinan : 18}
+              end={totalSantriJinan}
               label="Santri Penerima"
               sublabel="Progres Hafalan Bulanan"
             />
           </div>
           <div className="pt-2 lg:pt-0 lg:px-6">
             <StatCounter
-              end={stats.totalProvinces > 0 ? stats.totalProvinces : 4}
+              end={stats.totalProvinces}
               label="Wilayah Nusantara"
               sublabel="Pesantren & Madrasah"
             />

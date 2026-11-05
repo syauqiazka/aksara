@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createAdminSession } from "@/lib/auth";
+import { getAdminCredentials } from "@/lib/auth-credentials";
 
 function safeCompare(left: string, right: string): boolean {
   const leftBuffer = Buffer.from(left);
@@ -9,8 +10,7 @@ function safeCompare(left: string, right: string): boolean {
 }
 
 export async function POST(request: Request) {
-  const expectedEmail = process.env.ADMIN_DEFAULT_EMAIL;
-  const expectedPassword = process.env.ADMIN_DEFAULT_PASSWORD;
+  const { email: expectedEmail, password: expectedPassword } = getAdminCredentials();
   const sessionSecret = process.env.ADMIN_SESSION_SECRET;
 
   if (!expectedEmail || !expectedPassword || !sessionSecret || sessionSecret.length < 32) {

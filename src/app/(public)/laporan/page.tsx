@@ -84,72 +84,84 @@ export default async function LaporanPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {reports.map((rep) => (
-            <div
-              key={rep.id}
-              className="bg-[var(--cream-100)] rounded-3xl overflow-hidden border border-[var(--cream-200)] flex flex-col justify-between hover:border-[var(--gold-500)]/80 hover:shadow-xl transition-all duration-300 group"
-            >
-              <div>
-                {rep.cover_url && (
-                  <div className="relative h-56 w-full overflow-hidden bg-[var(--green-950)]">
-                    <Image
-                      src={rep.cover_url}
-                      alt={rep.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--green-950)]/70 via-transparent to-transparent" />
-                  </div>
-                )}
-
-                <div className="p-6 space-y-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs text-[var(--gold-700)] font-semibold uppercase tracking-wider flex items-center gap-1.5 font-mono">
-                      <Calendar className="w-3.5 h-3.5" />
-                      <span>{formatTanggal(rep.period_start)} s/d {formatTanggal(rep.period_end)}</span>
-                    </span>
-                    <Badge variant="neutral">
-                      {rep.program.replace("_", " ")}
-                    </Badge>
-                  </div>
-
-                  <h3 className="font-serif text-xl sm:text-2xl font-bold text-[var(--ink-900)] leading-snug group-hover:text-[var(--green-800)] transition-colors">
-                    {rep.title}
-                  </h3>
-
-                  <p className="text-sm text-[var(--ink-600)] line-clamp-3 leading-relaxed font-sans">
-                    {rep.summary}
-                  </p>
-
-                  <div className="flex items-center justify-between text-xs py-3 border-y border-[var(--cream-200)] text-[var(--ink-900)] font-semibold">
-                    <div className="flex items-center gap-1.5">
-                      <Users className="w-4 h-4 text-[var(--green-700)]" />
-                      <span>{rep.beneficiaries.toLocaleString("id-ID")} Penerima</span>
+        {reports.length === 0 ? (
+          <div className="p-16 rounded-3xl bg-[var(--cream-100)] border border-[var(--cream-200)] text-center max-w-lg mx-auto space-y-3">
+            <FileText className="w-12 h-12 text-[var(--ink-400)] opacity-40 mx-auto" />
+            <h3 className="font-serif text-xl font-bold text-[var(--ink-900)]">
+              Belum Ada Arsip Laporan
+            </h3>
+            <p className="text-sm text-[var(--ink-600)] leading-relaxed font-sans">
+              Laporan pertanggungjawaban penyaluran dan audit program akan dipublikasikan secara berkala setelah proses verifikasi lapangan selesai.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {reports.map((rep) => (
+              <div
+                key={rep.id}
+                className="bg-[var(--cream-100)] rounded-3xl overflow-hidden border border-[var(--cream-200)] flex flex-col justify-between hover:border-[var(--gold-500)]/80 hover:shadow-xl transition-all duration-300 group"
+              >
+                <div>
+                  {rep.cover_url && (
+                    <div className="relative h-56 w-full overflow-hidden bg-[var(--green-950)]">
+                      <Image
+                        src={rep.cover_url}
+                        alt={rep.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[var(--green-950)]/70 via-transparent to-transparent" />
                     </div>
-                    {rep.amount_idr && (
-                      <div className="text-[var(--gold-700)] font-mono">
-                        Rp {rep.amount_idr.toLocaleString("id-ID")}
+                  )}
+
+                  <div className="p-6 space-y-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs text-[var(--gold-700)] font-semibold uppercase tracking-wider flex items-center gap-1.5 font-mono">
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>{formatTanggal(rep.period_start)} s/d {formatTanggal(rep.period_end)}</span>
+                      </span>
+                      <Badge variant="neutral">
+                        {rep.program.replace("_", " ")}
+                      </Badge>
+                    </div>
+
+                    <h3 className="font-serif text-xl sm:text-2xl font-bold text-[var(--ink-900)] leading-snug group-hover:text-[var(--green-800)] transition-colors">
+                      {rep.title}
+                    </h3>
+
+                    <p className="text-sm text-[var(--ink-600)] line-clamp-3 leading-relaxed font-sans">
+                      {rep.summary}
+                    </p>
+
+                    <div className="flex items-center justify-between text-xs py-3 border-y border-[var(--cream-200)] text-[var(--ink-900)] font-semibold">
+                      <div className="flex items-center gap-1.5">
+                        <Users className="w-4 h-4 text-[var(--green-700)]" />
+                        <span>{rep.beneficiaries.toLocaleString("id-ID")} Penerima</span>
                       </div>
-                    )}
+                      {rep.amount_idr && (
+                        <div className="text-[var(--gold-700)] font-mono">
+                          Rp {rep.amount_idr.toLocaleString("id-ID")}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="p-6 pt-0">
-                <Link
-                  href={`/laporan/${rep.slug}`}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-full text-xs font-semibold bg-[var(--green-800)] text-[var(--cream-50)] hover:bg-[var(--green-700)] transition-colors shadow-sm"
-                >
-                  <FileText className="w-4 h-4" />
-                  <span>Baca Laporan Transparan</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
+                <div className="p-6 pt-0">
+                  <Link
+                    href={`/laporan/${rep.slug}`}
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-full text-xs font-semibold bg-[var(--green-800)] text-[var(--cream-50)] hover:bg-[var(--green-700)] transition-colors shadow-sm"
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>Baca Laporan Transparan</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

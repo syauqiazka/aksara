@@ -1,11 +1,11 @@
 export const organizationContent = {
   brandName: "Yayasan Sahabat Aksara",
-  legalName: "Yayasan Ajirasa Aksara Semesta",
+  legalName: "-",
   tagline: "Keberkahan Al-Qur'an dan kemajuan teknologi untuk melahirkan generasi yang cerdas, berakhlak mulia, serta mandiri.",
   shortDescription:
     "Yayasan Ajirasa Aksara Semesta (Sahabat Aksara) adalah lembaga nirlaba/sosial yang berkhidmat untuk berkontribusi menghadirkan kebaikan dan kemanfaatan yang berkelanjutan bagi masyarakat melalui aksi pilar Spiritual, Sosial, Pendidikan, dan Teknologi.",
-  npwp: "827382389",
-  skKemenkumham: "Keputusan Menteri Hukum dan Hak Asasi Manusia (Kemenkumham) RI Nomor AHU-0002692.AH.01.04. Tahun 2026",
+  npwp: "-",
+  skKemenkumham: "-",
   aktaPendirian: "Akta Pendirian Nomor 195 tanggal 15 Januari 2024",
   establishedDate: "22 Oktober 2026",
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -58,12 +59,31 @@ export default function DataSebaranView({
   const [pageSize, setPageSize] = useState<number>(10);
 
   // Modal / Drawer state
+  const [mounted, setMounted] = useState(false);
   const [activeGalleryModal, setActiveGalleryModal] = useState<{
     title: string;
     subtitle?: string;
     photos: string[];
     description?: string;
   } | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (activeGalleryModal) {
+      document.body.style.overflow = "hidden";
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") setActiveGalleryModal(null);
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        document.body.style.overflow = "";
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    }
+  }, [activeGalleryModal]);
 
   // Filter lists
   const years = useMemo(() => {
@@ -971,15 +991,15 @@ export default function DataSebaranView({
       {/* ======================================================== */}
       {/* 6. MODAL: GALERI FOTO KEGIATAN                          */}
       {/* ======================================================== */}
-      {activeGalleryModal && (
+      {mounted && activeGalleryModal && createPortal(
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in"
+          className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 bg-black/75 backdrop-blur-sm animate-fade-in"
           onClick={() => setActiveGalleryModal(null)}
         >
           <div
-            className="bg-[var(--cream-50)] rounded-3xl max-w-xl w-full max-h-[90vh] overflow-y-auto border border-[var(--gold-500)]/40 shadow-2xl p-6 sm:p-8 space-y-5"
+            className="relative bg-[var(--cream-50)] rounded-3xl max-w-lg w-full max-h-[85vh] overflow-y-auto border border-[var(--gold-500)]/40 shadow-2xl p-6 sm:p-8 space-y-5 my-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between pb-3 border-b border-[var(--cream-200)]">
@@ -995,7 +1015,7 @@ export default function DataSebaranView({
               </div>
               <button
                 onClick={() => setActiveGalleryModal(null)}
-                className="p-2 rounded-full hover:bg-[var(--cream-200)] text-[var(--ink-600)] transition-colors"
+                className="p-2 rounded-full hover:bg-[var(--cream-200)] text-[var(--ink-600)] transition-colors cursor-pointer"
                 aria-label="Tutup modal galeri"
               >
                 <X className="w-5 h-5" />
@@ -1009,32 +1029,39 @@ export default function DataSebaranView({
             )}
 
             <div className="grid grid-cols-1 gap-3">
-              {activeGalleryModal.photos.map((url, pIdx) => (
-                <div
-                  key={pIdx}
-                  className="relative aspect-16/10 rounded-2xl overflow-hidden border border-[var(--cream-200)] bg-[var(--green-950)] shadow-sm"
-                >
-                  <Image
-                    src={url}
-                    alt={activeGalleryModal.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 550px"
-                  />
+              {activeGalleryModal.photos.length > 0 ? (
+                activeGalleryModal.photos.map((url, pIdx) => (
+                  <div
+                    key={pIdx}
+                    className="relative aspect-16/10 rounded-2xl overflow-hidden border border-[var(--cream-200)] bg-[var(--green-950)] shadow-sm"
+                  >
+                    <Image
+                      src={url}
+                      alt={activeGalleryModal.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 550px"
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="p-8 text-center text-xs text-[var(--ink-500)] rounded-2xl bg-[var(--cream-100)] border border-dashed border-[var(--cream-200)]">
+                  Foto dokumentasi sedang diproses oleh tim media.
                 </div>
-              ))}
+              )}
             </div>
 
             <div className="pt-2 text-right">
               <button
                 onClick={() => setActiveGalleryModal(null)}
-                className="px-6 py-2 rounded-full bg-[var(--green-800)] text-[var(--cream-50)] text-xs font-semibold hover:bg-[var(--green-700)] transition-colors"
+                className="px-6 py-2 rounded-full bg-[var(--green-800)] text-[var(--cream-50)] text-xs font-semibold hover:bg-[var(--green-700)] transition-colors cursor-pointer"
               >
                 Tutup
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

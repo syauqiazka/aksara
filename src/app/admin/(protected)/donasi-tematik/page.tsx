@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Select from "@/components/ui/Select";
 import { PlusCircle, Search, Trash2, Edit, X, HeartHandshake } from "lucide-react";
 import { ThemedCampaign } from "@/lib/db/types";
 import ImageUploader from "@/components/admin/ImageUploader";
 import { cleanNumericString } from "@/lib/numeric-utils";
+import { uploadPendingFileOnSave, deleteOldBlobAfterUpdate } from "@/lib/upload-helper";
 
 export default function AdminThemedCampaignsPage() {
   const [campaigns, setCampaigns] = useState<ThemedCampaign[]>([]);
@@ -17,6 +19,7 @@ export default function AdminThemedCampaignsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState<ThemedCampaign | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // Form states
   const [formData, setFormData] = useState({
@@ -49,6 +52,7 @@ export default function AdminThemedCampaignsPage() {
 
   const openCreateModal = () => {
     setEditingCampaign(null);
+    setSelectedFile(null);
     setFormData({
       title: "",
       disaster_type: "Bencana Alam",
@@ -64,6 +68,7 @@ export default function AdminThemedCampaignsPage() {
 
   const openEditModal = (camp: ThemedCampaign) => {
     setEditingCampaign(camp);
+    setSelectedFile(null);
     setFormData({
       title: camp.title,
       disaster_type: camp.disaster_type,
@@ -80,18 +85,30 @@ export default function AdminThemedCampaignsPage() {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingCampaign(null);
+    setSelectedFile(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setFeedback(null);
+    let uploadRollback = null;
+    let uploadCommit = null;
 
     try {
+      let finalCover = formData.cover_url;
+      if (selectedFile) {
+        const { url, rollback, commit } = await uploadPendingFileOnSave(selectedFile);
+        uploadRollback = rollback;
+        uploadCommit = commit;
+        finalCover = url || formData.cover_url;
+      }
+
       const url = "/api/admin/campaigns";
       const method = editingCampaign ? "PUT" : "POST";
       const parsedPayload = {
         ...formData,
+        cover_url: finalCover || null,
         target_idr: parseInt(formData.target_idr, 10) || 0,
         collected_idr: parseInt(formData.collected_idr, 10) || 0,
       };
@@ -108,15 +125,25 @@ export default function AdminThemedCampaignsPage() {
         throw new Error(resData.error || "Gagal menyimpan kampanye.");
       }
 
+      if (uploadCommit) {
+        await uploadCommit();
+      }
+
+      if (editingCampaign && editingCampaign.cover_url && editingCampaign.cover_url !== finalCover) {
+        await deleteOldBlobAfterUpdate(editingCampaign.cover_url, finalCover);
+      }
+
       setFeedback({
         type: "success",
         message: editingCampaign
           ? `Kampanye "${formData.title}" berhasil diperbarui.`
           : `Kampanye "${formData.title}" berhasil ditambahkan.`,
       });
+      setSelectedFile(null);
       closeModal();
       fetchData();
     } catch (err: unknown) {
+      if (uploadRollback) await uploadRollback();
       const msg = err instanceof Error ? err.message : "Terjadi kesalahan saat menyimpan.";
       setFeedback({ type: "error", message: msg });
     } finally {
@@ -142,10 +169,14 @@ export default function AdminThemedCampaignsPage() {
     }
   };
 
-  const handleDelete = async (id: string, title: string) => {
+  const handleDelete = async (id: string, title: string, coverUrl?: string | null) => {
     if (!confirm(`Hapus kampanye donasi tematik "${title}"?`)) return;
     try {
-      await fetch(`/api/admin/campaigns?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/campaigns?id=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Gagal menghapus kampanye.");
+      if (coverUrl) {
+        await deleteOldBlobAfterUpdate(coverUrl, "");
+      }
       setFeedback({
         type: "success",
         message: `Kampanye "${title}" berhasil dihapus.`,
@@ -251,6 +282,18 @@ export default function AdminThemedCampaignsPage() {
                 className="p-6 rounded-3xl bg-[var(--cream-100)] border border-[var(--cream-200)] shadow-sm flex flex-col justify-between space-y-4"
               >
                 <div className="space-y-3">
+                  {camp.cover_url && (
+                    <div className="relative aspect-16/9 rounded-2xl overflow-hidden border border-[var(--cream-200)] shadow-xs">
+                      <Image
+                        src={camp.cover_url}
+                        alt={camp.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 400px"
+                      />
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold uppercase tracking-wider text-[var(--terracotta-500)]">
                       {camp.disaster_type}, {camp.location}
@@ -308,7 +351,7 @@ export default function AdminThemedCampaignsPage() {
                       <Edit className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => handleDelete(camp.id, camp.title)}
+                      onClick={() => handleDelete(camp.id, camp.title, camp.cover_url)}
                       className="p-1.5 text-red-600 hover:text-red-800 rounded-lg hover:bg-red-50 transition-colors"
                       title="Hapus Kampanye"
                     >
@@ -426,6 +469,8 @@ export default function AdminThemedCampaignsPage() {
                 label="Foto Cover / Banner Kampanye (Opsional)"
                 value={formData.cover_url}
                 onChange={(url) => setFormData({ ...formData, cover_url: url })}
+                file={selectedFile}
+                onFileChange={setSelectedFile}
                 helperText="Upload gambar aksi tanggap darurat yang menarik. Disimpan di Vercel Blob."
               />
 

@@ -235,7 +235,7 @@ export const db = {
       let query = client.from("infak_jinan").select("*, photos:infak_jinan_photos(*), santri_list:infak_jinan_santri(*, hafalan_updates:santri_hafalan_updates(*))").order("mushaf_no", { ascending: true });
       if (onlyPublished) query = query.eq("status", "published");
       const { data, error } = await query;
-      if (error || !data || data.length === 0) {
+      if (error || !data) {
         return localStore.getInfakJinan(onlyPublished);
       }
       return data as InfakJinanRecord[];
@@ -252,7 +252,7 @@ export const db = {
     try {
       const client = getClient();
       const { data, error } = await client.from("public_infak_jinan").select("*, photos:infak_jinan_photos(*)");
-      if (error || !data || data.length === 0) {
+      if (error || !data) {
         return localStore.getPublicInfakJinan();
       }
       return data as PublicInfakJinanRecord[];
@@ -338,7 +338,7 @@ export const db = {
       let query = client.from("buss_distributions").select("*").order("year", { ascending: false });
       if (onlyPublished) query = query.eq("status", "published");
       const { data, error } = await query;
-      if (error || !data || data.length === 0) {
+      if (error || !data) {
         return localStore.getBuss(onlyPublished);
       }
       return data as BussDistribution[];
@@ -374,7 +374,7 @@ export const db = {
       let query = client.from("yatim_berdikari_activities").select("*").order("activity_date", { ascending: false });
       if (onlyPublished) query = query.eq("status", "published");
       const { data, error } = await query;
-      if (error || !data || data.length === 0) {
+      if (error || !data) {
         return localStore.getYatimActivities(onlyPublished);
       }
       return data as YatimActivity[];
