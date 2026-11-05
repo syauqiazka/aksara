@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { PlusCircle, Search, Trash2, Eye, EyeOff } from "lucide-react";
+import { PlusCircle, Search, Trash2, Eye, EyeOff, Edit } from "lucide-react";
 import { GeberMasjidDistribution } from "@/lib/db/types";
 
 export default function AdminGeberListPage() {
@@ -173,13 +173,22 @@ export default function AdminGeberListPage() {
                     </button>
                   </td>
                   <td className="py-3 px-4 text-right">
-                    <button
-                      onClick={() => handleDelete(row.id, row.mosque_name)}
-                      className="p-1.5 rounded-lg text-[var(--danger)] hover:bg-[var(--danger)]/10"
-                      title="Hapus Data"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      <Link
+                        href={`/admin/geber-masjid/${row.id}`}
+                        className="p-1.5 rounded-lg text-[var(--ink-600)] hover:text-[var(--green-800)] hover:bg-[var(--cream-200)] transition-colors"
+                        title="Edit Data Geber"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(row.id, row.mosque_name)}
+                        className="p-1.5 rounded-lg text-[var(--danger)] hover:bg-[var(--danger)]/10 transition-colors"
+                        title="Hapus Data"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))

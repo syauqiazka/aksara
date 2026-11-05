@@ -65,7 +65,7 @@ export default async function ProgramDetailPage({ params }: Props) {
             </div>
 
             {program.quote && (
-              <blockquote className="p-6 rounded-2xl bg-[var(--cream-100)] border-l-4 border-[var(--gold-600)] italic font-serif text-base sm:text-lg text-[var(--ink-600)] leading-relaxed">
+              <blockquote className="p-6 rounded-2xl bg-[var(--cream-100)] border border-[var(--cream-200)] italic font-serif text-base sm:text-lg text-[var(--ink-600)] leading-relaxed">
                 &ldquo;{program.quote}&rdquo;
               </blockquote>
             )}

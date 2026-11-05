@@ -1,7 +1,12 @@
+import Image from "next/image";
+import Link from "next/link";
 import { db } from "@/lib/db/api";
-import { Phone, Mail, ShieldCheck } from "lucide-react";
+import { Phone, Mail, ShieldCheck, ImageIcon, Calendar, ArrowRight } from "lucide-react";
 import BankAccountsList from "@/components/sections/BankAccountsList";
 import PageHeader from "@/components/ui/PageHeader";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export const metadata = {
   title: "Info Donasi & Rekening Resmi | Yayasan Sahabat Aksara",
@@ -13,6 +18,7 @@ export default async function DonasiPage() {
   const bankAccounts = await db.getBankAccounts();
   const campaigns = await db.getThemedCampaigns();
   const contact = await db.getContactInfo();
+  const gallery = await db.getGalleryItems();
 
   return (
     <div className="flex flex-col w-full bg-[var(--cream-50)] text-[var(--ink-900)]">
@@ -168,7 +174,75 @@ export default async function DonasiPage() {
         </div>
       </section>
 
-      {/* 4. FIQIH & TRANSPARANSI PRIVASI DONASI */}
+      {/* 4. GALERI DOKUMENTASI PROGRAM RESMI */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-12">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-[var(--cream-200)] pb-6">
+          <div>
+            <div className="text-xs uppercase tracking-[0.2em] text-[var(--gold-700)] font-semibold">
+              Bukti Penyaluran Terverifikasi
+            </div>
+            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[var(--ink-900)] mt-2 [text-wrap:balance]">
+              Dokumentasi Aksi Nyata di Lapangan
+            </h2>
+            <p className="text-sm text-[var(--ink-600)] max-w-xl mt-2 leading-relaxed font-sans">
+              Rekam jejak visual serah terima mushaf Al-Qur&apos;an Jinan, kegiatan Geber Bersih Masjid, majlis tasmi&apos; 30 juz, serta penyaluran bantuan amanah para muhsinin.
+            </p>
+          </div>
+          <Link
+            href="/dokumentasi"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-xs font-semibold bg-[var(--green-800)] text-[var(--cream-50)] hover:bg-[var(--green-700)] transition-colors shadow-sm flex-shrink-0"
+          >
+            <span>Buka Arsip Galeri Lengkap</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        {gallery.length === 0 ? (
+          <div className="p-16 rounded-3xl bg-[var(--cream-100)] border border-[var(--cream-200)] text-center max-w-md mx-auto space-y-3">
+            <ImageIcon className="w-10 h-10 text-[var(--ink-400)] opacity-40 mx-auto" />
+            <h3 className="font-serif text-lg font-bold text-[var(--ink-900)]">
+              Belum Ada Foto Dokumentasi
+            </h3>
+            <p className="text-xs text-[var(--ink-600)]">
+              Foto kegiatan serah terima sedang dalam kurasi berkala oleh pengurus yayasan.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {gallery.slice(0, 6).map((item) => (
+              <div
+                key={item.id}
+                className="group relative rounded-3xl overflow-hidden border border-[var(--cream-200)] bg-[var(--green-950)] aspect-[4/3] shadow-md hover:shadow-2xl transition-all duration-300"
+              >
+                <Image
+                  src={item.image_url}
+                  alt={item.title}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[var(--green-950)]/90 via-[var(--green-950)]/25 to-transparent" />
+                <div className="absolute bottom-5 left-5 right-5 text-[var(--cream-50)]">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--gold-400)] mb-1 flex items-center gap-1.5 font-mono">
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span>{item.program} / {item.date}</span>
+                  </div>
+                  <h3 className="font-serif text-lg sm:text-xl font-bold leading-snug">
+                    {item.title}
+                  </h3>
+                  {item.caption && (
+                    <p className="text-xs text-[var(--cream-200)]/80 mt-1 line-clamp-2 font-sans">
+                      {item.caption}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* 5. FIQIH & TRANSPARANSI PRIVASI DONASI */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full space-y-8">
         <div className="p-8 rounded-3xl bg-[var(--cream-100)] border border-[var(--gold-500)]/30 space-y-4">
           <div className="flex items-center gap-2.5 text-[var(--gold-700)] font-semibold text-sm">

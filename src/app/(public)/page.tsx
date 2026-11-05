@@ -14,9 +14,7 @@ import {
 import { db } from "@/lib/db/api";
 import { formatTanggal } from "@/lib/format-date";
 import { organizationContent } from "@/content/organization";
-import Preloader from "@/components/motion/Preloader";
 import StatCounter from "@/components/motion/StatCounter";
-import AksaraMarquee from "@/components/motion/AksaraMarquee";
 import HeroShowcase from "@/components/sections/HeroShowcase";
 import IndonesiaMap from "@/components/sections/IndonesiaMap";
 import Button from "@/components/ui/Button";
@@ -29,8 +27,6 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col w-full overflow-hidden">
-      <Preloader />
-
       {/* 1. HERO SHOWCASE (Full Bleed Green-950, Asymmetric 7:5) */}
       <HeroShowcase totalMushaf={stats.totalMushaf} totalMasjid={stats.totalMasjid} />
 
@@ -69,9 +65,6 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
-
-        {/* Marquee Nilai Filosofis AKSARA */}
-        <AksaraMarquee />
       </section>
 
       {/* 3. FONDASI KHIDMAT: EMPAT PILAR ASIMETRIS (Warm Cream-50, Editorial 7:5) */}
@@ -92,7 +85,7 @@ export default async function HomePage() {
             </p>
 
             {/* Kutipan Komitmen */}
-            <div className="p-6 rounded-2xl bg-[var(--cream-100)] border-l-4 border-[var(--gold-600)] text-sm sm:text-base text-[var(--ink-600)] font-serif italic">
+            <div className="p-6 rounded-2xl bg-[var(--cream-100)] border border-[var(--cream-200)] text-sm sm:text-base text-[var(--ink-600)] font-serif italic">
               &ldquo;Tidak ada kebaikan yang lebih abadi daripada mushaf yang terus dibaca dan ilmu yang terus diamalkan oleh generasi penerus.&rdquo;
             </div>
 

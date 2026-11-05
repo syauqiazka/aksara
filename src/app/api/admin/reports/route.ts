@@ -5,9 +5,17 @@ import { reportSchema } from "@/lib/validation/schemas";
 import { getAdminSession } from "@/lib/auth";
 import { commitUpload, deleteBlobFromStorage } from "@/lib/storage";
 
-export async function GET() {
+export async function GET(request: Request) {
   const session = await getAdminSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get("id");
+  if (id) {
+    const item = await db.getReportById(id);
+    if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json(item);
+  }
 
   const data = await db.getReports(false);
   return NextResponse.json(data);

@@ -70,7 +70,7 @@ test.describe("Tahap 4: Sinkronisasi Konten Docx Baru (Kerangka 104457)", () => 
 
     // Kontak WhatsApp resmi
     const waLink = main.locator("a[href*='wa.me/082262170018'], a[href*='wa.me/6282262170018']");
-    await expect(waLink).toBeVisible();
+    await expect(waLink.first()).toBeVisible();
 
     // Mitra kami
     await expect(main.getByText("Madrasah Al-Huffazh Gedongan")).toBeVisible();

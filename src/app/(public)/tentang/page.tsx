@@ -65,7 +65,7 @@ export default function TentangPage() {
             </div>
 
             {/* Founder Quote Card */}
-            <div className="p-6 rounded-2xl bg-[var(--cream-100)] border-l-4 border-[var(--gold-600)] shadow-sm">
+            <div className="p-6 rounded-2xl bg-[var(--cream-100)] border border-[var(--cream-200)] shadow-sm">
               <Quote className="w-6 h-6 text-[var(--gold-700)] mb-2" />
               <p className="text-sm italic font-serif text-[var(--ink-600)] leading-relaxed">
                 &ldquo;{founder.quote}&rdquo;

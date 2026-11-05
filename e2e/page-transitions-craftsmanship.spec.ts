@@ -5,6 +5,10 @@ test.describe("Craftsmanship & Seamless Page Transitions", () => {
     page,
   }) => {
     await page.goto("/tentang");
+    const skipBtn = page.getByRole("button", { name: /Lewati/i });
+    if (await skipBtn.isVisible()) {
+      await skipBtn.click();
+    }
     await page.waitForLoadState("networkidle");
 
     const container = page.locator(".page-transition-container");
@@ -16,13 +20,17 @@ test.describe("Craftsmanship & Seamless Page Transitions", () => {
     await page.waitForURL("**/program");
 
     await expect(page.locator(".page-transition-container")).toBeVisible();
-    await expect(page.locator("h1")).toContainText(/Program|Khidmat/i);
+    await expect(page.locator("main h1")).toContainText(/Program|Khidmat/i);
   });
 
   test("2. Automatic scroll restoration resets window.scrollY to 0 on page navigation", async ({
     page,
   }) => {
     await page.goto("/tentang");
+    const skipBtn = page.getByRole("button", { name: /Lewati/i });
+    if (await skipBtn.isVisible()) {
+      await skipBtn.click();
+    }
     await page.waitForLoadState("networkidle");
 
     // Scroll down deeply
@@ -48,6 +56,10 @@ test.describe("Craftsmanship & Seamless Page Transitions", () => {
     page,
   }) => {
     await page.goto("/");
+    const skipBtn = page.getByRole("button", { name: /Lewati/i });
+    if (await skipBtn.isVisible()) {
+      await skipBtn.click();
+    }
     await page.waitForLoadState("networkidle");
 
     const h1Wrap = await page.evaluate(() => {
@@ -67,6 +79,10 @@ test.describe("Craftsmanship & Seamless Page Transitions", () => {
     page,
   }) => {
     await page.goto("/");
+    const skipBtn = page.getByRole("button", { name: /Lewati/i });
+    if (await skipBtn.isVisible()) {
+      await skipBtn.click();
+    }
     await page.waitForLoadState("networkidle");
 
     const heroCtaButton = page.locator("section a[href='/donasi']").first();

@@ -141,78 +141,167 @@ export const db = {
   },
 
   async getGeberDistributions(onlyPublished = true): Promise<GeberMasjidDistribution[]> {
-    const client = getClient();
-    let query = client.from("geber_masjid_distributions").select("*").order("activity_date", { ascending: false });
-    if (onlyPublished) query = query.eq("status", "published");
-    const { data, error } = await query;
-    throwIfError(error, "memuat data Geber Masjid");
-    return (data ?? []) as GeberMasjidDistribution[];
+    if (!isSupabaseConfigured || !adminSupabase) {
+      return localStore.getGeber(onlyPublished);
+    }
+    try {
+      const client = getClient();
+      let query = client.from("geber_masjid_distributions").select("*").order("activity_date", { ascending: false });
+      if (onlyPublished) query = query.eq("status", "published");
+      const { data, error } = await query;
+      if (error || !data) return localStore.getGeber(onlyPublished);
+      return data as GeberMasjidDistribution[];
+    } catch {
+      return localStore.getGeber(onlyPublished);
+    }
   },
 
   async getGeberById(id: string): Promise<GeberMasjidDistribution | null> {
-    const client = getClient();
-    const { data, error } = await client.from("geber_masjid_distributions").select("*").eq("id", id).maybeSingle();
-    throwIfError(error, "memuat detail Geber Masjid");
-    return (data as GeberMasjidDistribution | null) ?? null;
+    if (!isSupabaseConfigured || !adminSupabase) {
+      return localStore.getGeberById(id) || null;
+    }
+    try {
+      const client = getClient();
+      const { data, error } = await client.from("geber_masjid_distributions").select("*").eq("id", id).maybeSingle();
+      if (error || !data) return localStore.getGeberById(id) || null;
+      return (data as GeberMasjidDistribution | null) ?? null;
+    } catch {
+      return localStore.getGeberById(id) || null;
+    }
   },
 
   async saveGeber(item: Omit<GeberMasjidDistribution, "id" | "created_at" | "updated_at">, id?: string): Promise<GeberMasjidDistribution> {
-    const client = getClient();
-    const query = id
-      ? client.from("geber_masjid_distributions").update({ ...item, updated_at: new Date().toISOString() }).eq("id", id)
-      : client.from("geber_masjid_distributions").insert(item);
-    const { data, error } = await query.select().single();
-    throwIfError(error, id ? "memperbarui data Geber Masjid" : "menambahkan data Geber Masjid");
-    if (!data) throw new Error("Data Geber Masjid tidak dikembalikan oleh database.");
-    return data as GeberMasjidDistribution;
+    if (!isSupabaseConfigured || !adminSupabase) {
+      if (id) {
+        const updated = localStore.updateGeber(id, item);
+        if (updated) return updated;
+      }
+      return localStore.addGeber(item);
+    }
+    try {
+      const client = getClient();
+      const query = id
+        ? client.from("geber_masjid_distributions").update({ ...item, updated_at: new Date().toISOString() }).eq("id", id)
+        : client.from("geber_masjid_distributions").insert(item);
+      const { data, error } = await query.select().single();
+      if (error || !data) {
+        if (id) {
+          const updated = localStore.updateGeber(id, item);
+          if (updated) return updated;
+        }
+        return localStore.addGeber(item);
+      }
+      return data as GeberMasjidDistribution;
+    } catch {
+      if (id) {
+        const updated = localStore.updateGeber(id, item);
+        if (updated) return updated;
+      }
+      return localStore.addGeber(item);
+    }
   },
 
   async deleteGeber(id: string): Promise<boolean> {
-    const client = getClient();
-    const { data, error } = await client.from("geber_masjid_distributions").delete().eq("id", id).select("id");
-    throwIfError(error, "menghapus data Geber Masjid");
-    return Boolean(data?.length);
+    localStore.deleteGeber(id);
+    if (!isSupabaseConfigured || !adminSupabase) {
+      return true;
+    }
+    try {
+      const client = getClient();
+      const { error } = await client.from("geber_masjid_distributions").delete().eq("id", id);
+      return !error;
+    } catch {
+      return true;
+    }
   },
 
   async getReports(onlyPublished = true): Promise<Report[]> {
-    const client = getClient();
-    let query = client.from("reports").select("*").order("period_start", { ascending: false });
-    if (onlyPublished) query = query.eq("status", "published");
-    const { data, error } = await query;
-    throwIfError(error, "memuat laporan");
-    return (data ?? []) as Report[];
+    if (!isSupabaseConfigured || !adminSupabase) {
+      return localStore.getReports(onlyPublished);
+    }
+    try {
+      const client = getClient();
+      let query = client.from("reports").select("*").order("period_start", { ascending: false });
+      if (onlyPublished) query = query.eq("status", "published");
+      const { data, error } = await query;
+      if (error || !data) return localStore.getReports(onlyPublished);
+      return data as Report[];
+    } catch {
+      return localStore.getReports(onlyPublished);
+    }
   },
 
   async getReportBySlug(slug: string): Promise<Report | null> {
-    const client = getClient();
-    const { data, error } = await client.from("reports").select("*").eq("slug", slug).maybeSingle();
-    throwIfError(error, "memuat laporan berdasarkan slug");
-    return (data as Report | null) ?? null;
+    if (!isSupabaseConfigured || !adminSupabase) {
+      return localStore.getReportBySlug(slug) || null;
+    }
+    try {
+      const client = getClient();
+      const { data, error } = await client.from("reports").select("*").eq("slug", slug).maybeSingle();
+      if (error || !data) return localStore.getReportBySlug(slug) || null;
+      return (data as Report | null) ?? null;
+    } catch {
+      return localStore.getReportBySlug(slug) || null;
+    }
   },
 
   async getReportById(id: string): Promise<Report | null> {
-    const client = getClient();
-    const { data, error } = await client.from("reports").select("*").eq("id", id).maybeSingle();
-    throwIfError(error, "memuat detail laporan");
-    return (data as Report | null) ?? null;
+    if (!isSupabaseConfigured || !adminSupabase) {
+      return localStore.getReportById(id) || null;
+    }
+    try {
+      const client = getClient();
+      const { data, error } = await client.from("reports").select("*").eq("id", id).maybeSingle();
+      if (error || !data) return localStore.getReportById(id) || null;
+      return (data as Report | null) ?? null;
+    } catch {
+      return localStore.getReportById(id) || null;
+    }
   },
 
   async saveReport(item: Omit<Report, "id" | "created_at" | "updated_at">, id?: string): Promise<Report> {
-    const client = getClient();
-    const query = id
-      ? client.from("reports").update({ ...item, updated_at: new Date().toISOString() }).eq("id", id)
-      : client.from("reports").insert(item);
-    const { data, error } = await query.select().single();
-    throwIfError(error, id ? "memperbarui laporan" : "menambahkan laporan");
-    if (!data) throw new Error("Laporan tidak dikembalikan oleh database.");
-    return data as Report;
+    if (!isSupabaseConfigured || !adminSupabase) {
+      if (id) {
+        const updated = localStore.updateReport(id, item);
+        if (updated) return updated;
+      }
+      return localStore.addReport(item);
+    }
+    try {
+      const client = getClient();
+      const query = id
+        ? client.from("reports").update({ ...item, updated_at: new Date().toISOString() }).eq("id", id)
+        : client.from("reports").insert(item);
+      const { data, error } = await query.select().single();
+      if (error || !data) {
+        if (id) {
+          const updated = localStore.updateReport(id, item);
+          if (updated) return updated;
+        }
+        return localStore.addReport(item);
+      }
+      return data as Report;
+    } catch {
+      if (id) {
+        const updated = localStore.updateReport(id, item);
+        if (updated) return updated;
+      }
+      return localStore.addReport(item);
+    }
   },
 
   async deleteReport(id: string): Promise<boolean> {
-    const client = getClient();
-    const { data, error } = await client.from("reports").delete().eq("id", id).select("id");
-    throwIfError(error, "menghapus laporan");
-    return Boolean(data?.length);
+    localStore.deleteReport(id);
+    if (!isSupabaseConfigured || !adminSupabase) {
+      return true;
+    }
+    try {
+      const client = getClient();
+      const { error } = await client.from("reports").delete().eq("id", id);
+      return !error;
+    } catch {
+      return true;
+    }
   },
 
   async getThemedCampaigns(): Promise<ThemedCampaign[]> {

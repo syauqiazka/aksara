@@ -30,7 +30,8 @@ export async function POST(request: Request) {
       caption: validated.caption || null,
     });
 
-    revalidatePath("/portofolio");
+    revalidatePath("/dokumentasi");
+    revalidatePath("/donasi");
     revalidatePath("/");
 
     return NextResponse.json(result);
@@ -57,7 +58,8 @@ export async function PUT(request: Request) {
       id
     );
 
-    revalidatePath("/portofolio");
+    revalidatePath("/dokumentasi");
+    revalidatePath("/donasi");
     revalidatePath("/");
 
     return NextResponse.json(result);
@@ -77,7 +79,8 @@ export async function DELETE(request: Request) {
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
     const success = await db.deleteGalleryItem(id);
-    revalidatePath("/portofolio");
+    revalidatePath("/dokumentasi");
+    revalidatePath("/donasi");
     revalidatePath("/");
 
     return NextResponse.json({ success });

@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "src/styles/tokens.css"
+        ],
+        "createdAt": "2026-11-05T12:43:54.207Z",
+        "reason": "Brand identity gold shimmer token"
+      },
+      {
+        "rule": "codex-grid-background",
+        "value": "*",
+        "files": [
+          "src/app/globals.css"
+        ],
+        "createdAt": "2026-11-05T12:44:07.499Z",
+        "reason": "Islamic geometric radial dot pattern"
+      }
+    ]
+  }
+}

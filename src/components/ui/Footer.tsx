@@ -93,6 +93,11 @@ export default function Footer() {
                   Laporan Akuntabilitas Terbuka
                 </Link>
               </li>
+              <li>
+                <Link href="/dokumentasi" className="hover:text-[var(--gold-300)] transition-colors">
+                  Galeri Dokumentasi Program
+                </Link>
+              </li>
             </ul>
           </div>
 

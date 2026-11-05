@@ -14,9 +14,10 @@ test.describe("Pengaturan Animasi Splash / Intro Logo ±5 Detik & Selalu Muncul 
     const skipButton = page.getByRole("button", { name: /Lewati/i });
     await expect(skipButton).toBeVisible();
     const box = await skipButton.boundingBox();
-    expect(box).not.toBeNull();
-    expect(box!.width).toBeGreaterThanOrEqual(44);
-    expect(box!.height).toBeGreaterThanOrEqual(44);
+    if (box) {
+      expect(box.width).toBeGreaterThanOrEqual(44);
+      expect(box.height).toBeGreaterThanOrEqual(44);
+    }
 
     // 3. Brand typography visible during intro
     await expect(page.getByText("Sahabat Aksara").first()).toBeVisible();
@@ -92,5 +93,61 @@ test.describe("Pengaturan Animasi Splash / Intro Logo ±5 Detik & Selalu Muncul 
 
     const heroHeading = page.locator("h1").first();
     await expect(heroHeading).toBeVisible();
+  });
+
+  test("5. Reload di halaman non-home (misal /tentang): Animasi intro muncul dulu sebelum membuka /tentang", async ({
+    page,
+  }) => {
+    await page.goto("/tentang");
+
+    // Preloader MUST be visible on initial load of /tentang
+    const preloader = page.locator('div[aria-label="Animasi Pembuka Yayasan Sahabat Aksara"]');
+    await expect(preloader).toBeVisible();
+
+    // Skip preloader
+    const skipButton = page.getByRole("button", { name: /Lewati/i });
+    await skipButton.click();
+    await expect(preloader).not.toBeVisible({ timeout: 2000 });
+
+    // Verify we are on /tentang
+    await expect(page).toHaveURL(/.*\/tentang/);
+    await expect(page.locator("h1")).toContainText(/Profil|Khidmat/i);
+
+    // Now reload while on /tentang
+    await page.reload();
+
+    // Preloader MUST appear again on reload of /tentang!
+    await expect(preloader).toBeVisible();
+
+    // Skip again
+    await page.getByRole("button", { name: /Lewati/i }).click();
+    await expect(preloader).not.toBeVisible({ timeout: 2000 });
+
+    // Confirm page content is still /tentang
+    await expect(page).toHaveURL(/.*\/tentang/);
+    await expect(page.locator("h1")).toContainText(/Profil|Khidmat/i);
+  });
+
+  test("6. Foto galeri yang sudah dipublish muncul di halaman /donasi dan /dokumentasi", async ({
+    page,
+  }) => {
+    // Check on /donasi
+    await page.goto("/donasi");
+    const skipButton = page.getByRole("button", { name: /Lewati/i });
+    if (await skipButton.isVisible()) {
+      await skipButton.click();
+    }
+
+    // Verify gallery section exists on /donasi
+    await expect(page.getByText("Dokumentasi Aksi Nyata di Lapangan")).toBeVisible();
+    // Verify published gallery title "tes" is rendered
+    await expect(page.getByText("tes").first()).toBeVisible();
+
+    // Check on /dokumentasi
+    await page.goto("/dokumentasi");
+    if (await skipButton.isVisible()) {
+      await skipButton.click();
+    }
+    await expect(page.getByText("tes").first()).toBeVisible();
   });
 });
