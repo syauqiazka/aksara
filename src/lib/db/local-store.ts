@@ -54,7 +54,52 @@ const globalForStore = globalThis as unknown as {
   __infakJinanList?: InfakJinanRecord[];
   __bussList?: BussDistribution[];
   __yatimList?: YatimActivity[];
+  __bankAccounts?: BankAccount[];
+  __contactInfo?: ContactInfo;
+  __socialLinks?: SocialLinks;
 };
+
+function loadPersistedSettings(): {
+  bankAccounts?: BankAccount[];
+  contactInfo?: ContactInfo;
+  socialLinks?: SocialLinks;
+} | null {
+  if (typeof window !== "undefined") return null;
+  try {
+    const fs = eval("require")("fs");
+    const path = eval("require")("path");
+    const filePath = path.join(process.cwd(), "data", "site-settings.json");
+    if (fs.existsSync(filePath)) {
+      const raw = fs.readFileSync(filePath, "utf8");
+      return JSON.parse(raw);
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+function savePersistedSettings(settings: {
+  bankAccounts?: BankAccount[];
+  contactInfo?: ContactInfo;
+  socialLinks?: SocialLinks;
+}) {
+  if (typeof window !== "undefined") return;
+  try {
+    const fs = eval("require")("fs");
+    const path = eval("require")("path");
+    const dirPath = path.join(process.cwd(), "data");
+    const filePath = path.join(dirPath, "site-settings.json");
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+    }
+    const current = loadPersistedSettings() || {};
+    const updated = { ...current, ...settings };
+    fs.writeFileSync(filePath, JSON.stringify(updated, null, 2), "utf8");
+  } catch {
+    // ignore
+  }
+}
 
 const infakJinanList: InfakJinanRecord[] =
   globalForStore.__infakJinanList || (globalForStore.__infakJinanList = []);
@@ -170,17 +215,41 @@ export const localStore = {
     return newItem;
   },
 
-  getBankAccounts: () => [...bankAccounts],
+  getBankAccounts: () => {
+    const persisted = loadPersistedSettings();
+    if (persisted?.bankAccounts && Array.isArray(persisted.bankAccounts)) {
+      return [...persisted.bankAccounts];
+    }
+    return globalForStore.__bankAccounts ? [...globalForStore.__bankAccounts] : [...bankAccounts];
+  },
   updateBankAccounts: (accounts: BankAccount[]) => {
-    bankAccounts = accounts;
+    bankAccounts = [...accounts];
+    globalForStore.__bankAccounts = [...accounts];
+    savePersistedSettings({ bankAccounts: accounts });
   },
-  getContactInfo: () => ({ ...contactInfo }),
+  getContactInfo: () => {
+    const persisted = loadPersistedSettings();
+    if (persisted?.contactInfo) {
+      return { ...persisted.contactInfo };
+    }
+    return globalForStore.__contactInfo ? { ...globalForStore.__contactInfo } : { ...contactInfo };
+  },
   updateContactInfo: (info: ContactInfo) => {
-    contactInfo = info;
+    contactInfo = { ...info };
+    globalForStore.__contactInfo = { ...info };
+    savePersistedSettings({ contactInfo: info });
   },
-  getSocialLinks: () => ({ ...socialLinks }),
+  getSocialLinks: () => {
+    const persisted = loadPersistedSettings();
+    if (persisted?.socialLinks) {
+      return { ...persisted.socialLinks };
+    }
+    return globalForStore.__socialLinks ? { ...globalForStore.__socialLinks } : { ...socialLinks };
+  },
   updateSocialLinks: (links: SocialLinks) => {
-    socialLinks = links;
+    socialLinks = { ...links };
+    globalForStore.__socialLinks = { ...links };
+    savePersistedSettings({ socialLinks: links });
   },
 
   getAggregatedStats: (): AggregatedStats => {

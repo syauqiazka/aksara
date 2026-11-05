@@ -1,0 +1,16 @@
+{
+  "bankAccounts": [
+    {
+      "bank": "Bank Syariah Indonesia (BSI)",
+      "number": "7722334455",
+      "holder": "Yayasan Ajirasa Aksara Semesta",
+      "branch": "KC Cirebon Siliwangi"
+    }
+  ],
+  "contactInfo": {
+    "whatsapp": "",
+    "phone": "",
+    "email": "",
+    "address": ""
+  }
+}

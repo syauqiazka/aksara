@@ -158,70 +158,105 @@ export const db = {
   },
 
   async getBankAccounts(): Promise<BankAccount[]> {
-    const client = getClient();
-    const { data, error } = await client.from("site_settings").select("value").eq("key", "bank_accounts").maybeSingle();
-    throwIfError(error, "memuat rekening bank");
-    return (data?.value as BankAccount[] | undefined) ?? [
-      {
-        bank: "Bank BCA",
-        number: "",
-        holder: "Yayasan Ajirasa Aksara Semesta",
-        branch: "Kantor Cabang",
-      },
-    ];
+    if (!isSupabaseConfigured || !supabase) {
+      return localStore.getBankAccounts();
+    }
+    try {
+      const client = getClient();
+      const { data, error } = await client.from("site_settings").select("value").eq("key", "bank_accounts").maybeSingle();
+      if (error || !data || !data.value) {
+        return localStore.getBankAccounts();
+      }
+      return data.value as BankAccount[];
+    } catch {
+      return localStore.getBankAccounts();
+    }
   },
 
   async updateBankAccounts(accounts: BankAccount[]): Promise<void> {
-    const client = getClient();
-    const { error } = await client.from("site_settings").upsert({
-      key: "bank_accounts",
-      value: accounts,
-      updated_at: new Date().toISOString(),
-    });
-    throwIfError(error, "menyimpan rekening bank");
+    localStore.updateBankAccounts(accounts);
+    if (!isSupabaseConfigured || !supabase) return;
+    try {
+      const client = getClient();
+      const { error } = await client.from("site_settings").upsert({
+        key: "bank_accounts",
+        value: accounts,
+        updated_at: new Date().toISOString(),
+      });
+      if (error) {
+        console.warn("Supabase updateBankAccounts fallback ke localStore:", error.message);
+      }
+    } catch (err) {
+      console.warn("Supabase updateBankAccounts fallback ke localStore:", err);
+    }
   },
 
   async getContactInfo(): Promise<ContactInfo> {
-    const client = getClient();
-    const { data, error } = await client.from("site_settings").select("value").eq("key", "contact_info").maybeSingle();
-    throwIfError(error, "memuat informasi kontak");
-    return (data?.value as ContactInfo | undefined) ?? {
-      whatsapp: "0822-6217-0018",
-      phone: "0822-6217-0018",
-      email: "kontak@sahabataksara.id",
-      address: "Cirebon, Jawa Barat, Indonesia",
-    };
+    if (!isSupabaseConfigured || !supabase) {
+      return localStore.getContactInfo();
+    }
+    try {
+      const client = getClient();
+      const { data, error } = await client.from("site_settings").select("value").eq("key", "contact_info").maybeSingle();
+      if (error || !data || !data.value) {
+        return localStore.getContactInfo();
+      }
+      return data.value as ContactInfo;
+    } catch {
+      return localStore.getContactInfo();
+    }
   },
 
   async updateContactInfo(info: ContactInfo): Promise<void> {
-    const client = getClient();
-    const { error } = await client.from("site_settings").upsert({
-      key: "contact_info",
-      value: info,
-      updated_at: new Date().toISOString(),
-    });
-    throwIfError(error, "menyimpan informasi kontak");
+    localStore.updateContactInfo(info);
+    if (!isSupabaseConfigured || !supabase) return;
+    try {
+      const client = getClient();
+      const { error } = await client.from("site_settings").upsert({
+        key: "contact_info",
+        value: info,
+        updated_at: new Date().toISOString(),
+      });
+      if (error) {
+        console.warn("Supabase updateContactInfo fallback ke localStore:", error.message);
+      }
+    } catch (err) {
+      console.warn("Supabase updateContactInfo fallback ke localStore:", err);
+    }
   },
 
   async getSocialLinks(): Promise<SocialLinks> {
-    const client = getClient();
-    const { data, error } = await client.from("site_settings").select("value").eq("key", "social_links").maybeSingle();
-    throwIfError(error, "memuat tautan media sosial");
-    return (data?.value as SocialLinks | undefined) ?? {
-      instagram: "https://instagram.com/sahabataksara",
-      youtube: "https://youtube.com/@sahabataksara",
-      tiktok: "https://tiktok.com/@sahabataksara",
-    };
+    if (!isSupabaseConfigured || !supabase) {
+      return localStore.getSocialLinks();
+    }
+    try {
+      const client = getClient();
+      const { data, error } = await client.from("site_settings").select("value").eq("key", "social_links").maybeSingle();
+      if (error || !data || !data.value) {
+        return localStore.getSocialLinks();
+      }
+      return data.value as SocialLinks;
+    } catch {
+      return localStore.getSocialLinks();
+    }
   },
 
   async updateSocialLinks(links: SocialLinks): Promise<void> {
-    const client = getClient();
-    const { error } = await client.from("site_settings").upsert({
-      key: "social_links",
-      value: links,
-      updated_at: new Date().toISOString(),
-    });
-    throwIfError(error, "menyimpan tautan media sosial");
+    localStore.updateSocialLinks(links);
+    if (!isSupabaseConfigured || !supabase) return;
+    try {
+      const client = getClient();
+      const { error } = await client.from("site_settings").upsert({
+        key: "social_links",
+        value: links,
+        updated_at: new Date().toISOString(),
+      });
+      if (error) {
+        console.warn("Supabase updateSocialLinks fallback ke localStore:", error.message);
+      }
+    } catch (err) {
+      console.warn("Supabase updateSocialLinks fallback ke localStore:", err);
+    }
   },
 
 

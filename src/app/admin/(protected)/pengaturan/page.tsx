@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { db } from "@/lib/db/api";
 import { BankAccount, ContactInfo } from "@/lib/db/types";
 import {
   Save,
@@ -15,6 +14,9 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
+  Plus,
+  Trash2,
+  Building2,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -40,12 +42,21 @@ export default function AdminSettingsPage() {
   const [authSuccess, setAuthSuccess] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
 
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const [settingsFeedback, setSettingsFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
   useEffect(() => {
     const load = async () => {
-      const accounts = await db.getBankAccounts();
-      const info = await db.getContactInfo();
-      setBankAccounts(accounts);
-      setContact(info);
+      try {
+        const res = await fetch("/api/admin/settings");
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.bankAccounts)) setBankAccounts(data.bankAccounts);
+          if (data.contactInfo) setContact(data.contactInfo);
+        }
+      } catch (err) {
+        console.error("Gagal memuat pengaturan:", err);
+      }
 
       // Fetch active admin email
       try {
@@ -64,12 +75,54 @@ export default function AdminSettingsPage() {
     load();
   }, []);
 
+  const handleAddBank = () => {
+    setBankAccounts((prev) => [
+      ...prev,
+      {
+        bank: "Bank BCA",
+        number: "",
+        holder: "Yayasan Ajirasa Aksara Semesta",
+        branch: "Kantor Cabang",
+      },
+    ]);
+  };
+
+  const handleRemoveBank = (idx: number) => {
+    setBankAccounts((prev) => prev.filter((_, i) => i !== idx));
+  };
+
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
-    await db.updateContactInfo(contact);
-    await db.updateBankAccounts(bankAccounts);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+    setSettingsSaving(true);
+    setSettingsFeedback(null);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bankAccounts, contactInfo: contact }),
+      });
+      if (res.ok) {
+        setSaved(true);
+        setSettingsFeedback({
+          type: "success",
+          message: "Daftar rekening bank dan informasi kontak resmi berhasil disimpan serta disinkronkan ke publik!",
+        });
+        setTimeout(() => setSaved(false), 3000);
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        setSettingsFeedback({
+          type: "error",
+          message: errData.error || "Gagal menyimpan pengaturan ke server.",
+        });
+      }
+    } catch {
+      setSettingsFeedback({
+        type: "error",
+        message: "Terjadi kesalahan jaringan saat menyimpan pengaturan.",
+      });
+    } finally {
+      setSettingsSaving(false);
+    }
   };
 
   const handleUpdateCredentials = async (e: React.FormEvent) => {
@@ -363,64 +416,196 @@ export default function AdminSettingsPage() {
 
         {/* Bank accounts */}
         <div className="p-8 rounded-3xl bg-[var(--cream-100)] border border-[var(--cream-200)] space-y-6">
-          <h3 className="font-serif text-lg font-bold text-[var(--ink-900)]">
-            Rekening Bank Resmi
-          </h3>
-
-          {bankAccounts.map((acc, idx) => (
-            <div key={idx} className="p-4 rounded-2xl bg-[var(--cream-50)] border border-[var(--cream-200)] space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-semibold text-[var(--ink-600)]">Nama Bank</label>
-                  <input
-                    type="text"
-                    value={acc.bank}
-                    onChange={(e) => {
-                      const updated = [...bankAccounts];
-                      updated[idx].bank = e.target.value;
-                      setBankAccounts(updated);
-                    }}
-                    className="w-full px-3 py-2 rounded-lg bg-[var(--cream-100)] border border-[var(--cream-200)] text-xs font-medium"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-semibold text-[var(--ink-600)]">Nomor Rekening</label>
-                  <input
-                    type="text"
-                    value={acc.number}
-                    onChange={(e) => {
-                      const updated = [...bankAccounts];
-                      updated[idx].number = e.target.value;
-                      setBankAccounts(updated);
-                    }}
-                    className="w-full px-3 py-2 rounded-lg bg-[var(--cream-100)] border border-[var(--cream-200)] font-mono text-xs font-bold"
-                  />
-                </div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--cream-200)] pb-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-[var(--gold-600)]" />
+                <h3 className="font-serif text-lg font-bold text-[var(--ink-900)]">
+                  Rekening Bank Resmi
+                </h3>
               </div>
-              <div>
-                <label className="block text-[11px] font-semibold text-[var(--ink-600)]">Atas Nama Rekening</label>
-                <input
-                  type="text"
-                  value={acc.holder}
-                  onChange={(e) => {
-                    const updated = [...bankAccounts];
-                    updated[idx].holder = e.target.value;
-                    setBankAccounts(updated);
-                  }}
-                  className="w-full px-3 py-2 rounded-lg bg-[var(--cream-100)] border border-[var(--cream-200)] text-xs"
-                />
-              </div>
+              <p className="text-xs text-[var(--ink-600)] mt-1">
+                Kelola rekening yayasan untuk kanal donasi. Seluruh rekening aktif otomatis ditampilkan di halaman donasi publik.
+              </p>
             </div>
-          ))}
+            <button
+              type="button"
+              onClick={handleAddBank}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold bg-[var(--green-800)] text-[var(--cream-50)] hover:bg-[var(--green-700)] transition-colors shadow-xs cursor-pointer self-start sm:self-auto"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Tambah Rekening Bank</span>
+            </button>
+          </div>
+
+          {bankAccounts.length === 0 ? (
+            <div className="p-8 rounded-2xl bg-[var(--cream-50)] border border-dashed border-[var(--cream-300)] text-center space-y-2">
+              <Building2 className="w-8 h-8 text-[var(--ink-400)] opacity-40 mx-auto" />
+              <p className="text-xs font-medium text-[var(--ink-600)]">
+                Belum ada rekening bank yang didaftarkan.
+              </p>
+              <button
+                type="button"
+                onClick={handleAddBank}
+                className="text-xs font-bold text-[var(--green-800)] hover:text-[var(--gold-700)] inline-flex items-center gap-1 cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Tambahkan Rekening Pertama</span>
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {bankAccounts.map((acc, idx) => (
+                <div
+                  key={idx}
+                  className="p-5 rounded-2xl bg-[var(--cream-50)] border border-[var(--cream-200)] shadow-xs space-y-4 relative group"
+                >
+                  <div className="flex items-center justify-between pb-2 border-b border-[var(--cream-200)]">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-[var(--green-950)] text-[var(--gold-300)] text-xs font-mono font-bold flex items-center justify-center">
+                        {idx + 1}
+                      </span>
+                      <span className="text-xs font-bold text-[var(--ink-900)]">
+                        {acc.bank ? acc.bank : `Rekening #${idx + 1}`}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveBank(idx)}
+                      title="Hapus rekening ini"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-[var(--terracotta-500)] hover:bg-[var(--terracotta-50)] hover:text-[var(--terracotta-600)] transition-colors cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Hapus</span>
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor={`bank-name-${idx}`} className="block text-[11px] font-semibold text-[var(--ink-700)] mb-1">
+                        Nama Bank
+                      </label>
+                      <input
+                        id={`bank-name-${idx}`}
+                        type="text"
+                        placeholder="Contoh: Bank BCA, Bank BSI, Bank Mandiri"
+                        value={acc.bank}
+                        onChange={(e) => {
+                          const updated = [...bankAccounts];
+                          updated[idx].bank = e.target.value;
+                          setBankAccounts(updated);
+                        }}
+                        className="w-full px-3 py-2 rounded-xl bg-[var(--cream-100)] border border-[var(--cream-200)] text-xs font-medium focus:outline-hidden focus:border-[var(--green-700)] focus:ring-1 focus:ring-[var(--green-700)]"
+                      />
+                      {/* Bank Presets Pill */}
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {["Bank BCA", "Bank BSI", "Bank Mandiri", "Bank BRI", "Bank BNI", "Bank Muamalat"].map((preset) => (
+                          <button
+                            key={preset}
+                            type="button"
+                            onClick={() => {
+                              const updated = [...bankAccounts];
+                              updated[idx].bank = preset;
+                              setBankAccounts(updated);
+                            }}
+                            className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--cream-200)]/60 text-[var(--ink-700)] hover:bg-[var(--gold-500)]/20 hover:text-[var(--gold-800)] transition-colors cursor-pointer"
+                          >
+                            {preset.replace("Bank ", "")}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label htmlFor={`bank-number-${idx}`} className="block text-[11px] font-semibold text-[var(--ink-700)] mb-1">
+                        Nomor Rekening
+                      </label>
+                      <input
+                        id={`bank-number-${idx}`}
+                        type="text"
+                        placeholder="Contoh: 1234567890"
+                        value={acc.number}
+                        onChange={(e) => {
+                          const updated = [...bankAccounts];
+                          updated[idx].number = e.target.value;
+                          setBankAccounts(updated);
+                        }}
+                        className="w-full px-3 py-2 rounded-xl bg-[var(--cream-100)] border border-[var(--cream-200)] font-mono text-xs font-bold text-[var(--green-950)] focus:outline-hidden focus:border-[var(--green-700)] focus:ring-1 focus:ring-[var(--green-700)]"
+                      />
+                      <span className="text-[10px] text-[var(--ink-500)] mt-1 block">
+                        Pastikan nomor rekening tepat agar donatur dapat menyalin dengan akurat.
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor={`bank-holder-${idx}`} className="block text-[11px] font-semibold text-[var(--ink-700)] mb-1">
+                        Atas Nama Rekening
+                      </label>
+                      <input
+                        id={`bank-holder-${idx}`}
+                        type="text"
+                        placeholder="Contoh: Yayasan Ajirasa Aksara Semesta"
+                        value={acc.holder}
+                        onChange={(e) => {
+                          const updated = [...bankAccounts];
+                          updated[idx].holder = e.target.value;
+                          setBankAccounts(updated);
+                        }}
+                        className="w-full px-3 py-2 rounded-xl bg-[var(--cream-100)] border border-[var(--cream-200)] text-xs focus:outline-hidden focus:border-[var(--green-700)] focus:ring-1 focus:ring-[var(--green-700)]"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor={`bank-branch-${idx}`} className="block text-[11px] font-semibold text-[var(--ink-700)] mb-1">
+                        Kantor Cabang
+                      </label>
+                      <input
+                        id={`bank-branch-${idx}`}
+                        type="text"
+                        placeholder="Contoh: KC Cirebon / Kantor Cabang"
+                        value={acc.branch}
+                        onChange={(e) => {
+                          const updated = [...bankAccounts];
+                          updated[idx].branch = e.target.value;
+                          setBankAccounts(updated);
+                        }}
+                        className="w-full px-3 py-2 rounded-xl bg-[var(--cream-100)] border border-[var(--cream-200)] text-xs focus:outline-hidden focus:border-[var(--green-700)] focus:ring-1 focus:ring-[var(--green-700)]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
+
+        {settingsFeedback && (
+          <div
+            className={`p-4 rounded-2xl flex items-start gap-3 border ${
+              settingsFeedback.type === "success"
+                ? "bg-[var(--green-900)] text-[var(--gold-300)] border-[var(--gold-500)]/40"
+                : "bg-[var(--terracotta-50)] text-[var(--terracotta-700)] border-[var(--terracotta-200)]"
+            }`}
+          >
+            {settingsFeedback.type === "success" ? (
+              <CheckCircle2 className="w-5 h-5 text-[var(--gold-400)] shrink-0 mt-0.5" />
+            ) : (
+              <AlertCircle className="w-5 h-5 text-[var(--terracotta-600)] shrink-0 mt-0.5" />
+            )}
+            <p className="text-xs font-semibold leading-relaxed">{settingsFeedback.message}</p>
+          </div>
+        )}
 
         <div className="flex justify-end">
           <button
             type="submit"
-            className="px-8 py-3 rounded-full text-xs font-semibold bg-gold-gradient text-[var(--green-950)] hover:brightness-110 shadow-lg flex items-center gap-2 cursor-pointer"
+            disabled={settingsSaving}
+            className="px-8 py-3 rounded-full text-xs font-semibold bg-gold-gradient text-[var(--green-950)] hover:brightness-110 shadow-lg flex items-center gap-2 cursor-pointer disabled:opacity-50"
           >
             <Save className="w-4 h-4" />
-            <span>Simpan Semua Pengaturan</span>
+            <span>{settingsSaving ? "Menyimpan Pengaturan..." : "Simpan Semua Pengaturan"}</span>
           </button>
         </div>
       </form>

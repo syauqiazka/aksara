@@ -24,6 +24,8 @@ export default async function HomePage() {
   const jinanList = await db.getPublicInfakJinan();
   const reports = await db.getReports(true);
   const latestReport = reports[0];
+  const bankAccounts = await db.getBankAccounts();
+  const primaryBank = bankAccounts.find((b) => b.number && b.number.trim().length > 0) || bankAccounts[0];
 
   return (
     <div className="flex flex-col w-full overflow-hidden">
@@ -496,13 +498,23 @@ export default async function HomePage() {
               Rekening Resmi Yayasan
             </div>
             <div className="font-serif text-xl sm:text-2xl font-bold text-[var(--cream-50)]">
-              Bank BCA
+              {primaryBank?.bank || "Bank BCA"}
             </div>
+            {primaryBank?.number ? (
+              <div className="font-mono text-lg font-bold text-[var(--gold-300)] my-1 tracking-wider">
+                {primaryBank.number}
+              </div>
+            ) : null}
             <div className="text-xs text-[var(--cream-200)] mt-1">
-              a.n. Yayasan Ajirasa Aksara Semesta (Sahabat Aksara)
+              a.n. {primaryBank?.holder || "Yayasan Ajirasa Aksara Semesta"}
             </div>
+            {primaryBank?.branch ? (
+              <div className="text-[11px] text-[var(--cream-200)]/70 mt-0.5">
+                Cabang: {primaryBank.branch}
+              </div>
+            ) : null}
             <div className="mt-3 inline-block px-3 py-1 rounded-full text-xs font-semibold bg-[var(--gold-500)]/20 text-[var(--gold-300)] border border-[var(--gold-500)]/30">
-              Konfirmasi &amp; Donasi Online Terbuka
+              {primaryBank?.number ? "Konfirmasi & Donasi Online Terbuka" : "Nomor Rekening Segera Diumumkan"}
             </div>
           </div>
 
