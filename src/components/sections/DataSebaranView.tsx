@@ -232,33 +232,44 @@ export default function DataSebaranView({
       </div>
 
       {/* 2. Interactive National Map (Pratinjau Sebaran) */}
-      <IndonesiaMap
-        infakData={initialInfakJinan.map((j) => ({
-          id: j.id,
-          mushaf_no: j.mushaf_no,
-          donor_name: j.display_donor_name,
-          show_donor_name: true,
-          recipient_name: j.pesantren_name,
-          recipient_type: "pesantren" as const,
-          province: j.donor_origin,
-          city: j.donor_origin,
-          district: "",
-          lat: null,
-          lng: null,
-          distributed_at: j.distributed_at,
-          quantity: 1,
-          photo_url: j.photos[0]?.url || null,
-          notes: null,
-          status: "published" as const,
-          created_at: j.distributed_at,
-          updated_at: j.distributed_at,
-        }))}
-        geberData={initialGeber}
-        activeTab="infak"
-      />
+      <div className="rounded-3xl overflow-hidden border border-[var(--gold-500)]/30 bg-[var(--green-950)]/80 p-4 sm:p-6 shadow-2xl">
+        <div className="flex items-center justify-between mb-4 px-2">
+          <div className="text-xs uppercase tracking-wider text-[var(--gold-400)] font-semibold flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-[var(--gold-400)]" />
+            <span>Peta Persebaran Titik Penyaluran Nusantara</span>
+          </div>
+          <span className="text-[11px] text-[var(--cream-200)]/70 hidden sm:inline">
+            Klik titik koordinat pulau untuk melihat detail penyaluran
+          </span>
+        </div>
+        <IndonesiaMap
+          infakData={initialInfakJinan.map((j) => ({
+            id: j.id,
+            mushaf_no: j.mushaf_no,
+            donor_name: j.display_donor_name,
+            show_donor_name: true,
+            recipient_name: j.pesantren_name,
+            recipient_type: "pesantren" as const,
+            province: j.donor_origin,
+            city: j.donor_origin,
+            district: "",
+            lat: null,
+            lng: null,
+            distributed_at: j.distributed_at,
+            quantity: 1,
+            photo_url: j.photos[0]?.url || null,
+            notes: null,
+            status: "published" as const,
+            created_at: j.distributed_at,
+            updated_at: j.distributed_at,
+          }))}
+          geberData={initialGeber}
+          activeTab="infak"
+        />
+      </div>
 
-      {/* 3. Search & Filter Bar */}
-      <div className="p-6 rounded-3xl bg-[var(--cream-100)] border border-[var(--cream-200)] shadow-sm space-y-4">
+      {/* 3. Search & Filter Bar (Sticky Toolbar) */}
+      <div className="sticky top-20 z-20 p-5 sm:p-6 rounded-3xl bg-[var(--cream-100)]/95 backdrop-blur-md border border-[var(--cream-200)] shadow-md space-y-4">
         <div className="flex flex-col md:flex-row gap-4 items-center">
           {/* Search box */}
           <div className="w-full md:flex-1">
@@ -395,8 +406,8 @@ export default function DataSebaranView({
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
                       <tr className="bg-[var(--green-950)] text-[var(--cream-50)] font-serif uppercase tracking-wider text-[11px]">
-                        <th className="py-4 px-3 text-center sticky left-0 z-10 bg-[var(--green-950)]">No.</th>
-                        <th className="py-4 px-4 sticky left-12 z-10 bg-[var(--green-950)]">Donatur</th>
+                        <th className="py-4 px-3 text-center sticky left-0 z-10 bg-[var(--green-950)] w-14">No.</th>
+                        <th className="py-4 px-4 sticky left-14 z-10 bg-[var(--green-950)] shadow-[2px_0_6px_rgba(0,0,0,0.2)]">Donatur</th>
                         <th className="py-4 px-3">Asal</th>
                         <th className="py-4 px-3 text-center">Urutan Mushaf</th>
                         <th className="py-4 px-4">Dedikasi untuk</th>
@@ -415,10 +426,10 @@ export default function DataSebaranView({
                             key={item.id}
                             className="hover:bg-[var(--cream-100)] transition-colors group"
                           >
-                            <td className="py-4 px-3 text-center font-mono text-[var(--ink-600)] sticky left-0 bg-[var(--cream-50)] group-hover:bg-[var(--cream-100)]">
+                            <td className="py-4 px-3 text-center font-mono text-[var(--ink-600)] sticky left-0 bg-[var(--cream-50)] group-hover:bg-[var(--cream-100)] z-10">
                               {displayIndex}
                             </td>
-                            <td className="py-4 px-4 font-semibold text-[var(--green-950)] sticky left-12 bg-[var(--cream-50)] group-hover:bg-[var(--cream-100)]">
+                            <td className="py-4 px-4 font-semibold text-[var(--green-950)] sticky left-14 bg-[var(--cream-50)] group-hover:bg-[var(--cream-100)] z-10 shadow-[2px_0_6px_rgba(0,0,0,0.04)]">
                               {item.display_donor_name}
                             </td>
                             <td className="py-4 px-3 text-[var(--ink-600)]">

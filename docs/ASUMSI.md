@@ -91,3 +91,27 @@ Berdasarkan dokumen kerangka terbaru (`Kerangka_Deskripsi_Website_Sahabat_Aksara
    - Peta interaktif `IndonesiaMap` dan tab BUSS / Yatim Berdikari (tetap utuh).
 4. **Privasi Nomor HP**:
    - Nomor HP donatur dan santri **sama sekali tidak tampil** di tabel utama maupun halaman detail publik (tidak ada kolom HP di publik, tidak diserialisasi di RSC/JSON). Catatan perbedaan dengan docx ("Terlampir") tetap dipertahankan untuk konfirmasi owner.
+
+
+---
+
+## 11. Resolusi Konflik MASTER.md vs DESIGN.md (Rombak Layout ui-ux-pro-max)
+
+Berdasarkan instruksi perombakan layout menggunakan skill `ui-ux-pro-max`, berikut rekonsiliasi dan resolusi konflik antara keluaran generator (`MASTER.md`) dan acuan utama repositori (`DESIGN.md`):
+
+1. **Warna Palet Dasar (TERKUNCI)**:
+   - *Keluaran MASTER.md*: Menyarankan Cyan (`#0891B2`) dan Orange (`#EA580C`) sebagai palet umum nonprofit.
+   - *Resolusi*: **DITOLAK**. `DESIGN.md` §2 menang mutlak. Warna dasar tetap Hijau Zamrud (`--green-950` / `--green-800`) dan Emas (`--gold-500` / `--gold-400`), didukung Krem (`--cream-50`) dan Sage (`--sage-100`). Palet ini diambil langsung dari logo resmi yayasan.
+2. **Tipografi Display & UI (TERKUNCI)**:
+   - *Keluaran MASTER.md*: Menyarankan kombinasi Inter + Playfair Display via Google Fonts external.
+   - *Resolusi*: **DITOLAK**. Pasangan tipografi tetap **Fraunces** (display berkarakter kaligrafis) + **Plus Jakarta Sans** (teks isi terbaca) + **Amiri / Scheherazade New** (Arab resmi) yang di-self host via `next/font`.
+3. **Dial Spasi & Variansi Layout (DIADOPSI)**:
+   - *Keluaran MASTER.md*: Variance 8/10 (asimetris tinggi), Motion 8/10 (animasi kompleks berakar), Density 3/10 (spacious/lega).
+   - *Resolusi*: **DITERIMA & DIADOPSI**. Pola grid simetris generik (3 kartu sama rata, 4 kartu sama rata) diubah menjadi komposisi asimetris editorial (7:5 dan 8:4) dengan white-space yang disengaja.
+4. **Data Sebaran Override (DIADOPSI)**:
+   - *Keluaran data-sebaran.md*: Kontainer data lebar (1400px / full-bleed), high density pada data grid, eliminasi auto-play tanpa kontrol, dan layout kartu bertumpuk pada mobile.
+   - *Resolusi*: **DITERIMA & DIADOPSI**. Struktur Data Sebaran dirancang sebagai "Command Center" transparansi dengan KPI strip di atas, peta berdimensi penuh, dan tabel dengan kolom beku (`sticky left`).
+
+5. **Standar Desain Admin Backoffice (Tambahan Cakupan)**:
+   - *Keluaran admin.md*: Menyarankan Dark Tech (#0F172A) + Glassmorphism backdrop-blur tipis + Fira Code/Fira Sans.
+   - *Resolusi*: **DITOLAK**. Admin tetap menggunakan token warna yayasan (`--green-950` untuk topbar/sidebar aksen, background kerja `--cream-50`/`--cream-100`, dan teks `--ink-900`) untuk menjamin konsistensi sistem dan kenyamanan mata pengurus saat entri data berjam-jam. Glassmorphism diganti dengan solid border & elevasi halus yang kokoh.

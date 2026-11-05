@@ -56,7 +56,7 @@ export default function AdminLoginPage() {
           <p className="text-[11px] text-[var(--gold-300)] uppercase tracking-[0.18em] font-semibold mb-2">
             Sahabat Aksara
           </p>
-          <h1 className="font-serif text-3xl font-bold text-[var(--cream-50)]">
+          <h1 className="font-fraunces text-3xl font-bold text-[var(--cream-50)]">
             Masuk Pengelola
           </h1>
           <p className="text-sm text-[var(--cream-200)]/80 mt-2 leading-relaxed">
@@ -118,7 +118,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full min-h-12 px-5 rounded-lg text-sm font-semibold bg-gold-gradient text-[var(--green-950)] hover:brightness-110 shadow-lg disabled:opacity-50 transition-all flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold-300)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--green-900)]"
+            className="w-full min-h-12 px-5 rounded-lg text-sm font-semibold bg-gold-gradient text-[var(--green-950)] hover:brightness-110 shadow-lg disabled:opacity-50 transition-all flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold-300)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--green-900)] cursor-pointer"
           >
             <ShieldCheck className="w-4 h-4" />
             <span>{loading ? "Memverifikasi..." : "Masuk ke Dashboard"}</span>

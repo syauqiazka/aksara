@@ -3,7 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { programsContent } from "@/content/programs";
 import Button from "@/components/ui/Button";
-import { CheckCircle2, ArrowLeft, HeartHandshake, HelpCircle, Target } from "lucide-react";
+import PageHeader from "@/components/ui/PageHeader";
+import { CheckCircle2, HeartHandshake, Target, ArrowRight } from "lucide-react";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -14,7 +15,7 @@ export async function generateMetadata({ params }: Props) {
   const program = programsContent.find((p) => p.slug === slug || p.aliases?.includes(slug));
   if (!program) return { title: "Program Tidak Ditemukan" };
   return {
-    title: program.title,
+    title: `${program.title} | Program Yayasan Sahabat Aksara`,
     description: program.shortDesc,
   };
 }
@@ -28,53 +29,24 @@ export default async function ProgramDetailPage({ params }: Props) {
   }
 
   return (
-    <div className="flex flex-col w-full bg-[var(--cream-50)] text-[var(--ink-900)] pt-20">
-      {/* Detail Hero */}
-      <section className="relative py-20 bg-[var(--green-950)] text-[var(--cream-50)] px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="absolute inset-0 bg-islamic-stars opacity-25 pointer-events-none" />
-        <div className="relative z-10 max-w-5xl mx-auto">
-          <Link
-            href="/program"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--gold-400)] hover:text-[var(--gold-300)] mb-6 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Kembali ke Daftar Program</span>
-          </Link>
+    <div className="flex flex-col w-full bg-[var(--cream-50)] text-[var(--ink-900)]">
+      {/* 1. Page Header Terpadu */}
+      <PageHeader
+        eyebrow={`Pilar: ${program.pillar}`}
+        title={program.title}
+        subtitle={program.shortDesc}
+        breadcrumbs={[
+          { label: "Program", href: "/program" },
+          { label: program.title },
+        ]}
+      />
 
-          <div className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[var(--green-900)] text-[var(--gold-300)] border border-[var(--gold-500)]/30 mb-4">
-            Pilar: {program.pillar}
-          </div>
-
-          <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-bold [text-wrap:balance] text-[var(--cream-50)]">
-            {program.title}
-          </h1>
-
-          <p className="mt-4 text-base sm:text-lg text-[var(--cream-100)]/90 max-w-3xl leading-relaxed">
-            {program.shortDesc}
-          </p>
-
-          {program.targetMushafOrGoal && (
-            <div className="mt-6 flex items-center gap-3">
-              <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[var(--gold-500)] text-[var(--green-950)] text-xs font-bold">
-                <Target className="w-4 h-4" />
-                Target: {program.targetMushafOrGoal}
-              </span>
-              {program.pricePerUnit && (
-                <span className="px-4 py-1.5 rounded-full bg-[var(--green-900)] text-[var(--gold-300)] border border-[var(--gold-500)]/40 text-xs font-bold">
-                  {program.pricePerUnit}
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Main Content & Sidebar */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Main article */}
+      {/* 2. Main Content & Participation Sidebar (8:4 Layout) */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          {/* Main Article (8 Kolom) */}
           <div className="lg:col-span-8 space-y-12">
-            {/* Visual Header */}
+            {/* Visual Header Mihrab */}
             <div className="relative aspect-[16/9] w-full rounded-3xl overflow-hidden border-2 border-[var(--gold-500)]/40 shadow-xl bg-[var(--green-950)]">
               <Image
                 src={program.heroImage}
@@ -82,21 +54,32 @@ export default async function ProgramDetailPage({ params }: Props) {
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 800px"
+                priority
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-[var(--green-950)]/70 via-transparent to-transparent" />
+              {program.pricePerUnit && (
+                <div className="absolute bottom-6 right-6 bg-gold-gradient text-[var(--green-950)] text-xs font-bold font-mono px-4 py-1.5 rounded-full shadow-lg">
+                  {program.pricePerUnit}
+                </div>
+              )}
             </div>
 
             {program.quote && (
-              <blockquote className="p-6 rounded-2xl bg-[var(--cream-100)] border-l-4 border-[var(--gold-600)] italic font-serif text-base sm:text-lg text-[var(--ink-600)]">
+              <blockquote className="p-6 rounded-2xl bg-[var(--cream-100)] border-l-4 border-[var(--gold-600)] italic font-serif text-base sm:text-lg text-[var(--ink-600)] leading-relaxed">
                 &ldquo;{program.quote}&rdquo;
               </blockquote>
             )}
 
             {/* Overview */}
-            <div>
-              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[var(--ink-900)] mb-4">
-                Latar Belakang & Urgensi Program
+            <div className="space-y-4">
+              <div className="text-xs uppercase tracking-[0.2em] text-[var(--gold-700)] font-semibold">
+                Latar Belakang &amp; Sasaran
+              </div>
+              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[var(--ink-900)]">
+                Ikhtisar Khidmat Program
               </h2>
-              <div className="space-y-4 text-base text-[var(--ink-600)] leading-relaxed">
+              <div className="w-16 h-1 bg-[var(--gold-600)] rounded-full mb-4" />
+              <div className="space-y-4 text-sm sm:text-base text-[var(--ink-600)] leading-relaxed font-sans">
                 {program.overview.map((p, idx) => (
                   <p key={idx}>{p}</p>
                 ))}
@@ -104,11 +87,14 @@ export default async function ProgramDetailPage({ params }: Props) {
             </div>
 
             {/* Impact Highlights */}
-            <div>
-              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[var(--ink-900)] mb-4">
-                Dampak & Keunggulan Khidmat
+            <div className="space-y-4 pt-6 border-t border-[var(--cream-200)]">
+              <div className="text-xs uppercase tracking-[0.2em] text-[var(--green-700)] font-semibold">
+                Keunggulan &amp; Dampak Nyata
+              </div>
+              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[var(--ink-900)]">
+                Dampak Khidmat yang Dihadirkan
               </h2>
-              <div className="space-y-3">
+              <div className="space-y-3 pt-2">
                 {program.impactPoints.map((point, idx) => (
                   <div key={idx} className="flex items-start gap-3 p-4 rounded-2xl bg-[var(--cream-100)] border border-[var(--cream-200)]">
                     <CheckCircle2 className="w-5 h-5 text-[var(--green-700)] flex-shrink-0 mt-0.5" />
@@ -119,21 +105,29 @@ export default async function ProgramDetailPage({ params }: Props) {
             </div>
           </div>
 
-          {/* Sticky Participation Sidebar */}
-          <div className="lg:col-span-4">
-            <div className="lg:sticky lg:top-28 p-6 sm:p-8 rounded-3xl bg-[var(--green-950)] text-[var(--cream-50)] border-2 border-[var(--gold-500)]/40 shadow-2xl space-y-6">
-              <div className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[var(--gold-500)] text-[var(--green-950)]">
-                Cara Berpartisipasi
+          {/* Sticky Participation Sidebar (4 Kolom) */}
+          <div className="lg:col-span-4 lg:sticky lg:top-28">
+            <div className="p-6 sm:p-8 rounded-3xl bg-[var(--green-950)] text-[var(--cream-50)] border-2 border-[var(--gold-500)]/40 shadow-2xl space-y-6">
+              <div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--gold-400)] block mb-1">
+                  Partisipasi Donasi
+                </span>
+                <h3 className="font-serif text-2xl font-bold text-[var(--cream-50)]">
+                  Langkah Mengambil Bagian
+                </h3>
               </div>
 
-              <h3 className="font-serif text-2xl font-bold text-[var(--cream-50)]">
-                Langkah Bergabung dalam Amal Jariyah Ini
-              </h3>
+              {program.targetMushafOrGoal && (
+                <div className="p-3.5 rounded-2xl bg-[var(--green-900)]/70 border border-[var(--gold-500)]/25 flex items-center gap-2.5 text-xs text-[var(--gold-300)]">
+                  <Target className="w-4 h-4 text-[var(--gold-400)] flex-shrink-0" />
+                  <span>Target: <strong>{program.targetMushafOrGoal}</strong></span>
+                </div>
+              )}
 
-              <div className="space-y-4">
+              <div className="space-y-3 pt-2">
                 {program.howToJoin.map((step, idx) => (
                   <div key={idx} className="flex gap-3 text-xs sm:text-sm text-[var(--cream-100)]">
-                    <div className="w-6 h-6 rounded-full bg-[var(--gold-500)] text-[var(--green-950)] font-bold flex items-center justify-center flex-shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-[var(--gold-500)] text-[var(--green-950)] font-bold flex items-center justify-center flex-shrink-0 text-xs">
                       {idx + 1}
                     </div>
                     <p className="leading-snug">{step}</p>
@@ -141,16 +135,17 @@ export default async function ProgramDetailPage({ params }: Props) {
                 ))}
               </div>
 
-              <div className="pt-4 border-t border-[var(--gold-500)]/30 space-y-3">
-                <Button href="/donasi" variant="gold" size="lg" className="w-full">
+              <div className="pt-4 border-t border-[var(--gold-500)]/20 space-y-3">
+                <Button href="/donasi" variant="gold" size="lg" className="w-full shadow-lg">
                   <HeartHandshake className="w-5 h-5 text-[var(--green-950)]" />
-                  <span>Donasi untuk Program Ini</span>
+                  <span>Salurkan Donasi</span>
                 </Button>
                 <Link
                   href="/data-sebaran"
-                  className="w-full py-3 flex items-center justify-center text-xs font-semibold text-[var(--gold-300)] hover:text-white"
+                  className="w-full py-2.5 flex items-center justify-center gap-1.5 text-xs font-semibold text-[var(--gold-300)] hover:text-white"
                 >
-                  Lihat Peta Penyaluran &rarr;
+                  <span>Pantau Penyaluran di Data Sebaran</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
             </div>
@@ -160,4 +155,3 @@ export default async function ProgramDetailPage({ params }: Props) {
     </div>
   );
 }
-

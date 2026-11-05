@@ -65,9 +65,9 @@ test.describe("Tahap 5-A: Tabel Infak Jinan Dua Tingkat (Donasi -> Santri) & Pri
     await page.waitForURL(/\/data-sebaran\/infak-jinan\/.+/);
 
     // Header ringkasan donasi di halaman detail
-    await expect(page.getByText("Mushaf ke-1", { exact: true })).toBeVisible();
+    await expect(page.getByText("Mushaf ke-1", { exact: true }).first()).toBeVisible();
     await expect(page.getByText("Inayah Binti Kartoni", { exact: true })).toBeVisible();
-    await expect(page.getByText("Pondok Pesantren Madrasah Al-Huffazh 2 Gedongan")).toBeVisible();
+    await expect(page.getByText("Pondok Pesantren Madrasah Al-Huffazh 2 Gedongan", { exact: true })).toBeVisible();
 
     // Tabel santri penerima
     const santriHeading = page.getByRole("heading", { name: /Daftar Santri Penerima/i });
@@ -174,7 +174,7 @@ test.describe("Tahap 5-A: Tabel Infak Jinan Dua Tingkat (Donasi -> Santri) & Pri
     // Klik link di mobile membawa ke detail donasi
     await mobileSantriBtn.click();
     await page.waitForURL(/\/data-sebaran\/infak-jinan\/.+/);
-    await expect(page.getByText("Mushaf ke-1", { exact: true })).toBeVisible();
+    await expect(page.getByText("Mushaf ke-1", { exact: true }).first()).toBeVisible();
     await expect(page.locator(".md\\:hidden").getByText("Muhammad Faiz").first()).toBeVisible();
   });
 });

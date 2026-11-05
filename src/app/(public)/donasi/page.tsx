@@ -1,49 +1,41 @@
-import Image from "next/image";
 import { db } from "@/lib/db/api";
-import { Phone, Mail } from "lucide-react";
+import { Phone, Mail, ShieldCheck } from "lucide-react";
 import BankAccountsList from "@/components/sections/BankAccountsList";
+import PageHeader from "@/components/ui/PageHeader";
 
 export const metadata = {
-  title: "Info Donasi, Rekening & Dokumentasi Program",
+  title: "Info Donasi & Rekening Resmi | Yayasan Sahabat Aksara",
   description:
-    "Rekening resmi infak Yayasan Sahabat Aksara, konfirmasi donasi via WhatsApp, kampanye tanggap bencana tematik, dan galeri dokumentasi penyaluran.",
+    "Rekening resmi infak Yayasan Sahabat Aksara, konfirmasi donasi via WhatsApp, kampanye tanggap bencana tematik, dan panduan wakaf mushaf jariyah.",
 };
 
 export default async function DonasiPage() {
   const bankAccounts = await db.getBankAccounts();
   const campaigns = await db.getThemedCampaigns();
-  const gallery = await db.getGalleryItems();
   const contact = await db.getContactInfo();
 
   return (
-    <div className="flex flex-col w-full bg-[var(--cream-50)] text-[var(--ink-900)] pt-20">
-      {/* 1. Hero Header */}
-      <section className="relative py-20 bg-[var(--green-950)] text-[var(--cream-50)] px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="absolute inset-0 bg-islamic-stars opacity-25 pointer-events-none" />
-        <div className="relative z-10 max-w-4xl mx-auto text-center">
-          <div className="text-xs uppercase tracking-[0.2em] text-[var(--gold-400)] font-semibold mb-4">
-            Kanal Donasi & Amanah Jariyah
-          </div>
-          <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-bold [text-wrap:balance]">
-            Salurkan Amal Jariyah untuk Sejuta Pahala Abadi
-          </h1>
-          <p className="mt-6 text-base sm:text-lg text-[var(--cream-100)]/90 max-w-2xl mx-auto leading-relaxed">
-            Semua transaksi dikelola secara profesional dan transparan. Konfirmasikan infak Anda agar dicatat pada nomor mushaf dan pelaporan resmi.
-          </p>
-        </div>
-      </section>
+    <div className="flex flex-col w-full bg-[var(--cream-50)] text-[var(--ink-900)]">
+      {/* 1. PAGE HEADER RESMI */}
+      <PageHeader
+        eyebrow="Kanal Donasi &amp; Rekening Resmi"
+        title="Salurkan Amal Jariyah untuk Sejuta Pahala Abadi"
+        subtitle="Semua transaksi dikelola secara profesional, akuntabel, dan transparan. Konfirmasikan infak Anda agar dicatat pada nomor mushaf dan pelaporan resmi yayasan."
+        breadcrumbs={[{ label: "Donasi" }]}
+      />
 
-      {/* 2. Rekening Resmi & Konfirmasi WhatsApp */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--gold-700)]">
+      {/* 2. REKENING BANK RESMI & KONFIRMASI WHATSAPP */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-12">
+        <div className="text-center max-w-2xl mx-auto">
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--gold-700)]">
             Kanal Transfer Bank Resmi
-          </span>
+          </div>
           <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[var(--ink-900)] mt-2">
             Rekening Yayasan Terverifikasi
           </h2>
-          <p className="text-sm text-[var(--ink-600)] mt-2">
-            Salin nomor rekening dengan satu klik untuk memudahkan transfer melalui mobile banking.
+          <div className="w-16 h-1 bg-[var(--gold-600)] rounded-full mx-auto mt-4" />
+          <p className="text-sm sm:text-base text-[var(--ink-600)] mt-4 leading-relaxed font-sans">
+            Salin nomor rekening dengan satu klik untuk memudahkan transfer melalui ATM atau mobile banking Anda.
           </p>
         </div>
 
@@ -51,13 +43,16 @@ export default async function DonasiPage() {
         <BankAccountsList initialAccounts={bankAccounts} />
 
         {/* WhatsApp Confirmation Banner */}
-        <div className="mt-12 p-8 rounded-3xl bg-[var(--green-900)] text-[var(--cream-50)] border-2 border-[var(--gold-500)]/40 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-2 text-center md:text-left">
-            <h3 className="font-serif text-2xl font-bold text-[var(--cream-50)]">
+        <div className="p-8 sm:p-10 rounded-3xl bg-[var(--green-950)] text-[var(--cream-50)] border-2 border-[var(--gold-500)]/40 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="space-y-3 text-center md:text-left">
+            <span className="text-xs uppercase tracking-wider text-[var(--gold-400)] font-semibold">
+              Layanan Konfirmasi Cepat
+            </span>
+            <h3 className="font-serif text-2xl sm:text-3xl font-bold text-[var(--cream-50)]">
               Sudah Melakukan Transfer Donasi?
             </h3>
-            <p className="text-sm text-[var(--cream-100)]/90 max-w-xl">
-              Konfirmasikan bukti transfer dan kirimkan nama custom yang ingin dicetak pada cover mushaf melalui kontak resmi layanan donatur kami.
+            <p className="text-sm text-[var(--cream-200)]/90 max-w-xl leading-relaxed font-sans">
+              Kirimkan bukti transfer dan cantumkan nama custom donatur / dedikasi keluarga yang ingin dicetak pada cover mushaf santri melalui layanan narahubung resmi.
             </p>
           </div>
           {contact.whatsapp ? (
@@ -65,15 +60,15 @@ export default async function DonasiPage() {
               href={`https://wa.me/${contact.whatsapp.replace(/[^0-9]/g, "")}?text=Assalamu'alaikum%20Sahabat%20Aksara,%20saya%20sudah%20melakukan%20transfer%20donasi...`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-semibold text-base bg-gold-gradient text-[var(--green-950)] hover:brightness-110 shadow-lg flex-shrink-0"
+              className="inline-flex items-center gap-2.5 px-8 py-4 rounded-full font-semibold text-sm sm:text-base bg-gold-gradient text-[var(--green-950)] hover:brightness-110 shadow-xl flex-shrink-0 transition-transform active:scale-95"
             >
               <Phone className="w-5 h-5 text-[var(--green-950)]" />
-              <span>Konfirmasi via WhatsApp</span>
+              <span>Konfirmasi via WhatsApp ({contact.whatsapp})</span>
             </a>
           ) : (
             <a
               href={`mailto:${contact.email}?subject=Konfirmasi%20Donasi%20Sahabat%20Aksara`}
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-semibold text-base bg-gold-gradient text-[var(--green-950)] hover:brightness-110 shadow-lg flex-shrink-0"
+              className="inline-flex items-center gap-2.5 px-8 py-4 rounded-full font-semibold text-sm sm:text-base bg-gold-gradient text-[var(--green-950)] hover:brightness-110 shadow-xl flex-shrink-0"
             >
               <Mail className="w-5 h-5 text-[var(--green-950)]" />
               <span>Konfirmasi via Email</span>
@@ -82,20 +77,20 @@ export default async function DonasiPage() {
         </div>
       </section>
 
-      {/* 3. Donasi Tematik (Tanggap Bencana) */}
+      {/* 3. DONASI TEMATIK KEBENCANAAN */}
       <section className="py-20 bg-[var(--cream-100)] px-4 sm:px-6 lg:px-8 border-y border-[var(--cream-200)]">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+        <div className="max-w-7xl mx-auto space-y-12">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[var(--cream-200)] pb-6">
             <div>
-              <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--terracotta-500)]">
+              <div className="text-xs uppercase tracking-[0.2em] text-[var(--terracotta-500)] font-semibold">
                 Tanggap Darurat Kemanusiaan
-              </span>
+              </div>
               <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[var(--ink-900)] mt-2">
-                Donasi Tematik Kebencanaan
+                Donasi Tematik Bencana Nusantara
               </h2>
             </div>
-            <p className="text-sm text-[var(--ink-600)] max-w-md">
-              Aksi siaga darurat logistik, obat-obatan, dan tempat bernaung bagi saudara-saudara kita yang tertimpa musibah.
+            <p className="text-sm text-[var(--ink-600)] max-w-md leading-relaxed font-sans">
+              Aksi siaga darurat logistik, obat-obatan, dan sarana ibadah darurat bagi saudara-saudara kita yang tertimpa musibah di pelosok tanah air.
             </p>
           </div>
 
@@ -110,8 +105,8 @@ export default async function DonasiPage() {
                   key={camp.id}
                   className="bg-[var(--cream-50)] rounded-3xl p-8 border border-[var(--cream-200)] shadow-sm hover:shadow-xl transition-all flex flex-col justify-between"
                 >
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
                       <span className="text-xs font-bold uppercase tracking-wider text-[var(--terracotta-500)]">
                         {camp.disaster_type} &bull; {camp.location}
                       </span>
@@ -126,21 +121,21 @@ export default async function DonasiPage() {
                       </span>
                     </div>
 
-                    <h3 className="font-serif text-2xl font-bold text-[var(--ink-900)] mb-3">
+                    <h3 className="font-serif text-2xl font-bold text-[var(--ink-900)]">
                       {camp.title}
                     </h3>
 
-                    <p className="text-sm text-[var(--ink-600)] leading-relaxed mb-6">
+                    <p className="text-sm text-[var(--ink-600)] leading-relaxed font-sans">
                       {camp.description}
                     </p>
 
                     {/* Progress Bar */}
-                    <div className="space-y-2 mb-6">
+                    <div className="space-y-2 pt-2">
                       <div className="flex items-center justify-between text-xs font-semibold">
-                        <span className="text-[var(--green-800)]">
+                        <span className="text-[var(--green-800)] font-mono">
                           Terkumpul: Rp {camp.collected_idr.toLocaleString("id-ID")}
                         </span>
-                        <span className="text-[var(--ink-600)]">
+                        <span className="text-[var(--ink-600)] font-mono">
                           Target: Rp {camp.target_idr.toLocaleString("id-ID")}
                         </span>
                       </div>
@@ -156,14 +151,16 @@ export default async function DonasiPage() {
                     </div>
                   </div>
 
-                  <a
-                    href={`https://wa.me/${contact.whatsapp.replace(/[^0-9]/g, "")}?text=Saya%20ingin%20berdonasi%20untuk%20kampanye:%20${encodeURIComponent(camp.title)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-3 rounded-full text-center text-xs font-bold bg-[var(--green-800)] text-[var(--cream-50)] hover:bg-[var(--green-700)] transition-colors shadow-sm"
-                  >
-                    Salurkan Bantuan untuk Kampanye Ini
-                  </a>
+                  <div className="pt-6">
+                    <a
+                      href={`https://wa.me/${contact.whatsapp ? contact.whatsapp.replace(/[^0-9]/g, "") : "6282262170018"}?text=Saya%20ingin%20berdonasi%20untuk%20kampanye:%20${encodeURIComponent(camp.title)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-3 rounded-full text-center text-xs font-bold bg-[var(--green-800)] text-[var(--cream-50)] hover:bg-[var(--green-700)] transition-colors shadow-sm block"
+                    >
+                      Salurkan Bantuan untuk Kampanye Ini
+                    </a>
+                  </div>
                 </div>
               );
             })}
@@ -171,72 +168,18 @@ export default async function DonasiPage() {
         </div>
       </section>
 
-      {/* 4. Galeri Dokumentasi Program */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--gold-700)]">
-            Bukti Nyata Pengabdian
-          </span>
-          <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[var(--ink-900)] mt-2">
-            Galeri Dokumentasi Program
-          </h2>
-          <p className="text-sm text-[var(--ink-600)] mt-2">
-            Momen serah terima mushaf, majlis tasmi&apos;, dan kebersamaan bersama santri tahfidz di berbagai daerah.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {gallery.map((item) => (
-            <div
-              key={item.id}
-              className="group relative rounded-3xl overflow-hidden border border-[var(--cream-200)] bg-[var(--green-950)] aspect-[4/3] shadow-md hover:shadow-2xl transition-all"
-            >
-              <Image
-                src={item.image_url}
-                alt={item.title}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
-                sizes="(max-width: 768px) 100vw, 33vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[var(--green-950)]/90 via-[var(--green-950)]/20 to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4 text-[var(--cream-50)]">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--gold-400)] mb-1">
-                  {item.program} &bull; {item.date}
-                </div>
-                <h4 className="font-serif text-lg font-bold leading-snug">
-                  {item.title}
-                </h4>
-                {item.caption && (
-                  <p className="text-xs text-[var(--cream-200)]/80 mt-1 line-clamp-2">
-                    {item.caption}
-                  </p>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 5. Mitra Sinergi Dakwah */}
-      <section className="py-16 bg-[var(--cream-100)] px-4 sm:px-6 lg:px-8 border-t border-[var(--cream-200)]">
-        <div className="max-w-4xl mx-auto text-center space-y-6">
-          <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--gold-700)]">
-            Sinergi Lembaga
-          </span>
-          <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[var(--ink-900)]">
-            Mitra Kami
-          </h2>
-          <div className="p-6 rounded-2xl bg-[var(--cream-50)] border border-[var(--gold-500)]/30 max-w-md mx-auto shadow-sm">
-            <h3 className="font-serif text-xl font-bold text-[var(--green-900)]">
-              Madrasah Al-Huffazh Gedongan
-            </h3>
-            <p className="text-xs text-[var(--ink-600)] mt-1.5">
-              Pondok Pesantren Pembinaan Kitab Kuning &amp; Tahfidz Al-Qur&apos;an 30 Juz &bull; Cirebon, Jawa Barat
-            </p>
+      {/* 4. FIQIH & TRANSPARANSI PRIVASI DONASI */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full">
+        <div className="p-8 rounded-3xl bg-[var(--cream-100)] border border-[var(--gold-500)]/30 space-y-4">
+          <div className="flex items-center gap-2.5 text-[var(--gold-700)] font-semibold text-sm">
+            <ShieldCheck className="w-5 h-5 text-[var(--green-800)]" />
+            <span>Kaidah Transparansi &amp; Fiqih Sedekah Jariyah</span>
           </div>
+          <p className="text-sm text-[var(--ink-600)] leading-relaxed font-sans">
+            Yayasan Sahabat Aksara menjunjung tinggi amanah donatur. Jika Anda menghendaki nama tidak ditampilkan pada tabel sebaran publik, sistem secara otomatis melabeli nama Anda sebagai <strong>&ldquo;Hamba Allah&rdquo;</strong>, namun nama dedikasi tetap tercetak penuh di sampul mushaf yang diterima oleh santri.
+          </p>
         </div>
       </section>
     </div>
   );
 }
-

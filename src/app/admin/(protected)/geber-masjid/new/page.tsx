@@ -223,7 +223,9 @@ export default function AdminNewGeberPage() {
             label="Foto Dokumentasi Geber Masjid (Opsional)"
             value={formData.photo_url}
             onChange={(url) => setFormData({ ...formData, photo_url: url })}
-            helperText="Upload foto aksi pembersihan atau sanitasi masjid. Disimpan di Vercel Blob."
+            file={selectedFile}
+            onFileChange={(f) => setSelectedFile(f)}
+            helperText="Upload foto aksi pembersihan atau sanitasi masjid. Otomatis dikompresi WebP."
           />
         </div>
 

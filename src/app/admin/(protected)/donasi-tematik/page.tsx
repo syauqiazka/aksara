@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Select from "@/components/ui/Select";
-import Image from "next/image";
-import { PlusCircle, Search, Trash2, Edit, CheckCircle, Clock, X, HeartHandshake, AlertCircle } from "lucide-react";
+import { PlusCircle, Search, Trash2, Edit, X, HeartHandshake } from "lucide-react";
 import { ThemedCampaign } from "@/lib/db/types";
 import ImageUploader from "@/components/admin/ImageUploader";
 

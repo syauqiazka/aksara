@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { PlusCircle, Search, Trash2, Edit, Eye, EyeOff } from "lucide-react";
+import { PlusCircle, Search, Trash2, Eye, EyeOff } from "lucide-react";
 import { GeberMasjidDistribution } from "@/lib/db/types";
 
 export default function AdminGeberListPage() {

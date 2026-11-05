@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import {
   UploadCloud,
-  Image as ImageIcon,
   X,
   Link2,
   CheckCircle2,

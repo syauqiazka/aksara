@@ -87,8 +87,8 @@ export default function HeroShowcase({ totalMushaf, totalMasjid }: HeroShowcaseP
         {/* Right Column: Layered Card Composition */}
         <div className="lg:col-span-5 relative flex justify-center">
           <div className="relative w-full max-w-md">
-            {/* Main Featured Photo Card */}
-            <div className="relative aspect-[4/5] rounded-3xl overflow-hidden border-2 border-[var(--gold-500)]/40 shadow-2xl bg-[var(--green-900)] group">
+            {/* Main Featured Photo Card in Arch / Mihrab Frame */}
+            <div className="relative aspect-[4/5] shape-mihrab overflow-hidden border-2 border-[var(--gold-500)]/60 shadow-2xl bg-[var(--green-900)] group">
               <Image
                 src="/images/infak-mushaf-custom.jpg"
                 alt="Mockup Mushaf Infak Custom Nama Donatur"
@@ -99,16 +99,16 @@ export default function HeroShowcase({ totalMushaf, totalMasjid }: HeroShowcaseP
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[var(--green-950)]/90 via-transparent to-transparent" />
 
-              {/* Tag pill at bottom of photo */}
+              {/* Editorial Caption at bottom of photo */}
               <div className="absolute bottom-5 left-5 right-5 text-[var(--cream-50)]">
-                <div className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[var(--gold-500)] text-[var(--green-950)] mb-1">
-                  Program Utama
+                <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--gold-400)] mb-1">
+                  Mushaf Custom Nama &bull; Program Jinan
                 </div>
                 <div className="font-serif font-bold text-lg text-[var(--cream-50)] leading-snug">
-                  Infak Al-Qur&apos;an Jinan
+                  Rp 100.000 / Mushaf Santri
                 </div>
-                <p className="text-xs text-[var(--cream-200)] mt-0.5">
-                  Rp 100.000 / mushaf custom nama &bull; Langsung sampai ke tangan santri pelosok.
+                <p className="text-xs text-[var(--cream-200)]/90 mt-1">
+                  Nama donatur tercetak abadi di cover mushaf para penghafal Al-Qur&apos;an.
                 </p>
               </div>
             </div>

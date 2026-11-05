@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { db } from "@/lib/db/api";
 import { BankAccount, ContactInfo } from "@/lib/db/types";
-import { Settings, Save, CheckCircle2, HardDrive, ArrowRight } from "lucide-react";
+import { Save, CheckCircle2, HardDrive, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminSettingsPage() {

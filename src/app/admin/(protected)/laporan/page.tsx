@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { PlusCircle, Search, Trash2, Edit, FileText } from "lucide-react";
+import { PlusCircle, Search, Trash2 } from "lucide-react";
 import { Report } from "@/lib/db/types";
 
 export default function AdminReportsListPage() {

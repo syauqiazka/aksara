@@ -143,6 +143,63 @@ Setiap halaman membuka dengan **momen sinematik**, lalu turun ke ritme membaca y
 8. **Laporan terbaru** (3 kartu) + **dokumentasi** (galeri).
 9. **CTA donasi** besar + rekening resmi.
 
+---
+
+## 6.1 Tata Letak & Ritme Komposisi Anti-Template (Editorial Asymmetric)
+
+Berdasarkan hasil analisis skill `ui-ux-pro-max` (Variance: 8/10, Motion: 8/10, Density: 3/10) dan aturan antislop, tata letak publik dilarang menggunakan pola generik "AI slop".
+
+### A. Anti-Pola yang Dihilangkan (AI Template Slop)
+1. **Bentuk Simetris Membosankan**: Dilarang mengulang pola "judul di tengah + baris garis pendek + 3 atau 4 kartu kotak identik" di setiap section.
+2. **Kapsul/Pill Inflasi**: Dilarang memberi background pil/border kapsul pada setiap sub-judul/eyebrow (misalnya `border border-gold-500/20 px-3 py-1 rounded-full`). Eyebrow harus berupa tipografi bersih dengan tracking rapi tanpa bingkai berlebih.
+3. **Monoton Kontainer**: Dilarang membungkus setiap section ke dalam kotak kaku `max-w-7xl mx-auto py-24 px-4` dengan jeda yang persis sama.
+4. **Glassmorphism Murahan**: Dilarang menggunakan backdrop-blur tipis dengan border putih pudar di atas background gelap. Gunakan solid tone bertekstur, garis emas 1px berkarakter, atau pembatas halus yang tegas.
+5. **Panah Dekoratif di Setiap Link**: Hindari `ArrowRight` di ujung setiap teks interaktif yang membuatnya tampak seperti template bootstrap.
+
+### B. Pola Tata Letak Baru (Asymmetric Editorial Rhythm)
+1. **Rasio Kolom Asimetris (7:5 & 8:4)**:
+   - Gunakan layout editorial berdampingan: kolom kiri lebar untuk narasi/angka display besar, kolom kanan sempit untuk aksi/daftar pendukung, atau sebaliknya.
+2. **Ritme Latar Belakang (Atmospheric Pacing)**:
+   - Selang-seling dramatis antara **Full-Bleed Hijau Zamrud Sakral (`--green-950`)** untuk momen pembuka, bukti peta, dan ikrar donasi, dengan **Krem Hangat Lapang (`--cream-50`/`--cream-100`)** untuk narasi pilar, kisah founder, dan data laporan.
+3. **Bukti & Data Sebagai Pahlawan Visual (Proof-First)**:
+   - Angka dampak (Mushaf, Masjid, Provinsi) dan Peta Sebaran Nusantara bukan sekadar elemen pelengkap bawah, melainkan jangkar kepercayaan (trust anchor) dengan skala tipografi masif.
+4. **Peran Foto Asli Editorial**:
+   - Foto founder Ahmad Dahlan dan kegiatan Tasmi'/Mushaf ditempatkan dengan perlakuan editorial: bingkai mihrab yang disengaja, caption berbobot, dan crop potret proporsional tanpa distorsi.
+5. **Data Sebaran Command Center**:
+   - Tampilan data sebaran disusun dalam hierarki: Ringkasan Metrik Kunci (KPI strip) di bagian paling atas -> Kontrol Navigasi Tab -> Peta Sebaran Nusantara lapang -> Toolbar Filter & Pencarian Lengket (Sticky) -> Tabel Data Terverifikasi dengan kolom nomor & donatur beku (`sticky left`).
+   - Tampilan mobile beralih ke kartu modular dengan tombol santri yang tegas dan nyaman disentuh (min. 44px tap target).
+
+---
+
+## 6.2 Sistem Bersama & Standar Desain Admin Backoffice
+
+### A. Sistem Bersama (Shared Design System)
+1. **Shell Publik (Navbar & Footer)**:
+   - Navbar: Transparan mengambang di atas hero gelap, bertransisi halus ke latar krem/hijau solid saat digulir. Menampilkan 6 menu terstruktur dan tombol donasi emas berkarakter tanpa tautan menuju `/admin`.
+   - Footer: Latar `--green-950` solid, garis ganda emas tipis, legalitas SK Kemenkumham, NPWP, informasi rekening satu-klik salin, dan narahubung resmi.
+2. **Subpage Header Pattern**:
+   - Header halaman dalam menggunakan latar `--green-950` terstruktur, breadcrumb ringkas yang jelas, judul display Fraunces berwibawa, dan subjudul penjelasan tanpa pill/kapsul berulang.
+3. **Form & Select Primitives**:
+   - Label selalu terikat (`for`/`id`), border `--cream-200` yang tegas, focus ring emas 2px, feedback validasi inline di bawah input (merah `--danger` dengan teks jelas). Tombol simpan memiliki status loading terpadu.
+
+### B. Prinsip Desain Admin Backoffice (Alat Kerja Pengurus)
+Admin adalah **alat kerja operasional yang cepat, padat, dan akurat**, bukan halaman pemasaran.
+1. **Hierarki Berorientasi Tugas**:
+   - Penataan antarmuka memprioritaskan aktivitas harian: Input Donasi Baru, Kelola Santri, Perbarui Hafalan Bulanan, dan Publikasi Laporan.
+2. **Kepadatan Informasi Tinggi (Compact Operational Density)**:
+   - Tabel administrasi menggunakan header sticky, kolom nomor urut dan status yang ringkas, pencarian real-time, filter status (Semua/Draft/Published), dan aksi per baris yang jelas (Edit, Santri, Hapus).
+3. **Indikator Status Ganda**:
+   - Status draft/published disajikan dengan teks + ikon (bukan mengandalkan warna semata), misalnya `CheckCircle` hijau untuk Terbit dan `Clock` oranye untuk Draf.
+4. **Form Donasi & Repeater Santri Ergonomis**:
+   - Form dibagi ke dalam seksi logis: Data Donatur -> Data Pesantren Tujuan -> Santri Penerima (Repeater Dinamis) -> Dokumentasi Foto (Upload-on-Save).
+   - Tombol simpan menempel tetap (*sticky bar*) di bagian bawah layar saat form panjang digulir.
+5. **Halaman Update Hafalan Cepat**:
+   - Dirancang untuk efisiensi entri data bulanan pengurus: daftar santri dengan baris input surat (dropdown 114 surah), ayat, saran juz otomatis, dan tombol "Salin dari Bulan Lalu".
+6. **Gerak Minimal & Fungsional**:
+   - Tanpa preloader, tanpa kursor kustom, tanpa parallax berat di area admin. Transisi terbatas pada feedback visual instan (toast notifikasi, modal dialog konfirmasi, dan skeleton loading).
+7. **Kepatuhan Token Brand**:
+   - Menggunakan token warna resmi yayasan (`--green-950`, `--green-800`, `--cream-50`, `--cream-100`) untuk konsistensi identitas, tanpa menerapkan gaya dark tech neon atau glassmorphism rapuh dari generator generic.
+
 ### Tentang Kami
 Profil → Kisah & latar belakang lembaga (scrollytelling: foto sticky di kiri, paragraf bergantian di kanan, timeline perjuangan: MA Al-Huffazh 2 Gedongan Cirebon → Paket C → Institut PTIQ Jakarta → yayasan) → Fokus pilar → Visi (layar penuh, berdedikasi memuliakan Al-Qur'an & memakmurkan masjid) → Misi (4 bidang) → **Makna Filosofis Nama** (A-K-S-A-R-A, interaktif) → **Makna Logo** (logo besar dengan titik-titik hotspot: tangan memangku globe, siluet buku terbuka, tunas bertumbuh, bentuk geometris, warna emas & hijau zamrud).
 

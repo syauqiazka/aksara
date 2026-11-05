@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Select from "@/components/ui/Select";
 import Image from "next/image";
-import { PlusCircle, Search, Trash2, Edit, Eye, EyeOff, X, Image as ImageIcon, CheckCircle2 } from "lucide-react";
+import { PlusCircle, Search, Trash2, Edit, Eye, EyeOff, X, Image as ImageIcon } from "lucide-react";
 import { GalleryItem } from "@/lib/db/types";
 import ImageUploader from "@/components/admin/ImageUploader";
 import { uploadPendingFileOnSave, deleteOldBlobAfterUpdate } from "@/lib/upload-helper";
@@ -83,12 +83,14 @@ export default function AdminGalleryPage() {
     setSubmitting(true);
     setFeedback(null);
     let uploadRollback = null;
+    let uploadCommit = null;
 
     try {
       let finalImg = formData.image_url;
       if (selectedFile) {
         const { url, rollback, commit } = await uploadPendingFileOnSave(selectedFile);
         uploadRollback = rollback;
+        uploadCommit = commit;
         finalImg = url || formData.image_url;
       }
 
@@ -105,6 +107,10 @@ export default function AdminGalleryPage() {
       const resData = await res.json();
       if (!res.ok) {
         throw new Error(resData.error || "Gagal menyimpan dokumentasi.");
+      }
+
+      if (uploadCommit) {
+        await uploadCommit();
       }
 
       if (editingItem && editingItem.image_url !== finalImg) {

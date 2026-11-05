@@ -1,6 +1,4 @@
 import { redirect } from "next/navigation";
-import Image from "next/image";
-import Link from "next/link";
 import { getAdminSession } from "@/lib/auth";
 import AdminNav from "@/components/admin/AdminNav";
 
@@ -23,15 +21,14 @@ export default async function AdminProtectedLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[var(--cream-50)] text-[var(--ink-900)] flex flex-col md:flex-row">
-      {/* Admin Sidebar Navigation */}
+    <div className="min-h-screen bg-[var(--cream-50)] text-[var(--ink-900)] flex flex-col md:flex-row antialiased">
+      {/* Admin Sidebar Navigation (Arah A) */}
       <AdminNav adminEmail={session.email} />
 
       {/* Main Workspace Area */}
-      <main className="flex-1 p-4 sm:p-8 lg:p-10 overflow-y-auto">
-        <div className="max-w-7xl mx-auto">{children}</div>
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto max-w-full">
+        <div className="max-w-6xl mx-auto">{children}</div>
       </main>
     </div>
   );
 }
-

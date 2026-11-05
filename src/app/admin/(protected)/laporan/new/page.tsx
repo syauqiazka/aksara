@@ -237,7 +237,9 @@ export default function AdminNewReportPage() {
             label="Foto Sampul / Cover Laporan *"
             value={formData.cover_url}
             onChange={(url) => setFormData({ ...formData, cover_url: url })}
-            helperText="Upload foto cover laporan kegiatan. Disimpan di Vercel Blob."
+            file={selectedFile}
+            onFileChange={(f) => setSelectedFile(f)}
+            helperText="Upload foto cover laporan kegiatan. Otomatis dikompresi WebP."
           />
         </div>
 
