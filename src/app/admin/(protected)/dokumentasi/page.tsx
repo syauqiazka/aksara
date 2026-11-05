@@ -279,7 +279,7 @@ export default function AdminGalleryPage() {
 
                 <div className="p-4 space-y-1.5">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--gold-700)] block">
-                    {item.program} &bull; {item.date}
+                    {item.program} / {item.date}
                   </span>
                   <h4 className="font-serif font-bold text-base text-[var(--ink-900)] leading-snug">
                     {item.title}

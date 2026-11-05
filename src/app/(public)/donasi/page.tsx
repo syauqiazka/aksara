@@ -108,7 +108,7 @@ export default async function DonasiPage() {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold uppercase tracking-wider text-[var(--terracotta-500)]">
-                        {camp.disaster_type} &bull; {camp.location}
+                        {camp.disaster_type}, {camp.location}
                       </span>
                       <span
                         className={`text-xs px-3 py-1 rounded-full font-bold ${
@@ -169,7 +169,7 @@ export default async function DonasiPage() {
       </section>
 
       {/* 4. FIQIH & TRANSPARANSI PRIVASI DONASI */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full space-y-8">
         <div className="p-8 rounded-3xl bg-[var(--cream-100)] border border-[var(--gold-500)]/30 space-y-4">
           <div className="flex items-center gap-2.5 text-[var(--gold-700)] font-semibold text-sm">
             <ShieldCheck className="w-5 h-5 text-[var(--green-800)]" />
@@ -177,6 +177,19 @@ export default async function DonasiPage() {
           </div>
           <p className="text-sm text-[var(--ink-600)] leading-relaxed font-sans">
             Yayasan Sahabat Aksara menjunjung tinggi amanah donatur. Jika Anda menghendaki nama tidak ditampilkan pada tabel sebaran publik, sistem secara otomatis melabeli nama Anda sebagai <strong>&ldquo;Hamba Allah&rdquo;</strong>, namun nama dedikasi tetap tercetak penuh di sampul mushaf yang diterima oleh santri.
+          </p>
+        </div>
+
+        {/* Mitra Resmi */}
+        <div className="p-8 rounded-3xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-center space-y-2">
+          <div className="text-xs uppercase tracking-widest text-[var(--gold-700)] font-semibold">
+            Mitra Strategis Penyaluran
+          </div>
+          <h3 className="font-serif text-xl font-bold text-[var(--green-950)]">
+            Madrasah Al-Huffazh Gedongan
+          </h3>
+          <p className="text-xs text-[var(--ink-600)] max-w-md mx-auto">
+            Mitra pondok pesantren rujukan dalam pembinaan kader huffazh dan distribusi mushaf Al-Qur&apos;an.
           </p>
         </div>
       </section>

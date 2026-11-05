@@ -193,7 +193,7 @@ export default function AdminInfakListPage() {
                     <td className="py-3 px-4">
                       <div className="font-semibold text-[var(--ink-900)]">{row.donor_name}</div>
                       <div className="text-[11px] text-[var(--ink-600)]">
-                        {row.donor_origin} &bull; HP: <span className="font-mono">{row.donor_phone || "-"}</span>
+                        {row.donor_origin} / HP: <span className="font-mono">{row.donor_phone || "-"}</span>
                       </div>
                     </td>
                     <td className="py-3 px-4">

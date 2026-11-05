@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { formatTanggal } from "@/lib/format-date";
 import Image from "next/image";
 import {
   ArrowLeft,
@@ -49,7 +50,7 @@ export default function InfakJinanDetailView({ donation, santri }: Props) {
             </span>
             <span className="text-xs text-[var(--sage-300)] flex items-center gap-1.5 font-medium">
               <Calendar className="w-4 h-4 text-[var(--gold-400)]" />
-              Tersalurkan: {donation.distributed_at}
+              Tersalurkan: {formatTanggal(donation.distributed_at)}
             </span>
           </div>
 
@@ -272,7 +273,7 @@ export default function InfakJinanDetailView({ donation, santri }: Props) {
                   {activeSantriTimeline.santri_name}
                 </h3>
                 <p className="text-xs text-[var(--ink-600)]">
-                  Mushaf ke-{donation.mushaf_no} &bull; {donation.pesantren_name}
+                  Mushaf ke-{donation.mushaf_no} / {donation.pesantren_name}
                 </p>
               </div>
               <button
@@ -306,7 +307,7 @@ export default function InfakJinanDetailView({ donation, santri }: Props) {
                         </div>
                         <div className="text-[10px] text-[var(--ink-600)] flex items-center gap-1">
                           <Calendar className="w-3 h-3 text-[var(--green-700)]" />
-                          <span>Pembaruan: {u.updated_on}</span>
+                          <span>Pembaruan: {formatTanggal(u.updated_on)}</span>
                         </div>
                         {u.notes && (
                           <p className="text-[11px] text-[var(--ink-700)] italic pt-1 border-t border-[var(--cream-200)]/60">
@@ -341,7 +342,7 @@ export default function InfakJinanDetailView({ donation, santri }: Props) {
                   Dokumentasi Serah Terima Mushaf #{donation.mushaf_no}
                 </h3>
                 <p className="text-xs text-[var(--ink-600)]">
-                  {donation.pesantren_name} &bull; {donation.distributed_at}
+                  {donation.pesantren_name} / {formatTanggal(donation.distributed_at)}
                 </p>
               </div>
               <button

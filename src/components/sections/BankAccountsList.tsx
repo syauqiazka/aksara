@@ -71,7 +71,7 @@ export default function BankAccountsList({ initialAccounts }: { initialAccounts:
 
           <div className="mt-6 pt-4 border-t border-[var(--gold-500)]/20 text-right">
             <span className="text-[11px] uppercase tracking-wider text-[var(--gold-400)] font-semibold">
-              Kanal Infaq Resmi Terdaftar
+              Kanal Infak Resmi Terdaftar
             </span>
           </div>
         </div>

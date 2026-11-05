@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { formatTanggal } from "@/lib/format-date";
 import { db } from "@/lib/db/api";
 import { Calendar, Users, FileText, ArrowRight, ShieldCheck } from "lucide-react";
 import PageHeader from "@/components/ui/PageHeader";
@@ -107,7 +108,7 @@ export default async function LaporanPage() {
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-xs text-[var(--gold-700)] font-semibold uppercase tracking-wider flex items-center gap-1.5 font-mono">
                       <Calendar className="w-3.5 h-3.5" />
-                      <span>{rep.period_start} s/d {rep.period_end}</span>
+                      <span>{formatTanggal(rep.period_start)} s/d {formatTanggal(rep.period_end)}</span>
                     </span>
                     <Badge variant="neutral">
                       {rep.program.replace("_", " ")}

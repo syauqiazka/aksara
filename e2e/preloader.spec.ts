@@ -21,7 +21,7 @@ test.describe("Tahap 3: Intro Animasi Loading Preloader ±3 Detik", () => {
 
     // 3. Brand typography visible during intro
     await expect(page.getByText("Sahabat Aksara").first()).toBeVisible();
-    await expect(page.getByText(/A • K • S • A • R • A/)).toBeVisible();
+    await expect(page.getByText(/A K S A R A/)).toBeVisible();
 
     // 4. Wait for the ~3.0s animation to complete naturally
     // Timeout of 8000ms allows for cold hydration + 3.0s animation

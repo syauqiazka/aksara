@@ -432,16 +432,16 @@ export default function Preloader() {
 
           <div
             ref={acronymRef}
-            className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] text-[var(--gold-400)] mt-2 font-mono"
+            className="text-xs sm:text-sm font-semibold uppercase tracking-[0.35em] text-[var(--gold-400)] mt-2 font-mono"
           >
-            A • K • S • A • R • A
+            A K S A R A
           </div>
 
           <p
             ref={tagRef}
             className="text-[11px] uppercase tracking-[0.16em] text-[var(--sage-300)] mt-2 font-sans"
           >
-            Spiritual &bull; Sosial &bull; Pendidikan &bull; Teknologi
+            Spiritual, Sosial, Pendidikan, dan Teknologi
           </p>
         </div>
       </div>

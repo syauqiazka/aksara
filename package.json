@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint && node scripts/check-token-contrast.mjs",
+    "lint": "eslint && node scripts/check-token-contrast.mjs && node scripts/lint-bullets.mjs",
+    "lint:bullets": "node scripts/lint-bullets.mjs",
     "check:contrast": "node scripts/check-token-contrast.mjs",
     "storage:orphans": "node scripts/storage-orphans.mjs",
     "e2e": "playwright test"

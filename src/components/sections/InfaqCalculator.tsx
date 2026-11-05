@@ -113,7 +113,7 @@ export default function InfaqCalculator() {
             </div>
 
             <div className="text-xs uppercase tracking-widest text-[var(--gold-400)] font-semibold">
-              Total Nilai Infaq Wakaf
+              Total Nilai Infak Wakaf
             </div>
 
             <div className="font-serif text-3xl sm:text-4xl font-extrabold text-gold-gradient my-2 tabular-nums">
@@ -134,7 +134,7 @@ export default function InfaqCalculator() {
             <div className="mt-4 p-3 rounded-xl bg-[var(--green-950)] border border-[var(--gold-500)]/30 text-[11px] text-[var(--sage-300)]">
               <span>Preview Cover: </span>
               <strong className="text-[var(--gold-300)] font-serif italic">
-                &ldquo;Donasi Infaq dari: {customName || "Hamba Allah"}&rdquo;
+                &ldquo;Donasi Infak dari: {customName || "Hamba Allah"}&rdquo;
               </strong>
             </div>
           </div>

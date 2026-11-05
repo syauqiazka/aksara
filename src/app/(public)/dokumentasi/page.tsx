@@ -63,7 +63,7 @@ export default async function DokumentasiPage() {
                 <div className="absolute bottom-5 left-5 right-5 text-[var(--cream-50)]">
                   <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--gold-400)] mb-1 flex items-center gap-1.5 font-mono">
                     <Calendar className="w-3.5 h-3.5" />
-                    <span>{item.program} &bull; {item.date}</span>
+                    <span>{item.program} / {item.date}</span>
                   </div>
                   <h3 className="font-serif text-lg sm:text-xl font-bold leading-snug">
                     {item.title}

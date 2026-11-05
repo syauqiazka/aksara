@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "gold" | "secondary" | "ghost";
+  variant?: "primary" | "gold" | "secondary" | "secondary-dark" | "ghost";
   size?: "sm" | "md" | "lg";
   href?: string;
   className?: string;
@@ -35,6 +35,8 @@ export default function Button({
       "bg-gold-gradient text-[var(--green-950)] font-semibold shadow-[0_4px_16px_rgba(212,175,55,0.4)] hover:shadow-[0_6px_24px_rgba(212,175,55,0.6)] hover:brightness-105",
     secondary:
       "border border-[var(--gold-500)] text-[var(--green-900)] hover:bg-[var(--gold-500)]/10 hover:border-[var(--gold-400)]",
+    "secondary-dark":
+      "border border-[var(--gold-400)] text-[var(--cream-50)] hover:bg-[var(--gold-500)]/20 hover:text-[var(--gold-300)] shadow-xs",
     ghost:
       "text-[var(--green-800)] hover:bg-[var(--green-800)]/10",
   };

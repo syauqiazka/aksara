@@ -59,7 +59,7 @@ export default function InteractiveLogoHotspots() {
           </div>
 
           <p className="text-xs text-[var(--gold-400)] mt-4 text-center font-medium">
-            &bull; Klik titik-titik hotspot pada logo untuk membaca filosofinya &bull;
+            Pilih titik hotspot pada logo untuk membaca filosofinya
           </p>
         </div>
 

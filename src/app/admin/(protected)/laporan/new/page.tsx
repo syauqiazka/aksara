@@ -7,6 +7,7 @@ import { ArrowLeft, Save, AlertCircle } from "lucide-react";
 import Select from "@/components/ui/Select";
 import ImageUploader from "@/components/admin/ImageUploader";
 import { uploadPendingFileOnSave } from "@/lib/upload-helper";
+import { cleanNumericString } from "@/lib/numeric-utils";
 
 export default function AdminNewReportPage() {
   const router = useRouter();
@@ -18,13 +19,13 @@ export default function AdminNewReportPage() {
     slug: "",
     title: "",
     program: "infak_alquran",
-    period_start: "2026-05-01",
-    period_end: "2026-05-31",
+    period_start: new Date().toISOString().split("T")[0],
+    period_end: new Date().toISOString().split("T")[0],
     summary: "",
     body: "",
-    beneficiaries: "150",
-    amount_idr: "30000000",
-    cover_url: "/images/infak-mushaf-custom.jpg",
+    beneficiaries: "",
+    amount_idr: "",
+    cover_url: "",
     status: "published",
   });
 
@@ -209,11 +210,13 @@ export default function AdminNewReportPage() {
               Jumlah Penerima Manfaat (Orang/Santri) *
             </label>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               required
-              min="0"
               value={formData.beneficiaries}
-              onChange={(e) => setFormData({ ...formData, beneficiaries: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, beneficiaries: cleanNumericString(e.target.value, true) })}
+              placeholder="Contoh: 100"
               className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
             />
           </div>
@@ -223,9 +226,11 @@ export default function AdminNewReportPage() {
               Total Anggaran Tersalurkan (Rupiah)
             </label>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               value={formData.amount_idr}
-              onChange={(e) => setFormData({ ...formData, amount_idr: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, amount_idr: cleanNumericString(e.target.value, false) })}
               placeholder="Contoh: 30000000"
               className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
             />

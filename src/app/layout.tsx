@@ -36,8 +36,8 @@ export const metadata: Metadata = {
   keywords: [
     "Yayasan Sahabat Aksara",
     "Yayasan Ajirasa Aksara Semesta",
-    "Infak Al-Quran Jinan",
-    "BUSS Al-Quran",
+    "Infak Al-Qur'an Jinan",
+    "BUSS Al-Qur'an",
     "Geber Masjid",
     "Tasmi 30 Juz Bil-Ghoib",
     "Yatim Berdikari",

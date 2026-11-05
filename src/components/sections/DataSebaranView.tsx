@@ -27,6 +27,8 @@ import {
 import IndonesiaMap from "@/components/sections/IndonesiaMap";
 import Select from "@/components/ui/Select";
 import Input from "@/components/ui/Input";
+import { formatTanggal } from "@/lib/format-date";
+import { getIslandByProvince } from "@/lib/provinces-38";
 
 interface DataSebaranViewProps {
   initialInfakJinan: PublicInfakJinanRecord[];
@@ -51,6 +53,7 @@ export default function DataSebaranView({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedYear, setSelectedYear] = useState<string>("all");
   const [selectedOrigin, setSelectedOrigin] = useState<string>("all");
+  const [selectedIslandFilter, setSelectedIslandFilter] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
 
@@ -92,9 +95,34 @@ export default function DataSebaranView({
 
       const matchesOrigin = selectedOrigin === "all" || item.donor_origin === selectedOrigin;
 
-      return matchesSearch && matchesOrigin;
+      let matchesIsland = true;
+      if (selectedIslandFilter) {
+        const provIsland = getIslandByProvince(item.pesantren_province);
+        if (provIsland) {
+          if (selectedIslandFilter === "nusa-tenggara" && provIsland === "bali-nusa") matchesIsland = true;
+          else if ((selectedIslandFilter === "maluku" || selectedIslandFilter === "papua") && provIsland === "maluku-papua") matchesIsland = true;
+          else matchesIsland = provIsland === selectedIslandFilter;
+        } else {
+          const addr = (item.pesantren_province || item.address || "").toLowerCase();
+          if (selectedIslandFilter === "jawa") {
+            matchesIsland = addr.includes("jawa") || addr.includes("cirebon") || addr.includes("bogor") || addr.includes("banten") || addr.includes("jakarta");
+          } else if (selectedIslandFilter === "sumatra") {
+            matchesIsland = addr.includes("sumatra") || addr.includes("aceh") || addr.includes("medan") || addr.includes("padang");
+          } else if (selectedIslandFilter === "kalimantan") {
+            matchesIsland = addr.includes("kalimantan");
+          } else if (selectedIslandFilter === "sulawesi") {
+            matchesIsland = addr.includes("sulawesi");
+          } else if (selectedIslandFilter === "nusa-tenggara") {
+            matchesIsland = addr.includes("bali") || addr.includes("nusa") || addr.includes("lombok") || addr.includes("flores");
+          } else if (selectedIslandFilter === "maluku" || selectedIslandFilter === "papua") {
+            matchesIsland = addr.includes("maluku") || addr.includes("papua");
+          }
+        }
+      }
+
+      return matchesSearch && matchesOrigin && matchesIsland;
     });
-  }, [initialInfakJinan, searchQuery, selectedOrigin]);
+  }, [initialInfakJinan, searchQuery, selectedOrigin, selectedIslandFilter]);
 
   // Tab 2: Filtered BUSS
   const filteredBuss = useMemo(() => {
@@ -174,7 +202,32 @@ export default function DataSebaranView({
 
   return (
     <div className="space-y-12">
-      {/* 1. Main Navigation Tabs (Infak Jinan | BUSS Al-Qur'an | Yatim Berdikari) */}
+      {/* 1. Interactive National Map (Pratinjau Sebaran) */}
+      <div className="rounded-3xl overflow-hidden border border-[var(--gold-500)]/30 bg-[var(--green-950)]/80 p-4 sm:p-6 shadow-2xl">
+        <div className="flex items-center justify-between mb-4 px-2">
+          <div className="text-xs uppercase tracking-wider text-[var(--gold-400)] font-semibold flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-[var(--gold-400)]" />
+            <span>Peta Persebaran Titik Penyaluran Nusantara</span>
+          </div>
+          <span className="text-[11px] text-[var(--cream-200)]/70 hidden sm:inline">
+            Klik titik koordinat pulau untuk melihat detail penyaluran
+          </span>
+        </div>
+        <IndonesiaMap
+          jinanData={initialInfakJinan}
+          onSelectIsland={(islandId) => {
+            setSelectedIslandFilter(islandId);
+            setActiveTab("jinan");
+            setCurrentPage(1);
+            const tableElem = document.getElementById("sebaran-table-section");
+            if (tableElem) {
+              tableElem.scrollIntoView({ behavior: "smooth" });
+            }
+          }}
+        />
+      </div>
+
+      {/* 2. Main Navigation Tabs (Infak Jinan | BUSS Al-Qur'an | Yatim Berdikari) */}
       <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
         {/* Tab A: Infak Jinan */}
         <button
@@ -231,45 +284,11 @@ export default function DataSebaranView({
         )}
       </div>
 
-      {/* 2. Interactive National Map (Pratinjau Sebaran) */}
-      <div className="rounded-3xl overflow-hidden border border-[var(--gold-500)]/30 bg-[var(--green-950)]/80 p-4 sm:p-6 shadow-2xl">
-        <div className="flex items-center justify-between mb-4 px-2">
-          <div className="text-xs uppercase tracking-wider text-[var(--gold-400)] font-semibold flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-[var(--gold-400)]" />
-            <span>Peta Persebaran Titik Penyaluran Nusantara</span>
-          </div>
-          <span className="text-[11px] text-[var(--cream-200)]/70 hidden sm:inline">
-            Klik titik koordinat pulau untuk melihat detail penyaluran
-          </span>
-        </div>
-        <IndonesiaMap
-          infakData={initialInfakJinan.map((j) => ({
-            id: j.id,
-            mushaf_no: j.mushaf_no,
-            donor_name: j.display_donor_name,
-            show_donor_name: true,
-            recipient_name: j.pesantren_name,
-            recipient_type: "pesantren" as const,
-            province: j.donor_origin,
-            city: j.donor_origin,
-            district: "",
-            lat: null,
-            lng: null,
-            distributed_at: j.distributed_at,
-            quantity: 1,
-            photo_url: j.photos[0]?.url || null,
-            notes: null,
-            status: "published" as const,
-            created_at: j.distributed_at,
-            updated_at: j.distributed_at,
-          }))}
-          geberData={initialGeber}
-          activeTab="infak"
-        />
-      </div>
-
       {/* 3. Search & Filter Bar (Sticky Toolbar) */}
-      <div className="sticky top-20 z-20 p-5 sm:p-6 rounded-3xl bg-[var(--cream-100)]/95 backdrop-blur-md border border-[var(--cream-200)] shadow-md space-y-4">
+      <div
+        id="sebaran-table-section"
+        className="sticky top-20 z-20 p-5 sm:p-6 rounded-3xl bg-[var(--cream-100)]/95 backdrop-blur-md border border-[var(--cream-200)] shadow-md space-y-4 scroll-mt-24"
+      >
         <div className="flex flex-col md:flex-row gap-4 items-center">
           {/* Search box */}
           <div className="w-full md:flex-1">
@@ -348,19 +367,34 @@ export default function DataSebaranView({
         </div>
 
         {/* Active Filter Info & Reset Button */}
-        {(searchQuery || selectedYear !== "all" || selectedOrigin !== "all") && (
-          <div className="flex items-center justify-between pt-2 border-t border-[var(--cream-200)] text-xs text-[var(--ink-600)]">
-            <div>
-              Menampilkan <strong>{currentDataset.length}</strong> hasil pencarian
+        {(searchQuery || selectedYear !== "all" || selectedOrigin !== "all" || selectedIslandFilter) && (
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[var(--cream-200)] text-xs text-[var(--ink-600)]">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span>
+                Menampilkan <strong>{currentDataset.length}</strong> hasil pencarian
+              </span>
+              {selectedIslandFilter && (
+                <span className="inline-flex items-center gap-1.5 bg-[var(--green-900)] text-[#ffd700] px-2.5 py-0.5 rounded-full font-semibold">
+                  <span>Wilayah: {selectedIslandFilter.toUpperCase()}</span>
+                  <button
+                    onClick={() => setSelectedIslandFilter(null)}
+                    className="hover:text-white cursor-pointer"
+                    aria-label="Hapus filter wilayah pulau"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
             </div>
             <button
               onClick={() => {
                 setSearchQuery("");
                 setSelectedYear("all");
                 setSelectedOrigin("all");
+                setSelectedIslandFilter(null);
                 setCurrentPage(1);
               }}
-              className="text-[var(--terracotta-500)] hover:underline font-semibold flex items-center gap-1"
+              className="text-[var(--terracotta-500)] hover:underline font-semibold flex items-center gap-1 cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
               <span>Reset Filter</span>
@@ -463,7 +497,7 @@ export default function DataSebaranView({
                               )}
                             </td>
                             <td className="py-4 px-4 text-[var(--ink-600)] whitespace-nowrap">
-                              {item.distributed_at}
+                              {formatTanggal(item.distributed_at)}
                             </td>
                             <td className="py-4 px-4 text-center">
                               {item.santri_count > 0 ? (
@@ -553,7 +587,7 @@ export default function DataSebaranView({
                         <div className="flex items-center justify-between text-xs text-[var(--ink-600)] pt-1 border-t border-[var(--cream-200)]">
                           <span className="flex items-center gap-1">
                             <Calendar className="w-3 h-3 text-[var(--green-700)]" />
-                            {item.distributed_at}
+                            {formatTanggal(item.distributed_at)}
                           </span>
                           {item.maps_url && (
                             <a
@@ -692,7 +726,7 @@ export default function DataSebaranView({
                       >
                         <div className="flex items-center justify-between pb-2 border-b border-[var(--cream-200)] text-xs">
                           <span className="font-mono text-[var(--ink-600)]">
-                            No. {displayIndex} &bull; Tahun {item.year}
+                            No. {displayIndex} / Tahun {item.year}
                           </span>
                           <span className="font-bold text-[var(--gold-700)]">
                             Juz {item.juz}
@@ -704,7 +738,7 @@ export default function DataSebaranView({
                             {item.santri_name}
                           </h4>
                           <p className="text-xs text-[var(--ink-600)]">
-                            {item.pesantren_name} &bull; Asal: {item.origin}
+                            {item.pesantren_name} / Asal: {item.origin}
                           </p>
                         </div>
 
@@ -780,7 +814,7 @@ export default function DataSebaranView({
                               {item.organizer}
                             </td>
                             <td className="py-4 px-4 text-[var(--ink-600)] whitespace-nowrap">
-                              {item.activity_date}
+                              {formatTanggal(item.activity_date)}
                             </td>
                             <td className="py-4 px-4 text-center">
                               <button
@@ -816,11 +850,11 @@ export default function DataSebaranView({
                       >
                         <div className="flex items-center justify-between pb-2 border-b border-[var(--cream-200)] text-xs">
                           <span className="font-mono text-[var(--ink-600)]">
-                            No. {displayIndex} &bull; Tahun {item.year}
+                            No. {displayIndex} / Tahun {item.year}
                           </span>
                           <span className="text-[var(--ink-600)] flex items-center gap-1">
                             <Calendar className="w-3 h-3 text-[var(--green-700)]" />
-                            {item.activity_date}
+                            {formatTanggal(item.activity_date)}
                           </span>
                         </div>
 
@@ -885,7 +919,7 @@ export default function DataSebaranView({
                           <div>{item.city}, {item.province}</div>
                           <div className="text-[10px] text-[var(--ink-600)] line-clamp-1">{item.address}</div>
                         </td>
-                        <td className="py-4 px-3 text-[var(--ink-600)]">{item.activity_date}</td>
+                        <td className="py-4 px-3 text-[var(--ink-600)]">{formatTanggal(item.activity_date)}</td>
                         <td className="py-4 px-3 text-center font-bold text-[var(--green-800)]">
                           {item.participants} orang
                         </td>

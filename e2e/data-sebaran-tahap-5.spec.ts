@@ -37,7 +37,7 @@ test.describe("Tahap 5-A: Tabel Infak Jinan Dua Tingkat (Donasi -> Santri) & Pri
     await expect(main.getByRole("columnheader", { name: "Pesantren Tujuan" })).toBeVisible();
     await expect(main.getByRole("columnheader", { name: "Alamat & Peta" })).toBeVisible();
     await expect(main.getByRole("columnheader", { name: "Tanggal Distribusi" })).toBeVisible();
-    await expect(main.getByRole("columnheader", { name: "Tersalurkan" })).toBeVisible();
+    await expect(main.getByRole("columnheader", { name: "Tersalurkan", exact: true })).toBeVisible();
     await expect(main.getByRole("columnheader", { name: "Dokumentasi" })).toBeVisible();
 
     // Nilai data baris pertama
@@ -121,7 +121,7 @@ test.describe("Tahap 5-A: Tabel Infak Jinan Dua Tingkat (Donasi -> Santri) & Pri
     // Kolom BUSS tabel desktop
     await expect(main.getByRole("columnheader", { name: "Tahun" })).toBeVisible();
     await expect(main.getByRole("columnheader", { name: "Nama Santri" })).toBeVisible();
-    await expect(main.getByRole("columnheader", { name: "Pesantren" })).toBeVisible();
+    await expect(main.getByRole("columnheader", { name: "Pesantren", exact: true })).toBeVisible();
     await expect(main.getByRole("columnheader", { name: "Surat & Ayat Terkini" })).toBeVisible();
 
     // Verifikasi donatur Hamba Allah jika donatur anonim

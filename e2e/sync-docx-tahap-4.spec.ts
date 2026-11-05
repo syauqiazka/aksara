@@ -36,14 +36,14 @@ test.describe("Tahap 4: Sinkronisasi Konten Docx Baru (Kerangka 104457)", () => 
     const main = page.locator("main");
 
     // 8 Program titles
-    await expect(main.getByRole("heading", { name: /Infak Al-Qur'an Jinan/i })).toBeVisible();
-    await expect(main.getByRole("heading", { name: /Program BUSS Al-Qur'an/i })).toBeVisible();
-    await expect(main.getByRole("heading", { name: /Gerakan Bersih Masjid \(Geber Masjid\)/i })).toBeVisible();
-    await expect(main.getByRole("heading", { name: /Majlis Tasmi' Al-Qur'an 30 Juz Bil-Ghoib/i })).toBeVisible();
-    await expect(main.getByRole("heading", { name: /Program Yatim Berdikari/i })).toBeVisible();
-    await expect(main.getByRole("heading", { name: /Beasiswa Pelatihan IT Mitra Produktif/i })).toBeVisible();
-    await expect(main.getByRole("heading", { name: /Program Dukungan Pembinaan dan Pemberdayaan UMKM/i })).toBeVisible();
-    await expect(main.getByRole("heading", { name: /Program Bantuan Tematik Nusantara/i })).toBeVisible();
+    await expect(main.getByRole("heading", { name: /Infak Al-Qur'an Jinan/i }).first()).toBeVisible();
+    await expect(main.getByRole("heading", { name: /Program BUSS Al-Qur'an/i }).first()).toBeVisible();
+    await expect(main.getByRole("heading", { name: /Gerakan Bersih Masjid \(Geber Masjid\)/i }).first()).toBeVisible();
+    await expect(main.getByRole("heading", { name: /Majlis Tasmi' Al-Qur'an 30 Juz Bil-Ghoib/i }).first()).toBeVisible();
+    await expect(main.getByRole("heading", { name: /Program Yatim Berdikari/i }).first()).toBeVisible();
+    await expect(main.getByRole("heading", { name: /Beasiswa Pelatihan IT Mitra Produktif/i }).first()).toBeVisible();
+    await expect(main.getByRole("heading", { name: /Program Dukungan Pembinaan dan Pemberdayaan UMKM/i }).first()).toBeVisible();
+    await expect(main.getByRole("heading", { name: /Program Bantuan Tematik Nusantara/i }).first()).toBeVisible();
 
     // Harga Infak Jinan adalah Rp 100.000 / Mushaf
     await expect(main.getByText("Rp 100.000 / Mushaf")).toBeVisible();

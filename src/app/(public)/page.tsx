@@ -13,6 +13,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { db } from "@/lib/db/api";
+import { formatTanggal } from "@/lib/format-date";
 import { organizationContent } from "@/content/organization";
 import Preloader from "@/components/motion/Preloader";
 import StatCounter from "@/components/motion/StatCounter";
@@ -23,7 +24,7 @@ import Button from "@/components/ui/Button";
 
 export default async function HomePage() {
   const stats = await db.getAggregatedStats();
-  const infakList = await db.getInfakDistributions(true);
+  const jinanList = await db.getPublicInfakJinan();
   const reports = await db.getReports(true);
   const latestReport = reports[0];
 
@@ -368,7 +369,7 @@ export default async function HomePage() {
 
           {/* Interactive Nusantara Map Stage */}
           <div className="rounded-3xl overflow-hidden border border-[var(--gold-500)]/30 bg-[var(--green-900)]/40 p-4 sm:p-6 shadow-2xl">
-            <IndonesiaMap infakData={infakList} activeTab="infak" />
+            <IndonesiaMap jinanData={jinanList} />
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
@@ -406,7 +407,7 @@ export default async function HomePage() {
                   {organizationContent.founder.name}
                 </div>
                 <div className="text-xs text-[var(--cream-200)] mt-0.5">
-                  {organizationContent.founder.role} &bull; Alumni MA Al-Huffazh 2 Cirebon &amp; Institut PTIQ Jakarta
+                  {organizationContent.founder.role}, Alumni MA Al-Huffazh 2 Cirebon &amp; Institut PTIQ Jakarta
                 </div>
               </div>
             </div>
@@ -440,7 +441,7 @@ export default async function HomePage() {
                     <FileText className="w-3.5 h-3.5 text-[var(--green-800)]" />
                     <span>Laporan Penyaluran Terbaru</span>
                   </span>
-                  <span>Periode: {latestReport.period_start} s/d {latestReport.period_end}</span>
+                  <span>Periode: {formatTanggal(latestReport.period_start)} s/d {formatTanggal(latestReport.period_end)}</span>
                 </div>
                 <h4 className="font-serif text-lg font-bold text-[var(--ink-900)]">
                   {latestReport.title}
@@ -471,7 +472,7 @@ export default async function HomePage() {
                 <span>Baca Perjalanan Lengkap Pendiri</span>
                 <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1.5 transition-transform" />
               </Link>
-              <span className="text-[var(--cream-200)]">&bull;</span>
+              <span className="text-[var(--cream-300)]">|</span>
               <Link
                 href="/laporan"
                 className="inline-flex items-center gap-2 font-semibold text-[var(--green-800)] hover:text-[var(--gold-700)] text-sm group"

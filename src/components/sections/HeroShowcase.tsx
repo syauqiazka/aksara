@@ -30,7 +30,7 @@ export default function HeroShowcase({ totalMushaf, totalMasjid }: HeroShowcaseP
         <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
           {/* Eyebrow Label (Text without pill container per R-24 / antislop) */}
           <div className="text-xs uppercase tracking-[0.2em] text-[var(--gold-400)] font-semibold">
-            Yayasan Sahabat Aksara &bull; Badan Nirlaba Terdaftar
+            Yayasan Sahabat Aksara / Badan Nirlaba Terdaftar
           </div>
 
           {/* Main Title with Fraunces Display Font */}
@@ -74,9 +74,9 @@ export default function HeroShowcase({ totalMushaf, totalMasjid }: HeroShowcaseP
 
             <Button
               href="/data-sebaran"
-              variant="secondary"
+              variant="secondary-dark"
               size="lg"
-              className="w-full sm:w-auto text-[var(--cream-50)] border-[var(--gold-500)]/50 hover:bg-[var(--gold-500)]/15"
+              className="w-full sm:w-auto"
             >
               <MapPin className="w-5 h-5 text-[var(--gold-400)]" />
               <span>Lihat Peta Sebaran</span>
@@ -102,7 +102,7 @@ export default function HeroShowcase({ totalMushaf, totalMasjid }: HeroShowcaseP
               {/* Editorial Caption at bottom of photo */}
               <div className="absolute bottom-5 left-5 right-5 text-[var(--cream-50)]">
                 <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--gold-400)] mb-1">
-                  Mushaf Custom Nama &bull; Program Jinan
+                  Mushaf Custom Nama: Program Jinan
                 </div>
                 <div className="font-serif font-bold text-lg text-[var(--cream-50)] leading-snug">
                   Rp 100.000 / Mushaf Santri

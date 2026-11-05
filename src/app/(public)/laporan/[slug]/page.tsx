@@ -5,6 +5,7 @@ import { db } from "@/lib/db/api";
 import { ArrowLeft, Users, Download } from "lucide-react";
 import Button from "@/components/ui/Button";
 import PageHeader from "@/components/ui/PageHeader";
+import { formatTanggal } from "@/lib/format-date";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -32,7 +33,7 @@ export default async function LaporanDetailPage({ params }: Props) {
     <div className="flex flex-col w-full bg-[var(--cream-50)] text-[var(--ink-900)]">
       {/* 1. Page Header Terpadu */}
       <PageHeader
-        eyebrow={`Periode: ${report.period_start} s/d ${report.period_end} &bull; Program ${report.program.replace("_", " ")}`}
+        eyebrow={`Periode: ${formatTanggal(report.period_start)} s/d ${formatTanggal(report.period_end)} | Program ${report.program.replace("_", " ")}`}
         title={report.title}
         subtitle={report.summary}
         breadcrumbs={[

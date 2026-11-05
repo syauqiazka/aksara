@@ -1,7 +1,6 @@
 import { portfolioContent } from "@/content/portfolio";
 import PageHeader from "@/components/ui/PageHeader";
 import {
-  Smartphone,
   Radio,
   Wallet,
   BookCheck,
@@ -10,7 +9,6 @@ import {
   UsersRound,
   CheckCircle2,
   Layers,
-  Clock,
   Sparkles,
 } from "lucide-react";
 
@@ -46,11 +44,11 @@ export default function PortofolioPage() {
           <div className="flex items-center gap-2 text-[var(--gold-400)] font-semibold">
             <Sparkles className="w-4 h-4 text-[var(--gold-400)] flex-shrink-0" />
             <span>Karakter Produk Teknologi:</span>
-            <span className="text-[var(--cream-50)]">Bebas Iklan &bull; Terbuka untuk Kemaslahatan Ummat</span>
+            <span className="text-[var(--cream-50)]">Bebas Iklan dan Terbuka untuk Kemaslahatan Ummat</span>
           </div>
           <div className="flex flex-wrap items-center gap-4 text-[var(--cream-200)]/80">
             <span>6 Modul Terintegrasi</span>
-            <span>&bull;</span>
+            <span className="text-[var(--gold-500)]/40">|</span>
             <span>Dukungan Mobile Android &amp; Web</span>
           </div>
         </div>
@@ -72,9 +70,8 @@ export default function PortofolioPage() {
                     <span className="text-xs font-bold uppercase tracking-widest text-[var(--green-700)]">
                       {app.category}
                     </span>
-                    <span className="text-xs px-3.5 py-1 rounded-full font-bold bg-[var(--gold-500)]/20 text-[var(--gold-700)] border border-[var(--gold-500)]/40 flex items-center gap-1.5 font-mono">
-                      <Clock className="w-3.5 h-3.5 text-[var(--gold-700)]" />
-                      <span>Dalam Pengembangan</span>
+                    <span className="text-xs px-3.5 py-1 rounded-full font-medium bg-[var(--cream-200)] text-[var(--ink-700)] border border-[var(--cream-300)]">
+                      Segera Dirilis
                     </span>
                   </div>
 
@@ -97,27 +94,9 @@ export default function PortofolioPage() {
                     {app.description}
                   </p>
 
-                  {/* Device UI Abstract Wireframe Illustration */}
-                  <div className="p-5 rounded-2xl bg-[var(--green-950)] text-[var(--cream-100)] border border-[var(--gold-500)]/30 mb-6 space-y-3">
-                    <div className="flex items-center justify-between pb-3 border-b border-[var(--gold-500)]/20 text-xs text-[var(--sage-300)]">
-                      <div className="flex items-center gap-1.5">
-                        <Smartphone className="w-3.5 h-3.5 text-[var(--gold-400)]" />
-                        <span className="font-mono">Pratinjau Antarmuka &bull; {app.name}</span>
-                      </div>
-                      <span className="text-[10px] text-[var(--gold-400)] font-semibold uppercase tracking-wider">
-                        Versi Beta
-                      </span>
-                    </div>
-
-                    <div className="p-3.5 rounded-xl bg-[var(--green-900)]/80 border border-[var(--cream-100)]/10 text-xs text-[var(--cream-200)] flex items-center gap-3">
-                      <div className="w-2.5 h-2.5 rounded-full bg-[var(--gold-400)] animate-pulse" />
-                      <span>{app.tagline}</span>
-                    </div>
-                  </div>
-
                   {/* Key Features */}
-                  <div className="space-y-2 pt-2 border-t border-[var(--cream-200)]">
-                    <div className="text-[11px] uppercase tracking-wider text-[var(--ink-400)] font-bold mb-2">
+                  <div className="space-y-2 pt-4 border-t border-[var(--cream-200)]">
+                    <div className="text-[11px] uppercase tracking-wider text-[var(--ink-500)] font-bold mb-2">
                       Fitur Unggulan:
                     </div>
                     {app.features.map((feat, fIdx) => (
@@ -130,7 +109,7 @@ export default function PortofolioPage() {
                 </div>
 
                 <div className="pt-8">
-                  <div className="w-full py-3 rounded-full text-center text-xs font-semibold bg-[var(--cream-200)] text-[var(--ink-600)] cursor-not-allowed">
+                  <div className="w-full py-3 rounded-xl text-center text-xs font-medium bg-[var(--cream-200)]/70 text-[var(--ink-600)] border border-[var(--cream-300)]/60">
                     Tautan Unduh Play Store Segera Dirilis
                   </div>
                 </div>

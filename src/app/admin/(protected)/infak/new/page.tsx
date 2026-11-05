@@ -21,14 +21,18 @@ import Input from "@/components/ui/Input";
 import ImageUploader from "@/components/admin/ImageUploader";
 import { uploadPendingFileOnSave } from "@/lib/upload-helper";
 import { QURAN_SURAHS, getSuggestedJuz, validateAyatNumber } from "@/lib/quran-surahs";
+import { cleanNumericString } from "@/lib/numeric-utils";
+import { PROVINCES_38 } from "@/lib/provinces-38";
 
 interface SantriFormItem {
   id: string;
   name: string;
   phone: string;
   initial_surah_no: number;
-  initial_ayat: number;
-  initial_juz: number;
+  initial_ayat: string;
+  initial_juz: string;
+  is_juz_manual?: boolean;
+  ayat_error?: string;
 }
 
 export default function AdminNewInfakPage() {
@@ -53,11 +57,13 @@ export default function AdminNewInfakPage() {
     mushaf_no: "",
     donor_name: "",
     show_donor_name: false,
-    donor_origin: "Cirebon",
+    donor_origin: "",
     donor_phone: "",
     dedication_name: "",
-    pesantren_name: "Pondok Pesantren Madrasah Al-Huffazh 2 Gedongan",
-    address: "Gedongan, Ender, Pangenan, Cirebon, Jawa Barat",
+    pesantren_name: "",
+    pesantren_province: "",
+    pesantren_city: "",
+    address: "",
     distributed_at: new Date().toISOString().split("T")[0],
     maps_url: "",
     status: "published" as "published" | "draft",
@@ -73,8 +79,10 @@ export default function AdminNewInfakPage() {
         name: "",
         phone: "",
         initial_surah_no: 1,
-        initial_ayat: 7,
-        initial_juz: 1,
+        initial_ayat: "7",
+        initial_juz: "1",
+        is_juz_manual: false,
+        ayat_error: "",
       },
     ]);
   };
@@ -83,25 +91,97 @@ export default function AdminNewInfakPage() {
     setSantriList(santriList.filter((s) => s.id !== id));
   };
 
-  const handleSantriChange = (
+  const handleSantriTextChange = (
     id: string,
-    field: keyof SantriFormItem,
-    value: string | number
+    field: "name" | "phone",
+    value: string
   ) => {
     setSantriList(
       santriList.map((item) => {
         if (item.id !== id) return item;
+        return { ...item, [field]: value };
+      })
+    );
+  };
 
-        const updated = { ...item, [field]: value };
-
-        // Auto-suggest juz when surah or ayat changes
-        if (field === "initial_surah_no" || field === "initial_ayat") {
-          const sNo = field === "initial_surah_no" ? Number(value) : item.initial_surah_no;
-          const ay = field === "initial_ayat" ? Number(value) : item.initial_ayat;
-          updated.initial_juz = getSuggestedJuz(sNo, ay);
+  const handleSantriSurahChange = (id: string, surahNo: number) => {
+    setSantriList(
+      santriList.map((item) => {
+        if (item.id !== id) return item;
+        let ayatErr = "";
+        if (item.initial_ayat) {
+          const val = validateAyatNumber(surahNo, item.initial_ayat);
+          if (!val.valid) {
+            ayatErr = val.message || "Ayat tidak valid";
+          }
         }
+        let juz = item.initial_juz;
+        if (!item.is_juz_manual && item.initial_ayat && !ayatErr) {
+          juz = getSuggestedJuz(surahNo, item.initial_ayat).toString();
+        }
+        return {
+          ...item,
+          initial_surah_no: surahNo,
+          ayat_error: ayatErr,
+          initial_juz: juz,
+        };
+      })
+    );
+  };
 
-        return updated;
+  const handleSantriAyatChange = (id: string, rawVal: string) => {
+    const cleaned = cleanNumericString(rawVal, false);
+    setSantriList(
+      santriList.map((item) => {
+        if (item.id !== id) return item;
+        let ayatErr = "";
+        if (cleaned) {
+          const val = validateAyatNumber(item.initial_surah_no, cleaned);
+          if (!val.valid) {
+            ayatErr = val.message || "Ayat tidak valid";
+          }
+        }
+        let juz = item.initial_juz;
+        if (!item.is_juz_manual && cleaned && !ayatErr) {
+          juz = getSuggestedJuz(item.initial_surah_no, cleaned).toString();
+        }
+        return {
+          ...item,
+          initial_ayat: cleaned,
+          ayat_error: ayatErr,
+          initial_juz: juz,
+        };
+      })
+    );
+  };
+
+  const handleSantriJuzChange = (id: string, rawVal: string) => {
+    const cleaned = cleanNumericString(rawVal, false);
+    setSantriList(
+      santriList.map((item) => {
+        if (item.id !== id) return item;
+        return {
+          ...item,
+          initial_juz: cleaned,
+          is_juz_manual: true,
+        };
+      })
+    );
+  };
+
+  const handleResetJuzAuto = (id: string) => {
+    setSantriList(
+      santriList.map((item) => {
+        if (item.id !== id) return item;
+        const autoJuz = getSuggestedJuz(
+          item.initial_surah_no,
+          item.initial_ayat || 1
+        ).toString();
+        return {
+          ...item,
+          initial_juz: autoJuz,
+          is_juz_manual: false,
+        };
       })
     );
   };
@@ -116,6 +196,11 @@ export default function AdminNewInfakPage() {
     // Validate active santri items
     for (let i = 0; i < activeSantri.length; i++) {
       const s = activeSantri[i];
+      if (!s.initial_ayat) {
+        setError(`Santri ${s.name}: Kolom ayat tidak boleh kosong.`);
+        setLoading(false);
+        return;
+      }
       const val = validateAyatNumber(s.initial_surah_no, s.initial_ayat);
       if (!val.valid) {
         setError(`Santri ${s.name}: ${val.message}`);
@@ -153,8 +238,8 @@ export default function AdminNewInfakPage() {
               status: targetStatus,
               initial_surah_no: s.initial_surah_no,
               initial_surah_name: surah?.nameLatin || "Al-Fatihah",
-              initial_ayat: s.initial_ayat,
-              initial_juz: s.initial_juz,
+              initial_ayat: parseInt(s.initial_ayat, 10) || 1,
+              initial_juz: parseInt(s.initial_juz, 10) || 1,
             };
           }),
         };
@@ -189,8 +274,8 @@ export default function AdminNewInfakPage() {
               status: targetStatus,
               initial_surah_no: s.initial_surah_no,
               initial_surah_name: surah?.nameLatin || "Al-Fatihah",
-              initial_ayat: s.initial_ayat,
-              initial_juz: s.initial_juz,
+              initial_ayat: parseInt(s.initial_ayat, 10) || 1,
+              initial_juz: parseInt(s.initial_juz, 10) || 1,
             };
           }),
         };
@@ -297,11 +382,17 @@ export default function AdminNewInfakPage() {
                     Mushaf Ke- (Nomor Urut Unik) *
                   </label>
                   <Input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     required
-                    min={1}
                     value={formData.mushaf_no}
-                    onChange={(e) => setFormData({ ...formData, mushaf_no: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        mushaf_no: cleanNumericString(e.target.value, false),
+                      })
+                    }
                     placeholder="Contoh: 101"
                   />
                 </div>
@@ -417,10 +508,36 @@ export default function AdminNewInfakPage() {
                   <Input
                     type="text"
                     required
+                    list="pesantren-suggestions"
                     value={formData.pesantren_name}
-                    onChange={(e) => setFormData({ ...formData, pesantren_name: e.target.value })}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const matched = [
+                        { name: "Pondok Pesantren Madrasah Al-Huffazh 2 Gedongan", province: "Jawa Barat", city: "Cirebon", address: "Gedongan, Ender, Pangenan, Cirebon, Jawa Barat", maps: "https://maps.google.com" },
+                        { name: "Pesantren Tahfidz Al-Hikmah", province: "Jawa Barat", city: "Bogor", address: "Jl. Pesantren No. 45, Cirebon, Jawa Barat", maps: "" },
+                        { name: "Madrasah Diniyah Nurul Iman", province: "Banten", city: "Serang", address: "Desa Ender, Pangenan, Cirebon, Jawa Barat", maps: "" },
+                      ].find((p) => p.name.toLowerCase() === val.toLowerCase());
+
+                      if (matched) {
+                        setFormData({
+                          ...formData,
+                          pesantren_name: matched.name,
+                          pesantren_province: matched.province,
+                          pesantren_city: matched.city,
+                          address: matched.address,
+                          maps_url: matched.maps || formData.maps_url,
+                        });
+                      } else {
+                        setFormData({ ...formData, pesantren_name: val });
+                      }
+                    }}
                     placeholder="Contoh: Pondok Pesantren Al-Hikmah"
                   />
+                  <datalist id="pesantren-suggestions">
+                    <option value="Pondok Pesantren Madrasah Al-Huffazh 2 Gedongan" />
+                    <option value="Pesantren Tahfidz Al-Hikmah" />
+                    <option value="Madrasah Diniyah Nurul Iman" />
+                  </datalist>
                 </div>
 
                 <div>
@@ -432,6 +549,34 @@ export default function AdminNewInfakPage() {
                     required
                     value={formData.distributed_at}
                     onChange={(e) => setFormData({ ...formData, distributed_at: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
+                    Provinsi Lembaga (Peta Sebaran) *
+                  </label>
+                  <Select
+                    value={formData.pesantren_province || ""}
+                    onChange={(e) => setFormData({ ...formData, pesantren_province: e.target.value })}
+                    options={[
+                      { value: "", label: "-- Pilih Provinsi (38 Provinsi) --" },
+                      ...PROVINCES_38.map((p) => ({ value: p.name, label: p.name })),
+                    ]}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
+                    Kota / Kabupaten Lembaga
+                  </label>
+                  <Input
+                    type="text"
+                    value={formData.pesantren_city || ""}
+                    onChange={(e) => setFormData({ ...formData, pesantren_city: e.target.value })}
+                    placeholder="Contoh: Cirebon, Bogor"
                   />
                 </div>
               </div>
@@ -559,7 +704,7 @@ export default function AdminNewInfakPage() {
                           <Input
                             type="text"
                             value={santri.name}
-                            onChange={(e) => handleSantriChange(santri.id, "name", e.target.value)}
+                            onChange={(e) => handleSantriTextChange(santri.id, "name", e.target.value)}
                             placeholder="Contoh: Muhammad Farhan"
                             required
                           />
@@ -572,7 +717,7 @@ export default function AdminNewInfakPage() {
                           <Input
                             type="text"
                             value={santri.phone}
-                            onChange={(e) => handleSantriChange(santri.id, "phone", e.target.value)}
+                            onChange={(e) => handleSantriTextChange(santri.id, "phone", e.target.value)}
                             placeholder="Contoh: 089876543210"
                           />
                         </div>
@@ -585,7 +730,7 @@ export default function AdminNewInfakPage() {
                           </label>
                           <Select
                             value={santri.initial_surah_no.toString()}
-                            onChange={(val) => handleSantriChange(santri.id, "initial_surah_no", Number(val))}
+                            onChange={(e) => handleSantriSurahChange(santri.id, parseInt(e.target.value, 10))}
                             options={QURAN_SURAHS.map((surah) => ({
                               value: surah.number.toString(),
                               label: `${surah.number}. ${surah.nameLatin} (${surah.totalAyat} ayat)`,
@@ -598,23 +743,38 @@ export default function AdminNewInfakPage() {
                             Ayat Terakhir
                           </label>
                           <Input
-                            type="number"
-                            min={1}
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                             value={santri.initial_ayat}
-                            onChange={(e) => handleSantriChange(santri.id, "initial_ayat", Number(e.target.value))}
+                            onChange={(e) => handleSantriAyatChange(santri.id, e.target.value)}
+                            placeholder="Contoh: 7"
+                            error={santri.ayat_error}
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-[var(--ink-700)] mb-1">
-                            Juz Otomatis
-                          </label>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="block text-[11px] font-semibold text-[var(--ink-700)]">
+                              Juz Otomatis
+                            </label>
+                            {santri.is_juz_manual && (
+                              <button
+                                type="button"
+                                onClick={() => handleResetJuzAuto(santri.id)}
+                                className="text-[10px] text-[var(--gold-700)] hover:text-[var(--gold-800)] underline cursor-pointer"
+                              >
+                                Kembalikan otomatis
+                              </button>
+                            )}
+                          </div>
                           <Input
-                            type="number"
-                            min={1}
-                            max={30}
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                             value={santri.initial_juz}
-                            onChange={(e) => handleSantriChange(santri.id, "initial_juz", Number(e.target.value))}
+                            onChange={(e) => handleSantriJuzChange(santri.id, e.target.value)}
+                            placeholder="Contoh: 1"
                           />
                         </div>
                       </div>
@@ -672,11 +832,11 @@ export default function AdminNewInfakPage() {
             <span className="font-semibold text-[var(--green-950)] font-mono">
               {formData.mushaf_no ? `Mushaf #${formData.mushaf_no}` : "Mushaf Baru"}
             </span>
-            <span>&bull;</span>
+            <span className="text-[var(--cream-300)]">|</span>
             <span className="text-[var(--ink-600)]">
               {santriList.length} Santri Binaan
             </span>
-            <span>&bull;</span>
+            <span className="text-[var(--cream-300)]">|</span>
             <span className="text-[var(--ink-600)]">
               {selectedFile ? "1 Foto Siap Unggah" : "Tanpa Foto"}
             </span>

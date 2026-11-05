@@ -224,7 +224,7 @@ export default function ImageUploader({
                   >
                     Ganti Foto
                   </button>
-                  <span className="text-[var(--cream-300)]">&bull;</span>
+                  <span className="text-[var(--cream-300)]">|</span>
                   <button
                     type="button"
                     onClick={handleClear}
@@ -255,7 +255,7 @@ export default function ImageUploader({
                 {placeholder}
               </div>
               <div className="text-[11px] text-[var(--ink-600)]">
-                Maks. 5 MB &bull; Otomatis dikompres ke WebP saat formulir disimpan
+                Maks. 5 MB (Otomatis dikompres ke WebP saat formulir disimpan)
               </div>
             </div>
           )}

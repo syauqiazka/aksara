@@ -63,11 +63,11 @@ export default function NotFound() {
             <Link href="/program" className="hover:text-[var(--green-800)] transition-colors underline underline-offset-2">
               Daftar Program
             </Link>
-            <span>•</span>
+            <span className="text-[var(--cream-300)]">|</span>
             <Link href="/laporan" className="hover:text-[var(--green-800)] transition-colors underline underline-offset-2">
               Laporan Akuntabilitas
             </Link>
-            <span>•</span>
+            <span className="text-[var(--cream-300)]">|</span>
             <Link href="/donasi" className="hover:text-[var(--green-800)] transition-colors underline underline-offset-2">
               Rekening Resmi
             </Link>

@@ -190,6 +190,8 @@ export interface InfakJinanRecord {
   donor_phone?: string | null; // SENSITIF: ADMIN SAJA
   dedication_name: string;
   pesantren_name: string;
+  pesantren_province?: string | null;
+  pesantren_city?: string | null;
   address: string;
   distributed_at: string;
   maps_url?: string | null;
@@ -210,6 +212,8 @@ export interface PublicInfakJinanRecord {
   donor_origin: string;
   dedication_name: string;
   pesantren_name: string;
+  pesantren_province?: string | null;
+  pesantren_city?: string | null;
   address: string;
   distributed_at: string;
   maps_url?: string | null;

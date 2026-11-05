@@ -102,7 +102,7 @@ export default function Footer() {
           {/* Col 3: Direct Donation Accounts (1-click copy) */}
           <div>
             <h4 className="text-sm font-semibold uppercase tracking-widest text-[var(--gold-400)] mb-4 font-sans">
-              Rekening Resmi Infaq
+              Rekening Resmi Infak
             </h4>
             <div className="p-4 rounded-xl bg-[var(--green-900)]/60 border border-[var(--gold-500)]/30 text-xs text-[var(--cream-200)]/90 leading-relaxed">
               <p className="font-semibold text-[var(--gold-300)] mb-1">Informasi rekening segera diumumkan</p>

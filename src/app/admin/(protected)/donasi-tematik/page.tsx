@@ -5,6 +5,7 @@ import Select from "@/components/ui/Select";
 import { PlusCircle, Search, Trash2, Edit, X, HeartHandshake } from "lucide-react";
 import { ThemedCampaign } from "@/lib/db/types";
 import ImageUploader from "@/components/admin/ImageUploader";
+import { cleanNumericString } from "@/lib/numeric-utils";
 
 export default function AdminThemedCampaignsPage() {
   const [campaigns, setCampaigns] = useState<ThemedCampaign[]>([]);
@@ -20,13 +21,13 @@ export default function AdminThemedCampaignsPage() {
   // Form states
   const [formData, setFormData] = useState({
     title: "",
-    disaster_type: "Gempa Bumi",
+    disaster_type: "Bencana Alam",
     location: "",
     status: "aktif" as "aktif" | "selesai",
     description: "",
     cover_url: "",
-    target_idr: 50000000,
-    collected_idr: 0,
+    target_idr: "",
+    collected_idr: "0",
   });
 
   const fetchData = async () => {
@@ -50,13 +51,13 @@ export default function AdminThemedCampaignsPage() {
     setEditingCampaign(null);
     setFormData({
       title: "",
-      disaster_type: "Gempa Bumi",
+      disaster_type: "Bencana Alam",
       location: "",
       status: "aktif",
       description: "",
       cover_url: "",
-      target_idr: 50000000,
-      collected_idr: 0,
+      target_idr: "",
+      collected_idr: "0",
     });
     setIsModalOpen(true);
   };
@@ -70,8 +71,8 @@ export default function AdminThemedCampaignsPage() {
       status: camp.status,
       description: camp.description,
       cover_url: camp.cover_url || "",
-      target_idr: camp.target_idr,
-      collected_idr: camp.collected_idr,
+      target_idr: camp.target_idr.toString(),
+      collected_idr: camp.collected_idr.toString(),
     });
     setIsModalOpen(true);
   };
@@ -89,7 +90,12 @@ export default function AdminThemedCampaignsPage() {
     try {
       const url = "/api/admin/campaigns";
       const method = editingCampaign ? "PUT" : "POST";
-      const body = editingCampaign ? { id: editingCampaign.id, ...formData } : formData;
+      const parsedPayload = {
+        ...formData,
+        target_idr: parseInt(formData.target_idr, 10) || 0,
+        collected_idr: parseInt(formData.collected_idr, 10) || 0,
+      };
+      const body = editingCampaign ? { id: editingCampaign.id, ...parsedPayload } : parsedPayload;
 
       const res = await fetch(url, {
         method,
@@ -247,7 +253,7 @@ export default function AdminThemedCampaignsPage() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold uppercase tracking-wider text-[var(--terracotta-500)]">
-                      {camp.disaster_type} &bull; {camp.location}
+                      {camp.disaster_type}, {camp.location}
                     </span>
                     <button
                       onClick={() => handleToggleStatus(camp)}
@@ -385,14 +391,15 @@ export default function AdminThemedCampaignsPage() {
                     Target Donasi (Rp) *
                   </label>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     required
-                    min={0}
-                    step={100000}
                     value={formData.target_idr}
                     onChange={(e) =>
-                      setFormData({ ...formData, target_idr: Number(e.target.value) })
+                      setFormData({ ...formData, target_idr: cleanNumericString(e.target.value, false) })
                     }
+                    placeholder="Contoh: 50000000"
                     className="w-full px-3.5 py-2 text-xs rounded-xl border border-[var(--cream-200)] focus:ring-2 focus:ring-[var(--gold-500)] focus:outline-none"
                   />
                 </div>
@@ -402,13 +409,14 @@ export default function AdminThemedCampaignsPage() {
                     Donasi Terkumpul (Rp)
                   </label>
                   <input
-                    type="number"
-                    min={0}
-                    step={10000}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     value={formData.collected_idr}
                     onChange={(e) =>
-                      setFormData({ ...formData, collected_idr: Number(e.target.value) })
+                      setFormData({ ...formData, collected_idr: cleanNumericString(e.target.value, true) })
                     }
+                    placeholder="Contoh: 0"
                     className="w-full px-3.5 py-2 text-xs rounded-xl border border-[var(--cream-200)] focus:ring-2 focus:ring-[var(--gold-500)] focus:outline-none"
                   />
                 </div>

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Save, AlertCircle } from "lucide-react";
 import ImageUploader from "@/components/admin/ImageUploader";
 import { uploadPendingFileOnSave } from "@/lib/upload-helper";
+import { cleanNumericString } from "@/lib/numeric-utils";
 
 export default function AdminNewGeberPage() {
   const router = useRouter();
@@ -15,14 +16,14 @@ export default function AdminNewGeberPage() {
 
   const [formData, setFormData] = useState({
     mosque_name: "",
-    province: "Jawa Barat",
-    city: "Bekasi",
-    district: "Bekasi Selatan",
+    province: "",
+    city: "",
+    district: "",
     address: "",
-    lat: "-6.2412",
-    lng: "106.9984",
+    lat: "",
+    lng: "",
     activity_date: new Date().toISOString().split("T")[0],
-    participants: "25",
+    participants: "",
     activity_notes: "",
     photo_url: "",
     status: "published",
@@ -158,6 +159,7 @@ export default function AdminNewGeberPage() {
               required
               value={formData.province}
               onChange={(e) => setFormData({ ...formData, province: e.target.value })}
+              placeholder="Contoh: Jawa Barat"
               className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
             />
           </div>
@@ -171,6 +173,7 @@ export default function AdminNewGeberPage() {
               required
               value={formData.city}
               onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+              placeholder="Contoh: Bekasi"
               className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
             />
           </div>
@@ -184,6 +187,7 @@ export default function AdminNewGeberPage() {
               required
               value={formData.district}
               onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+              placeholder="Contoh: Bekasi Selatan"
               className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
             />
           </div>
@@ -208,11 +212,13 @@ export default function AdminNewGeberPage() {
               Jumlah Relawan yang Terjun *
             </label>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               required
-              min="1"
+              placeholder="Contoh: 25"
               value={formData.participants}
-              onChange={(e) => setFormData({ ...formData, participants: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, participants: cleanNumericString(e.target.value, false) })}
               className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
             />
           </div>

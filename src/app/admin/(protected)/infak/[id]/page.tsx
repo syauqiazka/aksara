@@ -14,6 +14,7 @@ import Select from "@/components/ui/Select";
 import Input from "@/components/ui/Input";
 import { InfakJinanRecord, InfakJinanSantri } from "@/lib/db/types";
 import { QURAN_SURAHS, getSuggestedJuz, validateAyatNumber } from "@/lib/quran-surahs";
+import { cleanNumericString } from "@/lib/numeric-utils";
 
 export default function AdminEditInfakPage() {
   const router = useRouter();
@@ -45,8 +46,10 @@ export default function AdminEditInfakPage() {
   const [selectedSantriId, setSelectedSantriId] = useState<string>("");
   const [updateDate, setUpdateDate] = useState<string>(new Date().toISOString().split("T")[0]);
   const [updateSurahNo, setUpdateSurahNo] = useState<number>(2);
-  const [updateAyat, setUpdateAyat] = useState<number>(252);
-  const [updateJuz, setUpdateJuz] = useState<number>(2);
+  const [updateAyat, setUpdateAyat] = useState<string>("252");
+  const [updateJuz, setUpdateJuz] = useState<string>("2");
+  const [isJuzManual, setIsJuzManual] = useState<boolean>(false);
+  const [ayatError, setAyatError] = useState<string>("");
   const [updateNotes, setUpdateNotes] = useState<string>("");
 
   const loadData = useCallback(async () => {
@@ -87,20 +90,55 @@ export default function AdminEditInfakPage() {
     loadData();
   }, [loadData]);
 
-  const handleSurahOrAyatChange = (surahNo: number, ayat: number) => {
+  const handleSurahChange = (surahNo: number) => {
     setUpdateSurahNo(surahNo);
-    setUpdateAyat(ayat);
-    setUpdateJuz(getSuggestedJuz(surahNo, ayat));
+    let err = "";
+    if (updateAyat) {
+      const val = validateAyatNumber(surahNo, updateAyat);
+      if (!val.valid) err = val.message || "Ayat tidak valid";
+    }
+    setAyatError(err);
+    if (!isJuzManual && updateAyat && !err) {
+      setUpdateJuz(getSuggestedJuz(surahNo, updateAyat).toString());
+    }
+  };
+
+  const handleAyatChange = (raw: string) => {
+    const cleaned = cleanNumericString(raw, false);
+    setUpdateAyat(cleaned);
+    let err = "";
+    if (cleaned) {
+      const val = validateAyatNumber(updateSurahNo, cleaned);
+      if (!val.valid) err = val.message || "Ayat tidak valid";
+    }
+    setAyatError(err);
+    if (!isJuzManual && cleaned && !err) {
+      setUpdateJuz(getSuggestedJuz(updateSurahNo, cleaned).toString());
+    }
+  };
+
+  const handleJuzChange = (raw: string) => {
+    const cleaned = cleanNumericString(raw, false);
+    setUpdateJuz(cleaned);
+    setIsJuzManual(true);
+  };
+
+  const handleResetJuzAuto = () => {
+    const auto = getSuggestedJuz(updateSurahNo, updateAyat || 1).toString();
+    setUpdateJuz(auto);
+    setIsJuzManual(false);
   };
 
   const handleCopyLastUpdate = (santri: InfakJinanSantri) => {
     if (santri.hafalan_updates && santri.hafalan_updates.length > 0) {
       const last = santri.hafalan_updates[santri.hafalan_updates.length - 1];
       setUpdateSurahNo(last.surah_no);
-      setUpdateAyat(last.ayat);
-      setUpdateJuz(last.juz);
+      setUpdateAyat(last.ayat.toString());
+      setUpdateJuz(last.juz.toString());
+      setIsJuzManual(false);
+      setAyatError("");
       setUpdateNotes(last.notes || "");
-      setSuccess(`Nilai terakhir santri "${santri.name}" disalin. Silakan sesuaikan ayat &amp; tanggal.`);
+      setSuccess(`Nilai terakhir santri "${santri.name}" disalin. Silakan sesuaikan ayat & tanggal.`);
     } else {
       setError("Belum ada riwayat sebelumnya untuk santri ini.");
     }
@@ -159,8 +197,8 @@ export default function AdminEditInfakPage() {
           santriId: selectedSantriId,
           updated_on: updateDate,
           surah_no: updateSurahNo,
-          ayat: updateAyat,
-          juz: updateJuz,
+          ayat: parseInt(updateAyat, 10) || 1,
+          juz: parseInt(updateJuz, 10) || 1,
           notes: updateNotes || null,
         }),
       });
@@ -236,10 +274,17 @@ export default function AdminEditInfakPage() {
                 Mushaf Ke- *
               </label>
               <Input
-                type="number"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 required
                 value={formData.mushaf_no}
-                onChange={(e) => setFormData({ ...formData, mushaf_no: e.target.value })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    mushaf_no: cleanNumericString(e.target.value, false),
+                  })
+                }
               />
             </div>
 
@@ -449,7 +494,7 @@ export default function AdminEditInfakPage() {
                 </label>
                 <Select
                   value={updateSurahNo.toString()}
-                  onChange={(e) => handleSurahOrAyatChange(parseInt(e.target.value, 10), updateAyat)}
+                  onChange={(e) => handleSurahChange(parseInt(e.target.value, 10))}
                   options={QURAN_SURAHS.map((q) => ({
                     value: q.number.toString(),
                     label: `${q.number}. ${q.nameLatin} (${q.totalAyat} ayat)`,
@@ -462,25 +507,40 @@ export default function AdminEditInfakPage() {
                   Ayat Terkini *
                 </label>
                 <Input
-                  type="number"
-                  min={1}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   required
                   value={updateAyat}
-                  onChange={(e) => handleSurahOrAyatChange(updateSurahNo, parseInt(e.target.value, 10) || 1)}
+                  onChange={(e) => handleAyatChange(e.target.value)}
+                  placeholder="Contoh: 7"
+                  error={ayatError}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
-                  Juz (Otomatis &bull; Bisa Edit) *
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-semibold text-[var(--ink-800)]">
+                    Juz (Otomatis, Bisa Diedit) *
+                  </label>
+                  {isJuzManual && (
+                    <button
+                      type="button"
+                      onClick={handleResetJuzAuto}
+                      className="text-[10px] text-[var(--gold-700)] hover:text-[var(--gold-800)] underline cursor-pointer"
+                    >
+                      Kembalikan otomatis
+                    </button>
+                  )}
+                </div>
                 <Input
-                  type="number"
-                  min={1}
-                  max={30}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   required
                   value={updateJuz}
-                  onChange={(e) => setUpdateJuz(parseInt(e.target.value, 10) || 1)}
+                  onChange={(e) => handleJuzChange(e.target.value)}
+                  placeholder="Contoh: 1"
                 />
               </div>
             </div>

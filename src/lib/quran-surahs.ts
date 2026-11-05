@@ -69,7 +69,7 @@ export const QURAN_SURAHS: QuranSurah[] = [
   { number: 61, nameLatin: "As-Saff", nameArabic: "الصف", totalAyat: 14 },
   { number: 62, nameLatin: "Al-Jumu'ah", nameArabic: "الجمعة", totalAyat: 11 },
   { number: 63, nameLatin: "Al-Munafiqun", nameArabic: "المنافقون", totalAyat: 11 },
-  { number: 64, nameLatin: "At-Taghabun", nameArabic: "التغابن", totalAyat: 18 },
+  { number: 64, nameLatin: "At-Tagabun", nameArabic: "التغابن", totalAyat: 18 },
   { number: 65, nameLatin: "At-Talaq", nameArabic: "الطلاق", totalAyat: 12 },
   { number: 66, nameLatin: "At-Tahrim", nameArabic: "التحريم", totalAyat: 12 },
   { number: 67, nameLatin: "Al-Mulk", nameArabic: "الملك", totalAyat: 30 },
@@ -93,7 +93,7 @@ export const QURAN_SURAHS: QuranSurah[] = [
   { number: 85, nameLatin: "Al-Buruj", nameArabic: "البروج", totalAyat: 22 },
   { number: 86, nameLatin: "At-Tariq", nameArabic: "الطارق", totalAyat: 17 },
   { number: 87, nameLatin: "Al-A'la", nameArabic: "الأعلى", totalAyat: 19 },
-  { number: 88, nameLatin: "Al-Ghasyiyah", nameArabic: "الغاشية", totalAyat: 26 },
+  { number: 88, nameLatin: "Al-Gasyiyah", nameArabic: "الغاشية", totalAyat: 26 },
   { number: 89, nameLatin: "Al-Fajr", nameArabic: "الفجر", totalAyat: 30 },
   { number: 90, nameLatin: "Al-Balad", nameArabic: "البلد", totalAyat: 20 },
   { number: 91, nameLatin: "Asy-Syams", nameArabic: "الشمس", totalAyat: 15 },
@@ -122,121 +122,105 @@ export const QURAN_SURAHS: QuranSurah[] = [
   { number: 114, nameLatin: "An-Nas", nameArabic: "الناس", totalAyat: 6 },
 ];
 
-export function getSurahByNumber(num: number): QuranSurah | undefined {
-  return QURAN_SURAHS.find((s) => s.number === num);
+/**
+ * Tabel batas awal resmi 30 Juz Al-Qur'an (Standar Mushaf Madinah / Kemenag RI).
+ * Digunakan untuk pemetaan titik batas hafalan secara deterministik & terverifikasi.
+ */
+export interface JuzBoundary {
+  juz: number;
+  startSurah: number;
+  startAyat: number;
 }
 
-export function validateAyatNumber(surahNo: number, ayat: number): { valid: boolean; maxAyat: number; message?: string } {
-  const surah = getSurahByNumber(surahNo);
-  if (!surah) return { valid: false, maxAyat: 0, message: "Nomor surah tidak valid" };
-  if (ayat < 1 || ayat > surah.totalAyat) {
+export const JUZ_BOUNDARIES: JuzBoundary[] = [
+  { juz: 1, startSurah: 1, startAyat: 1 },
+  { juz: 2, startSurah: 2, startAyat: 142 },
+  { juz: 3, startSurah: 2, startAyat: 253 },
+  { juz: 4, startSurah: 3, startAyat: 93 },
+  { juz: 5, startSurah: 4, startAyat: 24 },
+  { juz: 6, startSurah: 4, startAyat: 148 },
+  { juz: 7, startSurah: 5, startAyat: 82 },
+  { juz: 8, startSurah: 6, startAyat: 111 },
+  { juz: 9, startSurah: 7, startAyat: 88 },
+  { juz: 10, startSurah: 8, startAyat: 41 },
+  { juz: 11, startSurah: 9, startAyat: 93 },
+  { juz: 12, startSurah: 11, startAyat: 6 },
+  { juz: 13, startSurah: 12, startAyat: 53 },
+  { juz: 14, startSurah: 15, startAyat: 1 },
+  { juz: 15, startSurah: 17, startAyat: 1 },
+  { juz: 16, startSurah: 18, startAyat: 75 },
+  { juz: 17, startSurah: 21, startAyat: 1 },
+  { juz: 18, startSurah: 23, startAyat: 1 },
+  { juz: 19, startSurah: 25, startAyat: 21 },
+  { juz: 20, startSurah: 27, startAyat: 56 },
+  { juz: 21, startSurah: 29, startAyat: 46 },
+  { juz: 22, startSurah: 33, startAyat: 31 },
+  { juz: 23, startSurah: 36, startAyat: 28 },
+  { juz: 24, startSurah: 39, startAyat: 32 },
+  { juz: 25, startSurah: 41, startAyat: 47 },
+  { juz: 26, startSurah: 46, startAyat: 1 },
+  { juz: 27, startSurah: 51, startAyat: 31 },
+  { juz: 28, startSurah: 58, startAyat: 1 },
+  { juz: 29, startSurah: 67, startAyat: 1 },
+  { juz: 30, startSurah: 78, startAyat: 1 },
+];
+
+export function getSurahByNumber(num: number | string): QuranSurah | undefined {
+  const n = typeof num === "string" ? parseInt(num, 10) : num;
+  return QURAN_SURAHS.find((s) => s.number === n);
+}
+
+export function validateAyatNumber(
+  surahNo: number | string,
+  ayat: number | string
+): { valid: boolean; maxAyat: number; message?: string } {
+  const sNo = typeof surahNo === "string" ? parseInt(surahNo, 10) : surahNo;
+  const ay = typeof ayat === "string" ? parseInt(ayat, 10) : ayat;
+
+  const surah = getSurahByNumber(sNo);
+  if (!surah) {
+    return { valid: false, maxAyat: 0, message: "Nomor surah tidak valid" };
+  }
+
+  if (isNaN(ay) || ay < 1) {
     return {
       valid: false,
       maxAyat: surah.totalAyat,
-      message: `Surah ${surah.nameLatin} hanya memiliki ${surah.totalAyat} ayat (ayat yang diinput: ${ayat})`,
+      message: `Nomor ayat harus minimal 1`,
     };
   }
+
+  if (ay > surah.totalAyat) {
+    return {
+      valid: false,
+      maxAyat: surah.totalAyat,
+      message: `Surah ${surah.nameLatin} hanya memiliki ${surah.totalAyat} ayat (ayat yang diinput: ${ay})`,
+    };
+  }
+
   return { valid: true, maxAyat: surah.totalAyat };
 }
 
+/**
+ * Menghitung nomor Juz secara akurat & deterministik berdasarkan tabel batas resmi 30 Juz.
+ */
+export function getSuggestedJuz(surahNo: number | string, ayat: number | string): number {
+  const sNo = typeof surahNo === "string" ? parseInt(surahNo, 10) : surahNo;
+  const ay = typeof ayat === "string" ? parseInt(ayat, 10) : ayat;
 
-export function getSuggestedJuz(surahNo: number, ayat: number): number {
-  if (surahNo === 1) return 1;
-  if (surahNo === 2) {
-    if (ayat <= 141) return 1;
-    if (ayat <= 252) return 2;
-    return 3;
+  if (isNaN(sNo) || sNo < 1) return 1;
+  const effectiveAyat = isNaN(ay) || ay < 1 ? 1 : ay;
+
+  // Telusuri dari Juz 30 mundur ke Juz 1
+  for (let i = JUZ_BOUNDARIES.length - 1; i >= 0; i--) {
+    const boundary = JUZ_BOUNDARIES[i];
+    if (
+      sNo > boundary.startSurah ||
+      (sNo === boundary.startSurah && effectiveAyat >= boundary.startAyat)
+    ) {
+      return boundary.juz;
+    }
   }
-  if (surahNo === 3) {
-    if (ayat <= 92) return 3;
-    return 4;
-  }
-  if (surahNo === 4) {
-    if (ayat <= 23) return 4;
-    if (ayat <= 147) return 5;
-    return 6;
-  }
-  if (surahNo === 5) {
-    if (ayat <= 81) return 6;
-    return 7;
-  }
-  if (surahNo === 6) {
-    if (ayat <= 110) return 7;
-    return 8;
-  }
-  if (surahNo === 7) {
-    if (ayat <= 87) return 8;
-    return 9;
-  }
-  if (surahNo === 8) {
-    if (ayat <= 40) return 9;
-    return 10;
-  }
-  if (surahNo === 9) {
-    if (ayat <= 92) return 10;
-    return 11;
-  }
-  if (surahNo === 10) return 11;
-  if (surahNo === 11) {
-    if (ayat <= 5) return 11;
-    return 12;
-  }
-  if (surahNo === 12) {
-    if (ayat <= 52) return 12;
-    return 13;
-  }
-  if (surahNo === 13 || surahNo === 14) return 13;
-  if (surahNo === 15 || surahNo === 16) return 14;
-  if (surahNo === 17) return 15;
-  if (surahNo === 18) {
-    if (ayat <= 74) return 15;
-    return 16;
-  }
-  if (surahNo === 19 || surahNo === 20) return 16;
-  if (surahNo === 21 || surahNo === 22) return 17;
-  if (surahNo === 23 || surahNo === 24) return 18;
-  if (surahNo === 25) {
-    if (ayat <= 20) return 18;
-    return 19;
-  }
-  if (surahNo === 26) return 19;
-  if (surahNo === 27) {
-    if (ayat <= 55) return 19;
-    return 20;
-  }
-  if (surahNo === 28) return 20;
-  if (surahNo === 29) {
-    if (ayat <= 45) return 20;
-    return 21;
-  }
-  if (surahNo >= 30 && surahNo <= 32) return 21;
-  if (surahNo === 33) {
-    if (ayat <= 30) return 21;
-    return 22;
-  }
-  if (surahNo === 34 || surahNo === 35) return 22;
-  if (surahNo === 36) {
-    if (ayat <= 27) return 22;
-    return 23;
-  }
-  if (surahNo === 37 || surahNo === 38) return 23;
-  if (surahNo === 39) {
-    if (ayat <= 31) return 23;
-    return 24;
-  }
-  if (surahNo === 40) return 24;
-  if (surahNo === 41) {
-    if (ayat <= 46) return 24;
-    return 25;
-  }
-  if (surahNo >= 42 && surahNo <= 45) return 25;
-  if (surahNo >= 46 && surahNo <= 50) return 26;
-  if (surahNo === 51) {
-    if (ayat <= 30) return 26;
-    return 27;
-  }
-  if (surahNo >= 52 && surahNo <= 57) return 27;
-  if (surahNo >= 58 && surahNo <= 66) return 28;
-  if (surahNo >= 67 && surahNo <= 77) return 29;
-  return 30;
+
+  return 1;
 }

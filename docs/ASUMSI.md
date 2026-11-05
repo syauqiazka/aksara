@@ -33,6 +33,11 @@ Dokumen ini mencatat asumsi dan keputusan yang diambil oleh Senior Creative Engi
 - Seluruh rute `/admin/**` diatur dengan `X-Robots-Tag: noindex, nofollow` dan diproteksi cookie session httpOnly dengan verifikasi server.
 - Kredensial default pengurus: `admin@sahabataksara.id` / `aksaramulia2026`.
 
+### 8. Letak Markaz & Sekretariat Yayasan pada Peta
+- Penanda statis "Pusat (Jakarta)" di koordinat (267, 301) dengan gelombang radar dihapus dari peta sebaran publik.
+- Letak sekretariat yayasan hanya boleh dimunculkan pada peta publik bila diambil dari `site_settings` dan telah dikonfirmasi definitif oleh pengurus yayasan.
+- Peta "Sebaran Infak Al-Qur'an Jinan" murni memetakan sebaran distribusi ke pesantren dan madrasah binaan nusantara berdasarkan data terverifikasi (status published) tanpa mock central hub buatan.
+
 ---
 
 ## 8. Temuan & Keputusan Storage Provider (Update Tahap 1)
