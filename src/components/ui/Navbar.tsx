@@ -73,7 +73,7 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm font-medium transition-all relative py-1 px-1.5 rounded-md focus-visible:ring-2 focus-visible:ring-[var(--gold-500)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--green-950)] focus-visible:outline-none ${
+                className={`text-sm font-medium transition-all relative py-1 px-1.5 rounded-md cursor-pointer select-none focus-visible:ring-2 focus-visible:ring-[var(--gold-500)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--green-950)] focus-visible:outline-none ${
                   isActive
                     ? "text-[var(--gold-400)] font-semibold"
                     : "text-[var(--cream-100)] hover:text-[var(--gold-300)]"
@@ -92,7 +92,7 @@ export default function Navbar() {
         <div className="flex items-center gap-4">
           <Link
             href="/donasi"
-            className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold bg-gold-gradient text-[var(--green-950)] hover:brightness-110 shadow-[0_2px_12px_rgba(212,175,55,0.35)] transition-all transform active:scale-95 outline-none"
+            className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold bg-gold-gradient text-[var(--green-950)] hover:brightness-110 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all duration-200 transform active:scale-[0.98] cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold-400)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--green-950)]"
           >
             <HeartHandshake className="w-4 h-4 text-[var(--green-950)]" />
             <span>Donasi</span>
@@ -139,7 +139,7 @@ export default function Navbar() {
             <Link
               href="/donasi"
               onClick={() => setMobileMenuOpen(false)}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full text-base font-semibold bg-gold-gradient text-[var(--green-950)] shadow-lg"
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full text-base font-semibold bg-gold-gradient text-[var(--green-950)] shadow-[var(--shadow-md)] active:scale-[0.98] cursor-pointer transition-all duration-200"
             >
               <HeartHandshake className="w-5 h-5 text-[var(--green-950)]" />
               <span>Salurkan Donasi</span>

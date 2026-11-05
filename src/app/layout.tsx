@@ -5,6 +5,7 @@ import Navbar from "@/components/ui/Navbar";
 import Footer from "@/components/ui/Footer";
 import SmoothScroll from "@/components/motion/SmoothScroll";
 import CustomCursor from "@/components/motion/CustomCursor";
+import PageTransition from "@/components/motion/PageTransition";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -99,7 +100,9 @@ export default function RootLayout({
         <SmoothScroll>
           <CustomCursor />
           <Navbar />
-          <main id="main-content" className="flex-grow flex flex-col">{children}</main>
+          <main id="main-content" className="flex-grow flex flex-col w-full relative">
+            <PageTransition>{children}</PageTransition>
+          </main>
           <Footer />
         </SmoothScroll>
       </body>

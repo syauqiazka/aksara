@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import gsap from "gsap";
 
 export default function Preloader() {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const curtainRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -57,6 +59,7 @@ export default function Preloader() {
   // Selalu tampilkan animasi pembuka logo setiap kali halaman di-refresh / dimuat
   useEffect(() => {
     setVisible(true);
+    setMounted(true);
   }, []);
 
   // Phase 2: Once visible and DOM elements are mounted, run GSAP animation
@@ -233,10 +236,10 @@ export default function Preloader() {
 
   if (!visible) return null;
 
-  return (
+  const preloaderContent = (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-[99999] flex items-center justify-center overflow-hidden"
+      className="fixed inset-0 z-[999999] flex items-center justify-center overflow-hidden"
       role="status"
       aria-live="polite"
       aria-label="Animasi Pembuka Yayasan Sahabat Aksara"
@@ -246,7 +249,7 @@ export default function Preloader() {
         onClick={handleSkip}
         type="button"
         aria-label="Lewati animasi intro"
-        className="fixed top-5 right-5 sm:top-7 sm:right-7 z-[100000] min-w-[44px] min-h-[44px] px-4 py-2 rounded-full bg-[var(--green-900)]/70 hover:bg-[var(--green-900)] border border-[var(--gold-500)]/40 hover:border-[var(--gold-400)] text-[var(--gold-300)] hover:text-[var(--gold-200)] text-xs font-semibold tracking-wider transition-all backdrop-blur-md shadow-lg flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
+        className="fixed top-5 right-5 sm:top-7 sm:right-7 z-[1000000] min-w-[44px] min-h-[44px] px-4 py-2 rounded-full bg-[var(--green-900)]/80 hover:bg-[var(--green-900)] border border-[var(--gold-500)]/40 hover:border-[var(--gold-400)] text-[var(--gold-300)] hover:text-[var(--gold-200)] text-xs font-semibold tracking-wider transition-all backdrop-blur-md shadow-lg flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)] cursor-pointer active:scale-[0.98]"
       >
         <span>Lewati</span>
         <span aria-hidden="true" className="text-sm">✕</span>
@@ -423,4 +426,10 @@ export default function Preloader() {
       </div>
     </div>
   );
+
+  if (mounted && typeof document !== "undefined") {
+    return createPortal(preloaderContent, document.body);
+  }
+
+  return preloaderContent;
 }

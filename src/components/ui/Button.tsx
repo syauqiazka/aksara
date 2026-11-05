@@ -20,7 +20,7 @@ export default function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    "inline-flex items-center justify-center font-medium rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)] focus:ring-offset-2 active:scale-95 disabled:opacity-50 disabled:pointer-events-none";
+    "inline-flex items-center justify-center font-medium rounded-full cursor-pointer select-none transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold-400)] focus-visible:ring-offset-2 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none";
 
   const sizeStyles = {
     sm: "px-4 py-2 text-sm gap-1.5",
@@ -30,13 +30,13 @@ export default function Button({
 
   const variantStyles = {
     primary:
-      "bg-[var(--green-800)] text-[var(--cream-50)] hover:bg-[var(--green-700)] shadow-[0_4px_14px_rgba(17,74,28,0.35)] hover:shadow-[0_6px_20px_rgba(17,74,28,0.45)]",
+      "bg-[var(--green-800)] text-[var(--cream-50)] hover:bg-[var(--green-700)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 border border-white/10",
     gold:
-      "bg-gold-gradient text-[var(--green-950)] font-semibold shadow-[0_4px_16px_rgba(212,175,55,0.4)] hover:shadow-[0_6px_24px_rgba(212,175,55,0.6)] hover:brightness-105",
+      "bg-gold-gradient text-[var(--green-950)] font-semibold shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:brightness-105 hover:-translate-y-0.5 border border-[var(--gold-400)]/40",
     secondary:
-      "border border-[var(--gold-500)] text-[var(--green-900)] hover:bg-[var(--gold-500)]/10 hover:border-[var(--gold-400)]",
+      "border border-[var(--gold-500)] text-[var(--green-900)] bg-transparent hover:bg-[var(--gold-500)]/10 hover:border-[var(--gold-400)] hover:-translate-y-0.5 shadow-xs",
     "secondary-dark":
-      "border border-[var(--gold-400)] text-[var(--cream-50)] hover:bg-[var(--gold-500)]/20 hover:text-[var(--gold-300)] shadow-xs",
+      "border border-[var(--gold-400)]/80 text-[var(--cream-50)] bg-transparent hover:bg-[var(--gold-500)]/15 hover:text-[var(--gold-300)] hover:border-[var(--gold-300)] hover:-translate-y-0.5 shadow-xs",
     ghost:
       "text-[var(--green-800)] hover:bg-[var(--green-800)]/10",
   };

@@ -38,17 +38,21 @@
   --r-lg: 28px;
   --r-pill: 9999px;
 
-  /* Elevations */
-  --shadow-sm: 0 1px 2px rgba(20, 35, 26, 0.06);
-  --shadow-md: 0 12px 32px -12px rgba(12, 58, 24, 0.25);
+  /* Elevations (Crafted Multi-layer Ambient Shadows) */
+  --shadow-sm: 0 1px 2px rgba(20, 35, 26, 0.04), 0 0 0 1px rgba(20, 35, 26, 0.04);
+  --shadow-md: 0 4px 12px -2px rgba(20, 35, 26, 0.05), 0 12px 28px -4px rgba(20, 35, 26, 0.08), 0 0 0 1px rgba(20, 35, 26, 0.05);
+  --shadow-lg: 0 8px 16px -4px rgba(20, 35, 26, 0.04), 0 24px 48px -8px rgba(12, 58, 24, 0.12), 0 0 0 1px rgba(20, 35, 26, 0.06);
+  --shadow-dark: 0 24px 48px -12px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(212, 175, 55, 0.22);
   --border-gold-glow: 1px solid rgba(212, 175, 55, 0.3);
 
-  /* Motion timing */
-  --dur-xs: 0.2s;
-  --dur-sm: 0.4s;
-  --dur-md: 0.7s;
-  --dur-lg: 1.1s;
-  --dur-xl: 1.8s;
+  /* Motion timing & easing */
+  --dur-xs: 0.15s;
+  --dur-sm: 0.24s;
+  --dur-md: 0.5s;
+  --dur-lg: 0.9s;
+  --dur-xl: 1.5s;
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
   --stagger-fast: 0.04s;
   --stagger-normal: 0.08s;
 }
