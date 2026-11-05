@@ -288,7 +288,7 @@ export default async function HomePage() {
               </div>
 
               <div className="pt-8 flex flex-col sm:flex-row items-center gap-4">
-                <Button href="/donasi" variant="secondary" size="md" className="w-full sm:w-auto text-[var(--cream-50)] border-[var(--gold-500)]/40 hover:bg-[var(--gold-500)]/15">
+                <Button href="/donasi" variant="secondary" size="md" className="w-full sm:w-auto text-white border-[var(--gold-500)]/40 hover:bg-[var(--gold-500)]/15">
                   <span>Dukung Santri Tahfidz</span>
                 </Button>
                 <Link
@@ -524,7 +524,7 @@ export default async function HomePage() {
               href="/tentang"
               variant="secondary"
               size="lg"
-              className="w-full sm:w-auto text-[var(--cream-50)] border-[var(--gold-500)]/40 hover:bg-[var(--gold-500)]/15"
+              className="w-full sm:w-auto text-white border-[var(--gold-500)]/40 hover:bg-[var(--gold-500)]/15"
             >
               <span>Profil &amp; Visi Lembaga</span>
             </Button>
