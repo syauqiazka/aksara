@@ -6,7 +6,6 @@ import {
   BookOpen,
   Building2,
   GraduationCap,
-  Sparkles,
   CheckCircle2,
   FileText,
   MapPin,
@@ -135,8 +134,7 @@ export default async function HomePage() {
               <p className="text-sm text-[var(--cream-200)]/90 leading-relaxed mb-4">
                 Gerakan Infak 1 Jt Al-Qur&apos;an Jinan, Beasiswa BUSS Al-Qur&apos;an, Aksi Nyata Geber Bersih Masjid, serta Majlis Tasmi&apos; 30 Juz Bil-Ghoib.
               </p>
-              <div className="text-xs font-bold text-[var(--gold-400)] flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" />
+              <div className="text-xs font-bold text-[var(--gold-400)]">
                 <span>Pusat Gravitasi Khidmat Yayasan</span>
               </div>
             </div>

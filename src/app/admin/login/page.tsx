@@ -41,8 +41,6 @@ export default function AdminLoginPage() {
 
   return (
     <main className="min-h-screen bg-[var(--green-950)] text-[var(--cream-50)] flex items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-islamic-stars opacity-20 pointer-events-none" />
-
       <section className="relative z-10 w-full max-w-md bg-[var(--green-900)] border border-[var(--gold-500)]/40 rounded-2xl p-7 sm:p-9 shadow-2xl">
         <div className="text-center mb-8">
           <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-[var(--gold-500)] mx-auto mb-5 bg-[var(--green-950)]">

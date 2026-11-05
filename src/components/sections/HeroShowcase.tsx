@@ -6,22 +6,19 @@ import {
   MapPin,
   ShieldCheck,
   CheckCircle2,
-  BookOpen,
   Award,
-  Building,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 
 interface HeroShowcaseProps {
-  totalMushaf: number;
-  totalMasjid: number;
+  totalMushaf?: number;
+  totalMasjid?: number;
 }
 
-export default function HeroShowcase({ totalMushaf, totalMasjid }: HeroShowcaseProps) {
+export default function HeroShowcase(_props?: HeroShowcaseProps) {
   return (
     <section className="relative min-h-[92vh] flex items-center bg-[var(--green-950)] text-[var(--cream-50)] pt-28 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Background Islamic star geometry & gradient highlight */}
-      <div className="absolute inset-0 bg-islamic-stars opacity-30 pointer-events-none" />
+      {/* Background Ambient Glow */}
       <div className="absolute -top-40 -right-40 w-96 h-96 bg-[var(--green-800)]/40 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-[var(--gold-500)]/15 rounded-full blur-3xl pointer-events-none" />
 
@@ -112,56 +109,9 @@ export default function HeroShowcase({ totalMushaf, totalMasjid }: HeroShowcaseP
                 </p>
               </div>
             </div>
-
-            {/* Floating Live Badge 1: Mushaf Tersalurkan */}
-            <div className="absolute -top-4 -left-4 sm:-left-6 bg-[var(--green-900)] border-2 border-[var(--gold-500)] px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-[float_4s_ease-in-out_infinite]">
-              <div className="w-10 h-10 rounded-xl bg-[var(--green-800)] text-[var(--gold-400)] flex items-center justify-center">
-                <BookOpen className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="font-mono text-lg font-extrabold text-gold-gradient">
-                  {totalMushaf > 0 ? `${totalMushaf.toLocaleString("id-ID")}+` : "0"}
-                </div>
-                <div className="text-[10px] uppercase tracking-wider text-[var(--cream-200)] font-semibold">
-                  Mushaf Tersalurkan
-                </div>
-              </div>
-            </div>
-
-            {/* Floating Live Badge 2: Geber Masjid */}
-            <div className="absolute -bottom-4 -right-4 sm:-right-6 bg-[var(--green-900)] border-2 border-[var(--gold-500)] px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-[float_5s_ease-in-out_infinite_reverse]">
-              <div className="w-10 h-10 rounded-xl bg-[var(--gold-500)] text-[var(--green-950)] flex items-center justify-center">
-                <Building className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="font-mono text-lg font-extrabold text-[var(--cream-50)]">
-                  {totalMasjid} Masjid
-                </div>
-                <div className="text-[10px] uppercase tracking-wider text-[var(--gold-300)] font-semibold">
-                  Aksi Geber Kebersihan
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-8px);
-          }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          :global(.animate-\[float_4s_ease-in-out_infinite\]),
-          :global(.animate-\[float_5s_ease-in-out_infinite_reverse\]) {
-            animation: none !important;
-          }
-        }
-      `}</style>
     </section>
   );
 }

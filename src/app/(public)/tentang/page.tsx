@@ -101,7 +101,7 @@ export default function TentangPage() {
                   <div key={idx} className="relative group">
                     {/* Node Dot */}
                     <div className="absolute -left-[19px] top-1.5 w-3.5 h-3.5 rounded-full bg-[var(--gold-500)] border-2 border-[var(--cream-50)] shadow-sm group-hover:scale-125 transition-transform" />
-                    
+
                     <div className="bg-[var(--cream-100)] p-5 rounded-2xl border border-[var(--cream-200)] hover:border-[var(--gold-500)]/60 shadow-sm transition-all">
                       <div className="text-xs font-bold font-mono text-[var(--gold-700)] uppercase tracking-wider mb-1">
                         Tahun {step.year}
@@ -233,7 +233,7 @@ export default function TentangPage() {
               <HeartHandshake className="w-5 h-5 text-[var(--green-950)]" />
               <span>Salurkan Donasi</span>
             </Button>
-            <Button href="/program" variant="secondary" size="lg" className="w-full sm:w-auto text-[var(--cream-50)] border-[var(--gold-500)]/40 hover:bg-[var(--gold-500)]/15">
+            <Button href="/program" variant="secondary" size="lg" className="w-full sm:w-auto text-white border-[var(--gold-500)]/40 hover:bg-[var(--gold-500)]/15">
               <span>Pelajari 8 Program Lembaga</span>
             </Button>
           </div>

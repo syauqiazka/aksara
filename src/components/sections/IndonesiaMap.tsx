@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useCallback, useMemo } from "react";
-import { MapPin, Sparkles, X, Layers } from "lucide-react";
+import { MapPin, X, Layers } from "lucide-react";
 import { INDONESIA_ISLANDS, IslandId, IslandInfo } from "./indonesiaMapData";
 import { PublicInfakJinanRecord } from "@/lib/db/types";
 import { getIslandByProvince } from "@/lib/provinces-38";
@@ -364,7 +364,7 @@ export default function IndonesiaMap({
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-3.5 h-3.5 text-[#ffd700]" />
+                    <Layers className="w-3.5 h-3.5 text-[#ffd700]" />
                     Wilayah Terpilih
                   </>
                 )}

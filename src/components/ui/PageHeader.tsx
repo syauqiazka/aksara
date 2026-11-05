@@ -24,8 +24,7 @@ export default function PageHeader({
 }: PageHeaderProps) {
   return (
     <section className="relative pt-32 pb-16 sm:pb-20 bg-[var(--green-950)] text-[var(--cream-50)] border-b border-[var(--gold-500)]/20 overflow-hidden">
-      {/* Background Star Geometry & Ambient Glow */}
-      <div className="absolute inset-0 bg-islamic-stars opacity-25 pointer-events-none" />
+      {/* Background Ambient Glow */}
       <div className="absolute -top-32 right-10 w-80 h-80 bg-[var(--green-800)]/30 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-32 left-10 w-80 h-80 bg-[var(--gold-500)]/10 rounded-full blur-3xl pointer-events-none" />
 

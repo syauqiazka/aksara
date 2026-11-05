@@ -14,9 +14,6 @@ export default function Footer() {
 
   return (
     <footer className="relative bg-[var(--green-950)] text-[var(--cream-100)] pt-16 pb-12 overflow-hidden border-t-2 border-[var(--gold-500)]/40">
-      {/* Background Islamic star geometry watermark */}
-      <div className="absolute inset-0 bg-islamic-stars opacity-40 pointer-events-none" />
-
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-[var(--gold-500)]/20">
           {/* Col 1: Identity & Legal */}

@@ -12,8 +12,6 @@ export default function InteractiveLogoHotspots() {
 
   return (
     <div className="bg-[var(--green-950)] text-[var(--cream-50)] p-6 sm:p-10 rounded-3xl border border-[var(--gold-500)]/30 relative overflow-hidden shadow-2xl">
-      <div className="absolute inset-0 bg-islamic-stars opacity-30 pointer-events-none" />
-
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
         {/* Interactive Logo Container */}
         <div className="lg:col-span-6 flex flex-col items-center">

@@ -26,11 +26,6 @@ export default function Preloader() {
 
   const handleComplete = () => {
     setVisible(false);
-    try {
-      sessionStorage.setItem("sahabat_aksara_visited", "true");
-    } catch {
-      // ignore
-    }
 
     // Shift focus to main content without scroll jump
     setTimeout(() => {
@@ -59,25 +54,9 @@ export default function Preloader() {
     }
   };
 
-  // Phase 1: Determine visibility based on sessionStorage
+  // Selalu tampilkan animasi pembuka logo setiap kali halaman di-refresh / dimuat
   useEffect(() => {
-    let hasVisited = false;
-    try {
-      hasVisited = Boolean(sessionStorage.getItem("sahabat_aksara_visited"));
-    } catch {
-      hasVisited = false;
-    }
-
-    if (hasVisited) {
-      return;
-    }
-
     setVisible(true);
-    try {
-      sessionStorage.setItem("sahabat_aksara_visited", "true");
-    } catch {
-      // ignore
-    }
   }, []);
 
   // Phase 2: Once visible and DOM elements are mounted, run GSAP animation
@@ -105,7 +84,7 @@ export default function Preloader() {
       return () => clearTimeout(timer);
     }
 
-    // Full 3.0s timeline with GSAP
+    // Full ~5.0s timeline with GSAP
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
         onComplete: handleComplete,
@@ -123,12 +102,12 @@ export default function Preloader() {
       if (acronymRef.current) gsap.set(acronymRef.current, { opacity: 0, letterSpacing: "0.35em" });
       if (tagRef.current) gsap.set(tagRef.current, { opacity: 0 });
 
-      // 1. Double Gold Rings Draw (0.0s -> 0.85s)
+      // 1. Double Gold Rings Draw (0.0s -> 1.25s)
       tl.to(
         outerRingRef.current,
         {
           strokeDashoffset: 0,
-          duration: 0.85,
+          duration: 1.25,
           ease: "power2.inOut",
         },
         0
@@ -138,22 +117,22 @@ export default function Preloader() {
         innerRingRef.current,
         {
           strokeDashoffset: 0,
-          duration: 0.8,
+          duration: 1.15,
           ease: "power2.inOut",
         },
-        0.1
+        0.15
       );
 
-      // 2. Logo Elements Sequential Reveal: Tangan, Buku, Globe, Tunas (0.5s -> 1.5s)
+      // 2. Logo Elements Sequential Reveal: Tangan, Buku, Globe, Tunas (0.8s -> 2.4s)
       tl.to(
         palmsRef.current,
         {
           opacity: 1,
           y: 0,
-          duration: 0.5,
+          duration: 0.7,
           ease: "back.out(1.5)",
         },
-        0.5
+        0.8
       );
 
       tl.to(
@@ -161,10 +140,10 @@ export default function Preloader() {
         {
           opacity: 0.45,
           scale: 1,
-          duration: 0.55,
+          duration: 0.75,
           ease: "power2.out",
         },
-        0.65
+        1.1
       );
 
       tl.to(
@@ -172,10 +151,10 @@ export default function Preloader() {
         {
           opacity: 1,
           scale: 1,
-          duration: 0.5,
+          duration: 0.7,
           ease: "back.out(1.4)",
         },
-        0.8
+        1.4
       );
 
       tl.to(
@@ -183,22 +162,22 @@ export default function Preloader() {
         {
           opacity: 1,
           scaleY: 1,
-          duration: 0.5,
+          duration: 0.75,
           ease: "elastic.out(1, 0.6)",
         },
-        1.0
+        1.8
       );
 
-      // 3. Brand Identity & Acronym AKSARA Reveal (1.3s -> 2.15s)
+      // 3. Brand Identity & Acronym AKSARA Reveal (2.3s -> 3.4s)
       tl.to(
         titleRef.current,
         {
           opacity: 1,
           y: 0,
-          duration: 0.5,
+          duration: 0.7,
           ease: "power2.out",
         },
-        1.3
+        2.3
       );
 
       tl.to(
@@ -206,23 +185,23 @@ export default function Preloader() {
         {
           opacity: 1,
           letterSpacing: "0.22em",
-          duration: 0.6,
+          duration: 0.8,
           ease: "power3.out",
         },
-        1.5
+        2.6
       );
 
       tl.to(
         tagRef.current,
         {
           opacity: 1,
-          duration: 0.4,
+          duration: 0.6,
           ease: "power2.out",
         },
-        1.7
+        2.9
       );
 
-      // 4. Elegantly Fade Content (2.15s -> 2.3s)
+      // 4. Elegantly Fade Content (4.3s -> 4.55s)
       tl.to(
         contentRef.current,
         {
@@ -231,18 +210,18 @@ export default function Preloader() {
           duration: 0.25,
           ease: "power2.in",
         },
-        2.15
+        4.3
       );
 
-      // 5. Green Curtain Wipe Up (2.3s -> 3.0s = exactly 3.0s total)
+      // 5. Green Curtain Wipe Up (4.55s -> 5.1s = exactly 5.1s total)
       tl.to(
         curtainRef.current,
         {
           yPercent: -100,
-          duration: 0.7,
+          duration: 0.55,
           ease: "power4.inOut",
         },
-        2.3
+        4.55
       );
     }, containerRef);
 
@@ -278,9 +257,6 @@ export default function Preloader() {
         ref={curtainRef}
         className="absolute inset-0 bg-[var(--green-950)] flex items-center justify-center z-10"
       >
-        {/* Subtle Islamic Star Pattern Texture */}
-        <div className="absolute inset-0 bg-islamic-stars opacity-15 pointer-events-none" />
-
         {/* Central Logo & Inscription */}
         <div
           ref={contentRef}

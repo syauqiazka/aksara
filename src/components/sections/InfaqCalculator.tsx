@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { BookOpen, HeartHandshake, CheckCircle2, Sparkles, ArrowRight, ShieldCheck } from "lucide-react";
+import { BookOpen, HeartHandshake, CheckCircle2, ShieldCheck } from "lucide-react";
 
 export default function InfaqCalculator() {
   const [mushafCount, setMushafCount] = useState<number>(3);
@@ -31,14 +31,10 @@ export default function InfaqCalculator() {
 
   return (
     <div className="bg-[var(--green-950)] text-[var(--cream-50)] rounded-3xl p-6 sm:p-10 border-2 border-[var(--gold-500)]/40 shadow-2xl relative overflow-hidden">
-      {/* Background stars */}
-      <div className="absolute inset-0 bg-islamic-stars opacity-20 pointer-events-none" />
-
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
         {/* Left Side: Interactive Controls */}
         <div className="lg:col-span-7 space-y-6">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[var(--green-900)] border border-[var(--gold-500)]/40 text-[var(--gold-300)] text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5 text-[var(--gold-400)]" />
             <span>Kalkulator Dampak Wakaf Mushaf</span>
           </div>
 

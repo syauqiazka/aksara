@@ -9,7 +9,6 @@ import {
   UsersRound,
   CheckCircle2,
   Layers,
-  Sparkles,
 } from "lucide-react";
 
 export const metadata = {
@@ -42,7 +41,6 @@ export default function PortofolioPage() {
       <section className="bg-[var(--green-950)] text-[var(--cream-50)] border-b border-[var(--gold-500)]/20 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs">
           <div className="flex items-center gap-2 text-[var(--gold-400)] font-semibold">
-            <Sparkles className="w-4 h-4 text-[var(--gold-400)] flex-shrink-0" />
             <span>Karakter Produk Teknologi:</span>
             <span className="text-[var(--cream-50)]">Bebas Iklan dan Terbuka untuk Kemaslahatan Ummat</span>
           </div>

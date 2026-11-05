@@ -57,10 +57,6 @@ body {
   background-position: 0 0, 16px 16px;
 }
 
-.bg-islamic-stars {
-  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0 L24 16 L40 20 L24 24 L20 40 L16 24 L0 20 L16 16 Z' fill='none' stroke='%23D4AF37' stroke-width='0.75' stroke-opacity='0.12'/%3E%3C/svg%3E");
-}
-
 /* Custom smooth scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
