@@ -246,7 +246,7 @@ Foto yang menampilkan wajah orang: pastikan ada izin penggunaan sebelum dipublik
 1. **Nama badan hukum**: Yayasan Ajirasa Aksara Semesta (nama brand: Sahabat Aksara). Seluruh penyebutan nama lama disingkirkan.
 2. **Tanggal resmi berdiri**: 22 Oktober 2026. Akta Pendirian Nomor 195 tanggal 15 Januari 2024. SK Kemenkumham Nomor AHU-0002692.AH.01.04. Tahun 2026.
 3. **NPWP**: 827382389 resmi dicantumkan.
-4. **Harga Infak**: Rp 100.000 per mushaf Jinan (target 1 Juta mushaf). Program BUSS Al-Qur'an bertingkat: Rp 150.000 (ekonomi), Rp 300.000 (bisnis), Rp 500.000 (eksekutif).
+4. **Harga Infak**: Rp 100.000 per mushaf Jinan (target 1 Juta mushaf). Program BUSS Al-Qur'an bertingkat: Rp 200.000 (ekonomis), Rp 400.000 (bisnis), Rp 600.000 (eksekutif), Rp 1.000.000 (luxury).
 5. **Kontak & Mitra**: Contact Person 0822-6217-0018, IG @Sahabat Aksara, Mitra: Madrasah Al-Huffazh Gedongan.
 6. **Rekening yayasan**: Bank BCA a.n. Yayasan Ajirasa Aksara Semesta (nomor rekening belum terbit, tampilkan "Nomor rekening segera diumumkan", jangan mengarang).
 7. **Latar belakang lembaga**: Ahmad Dahlan, alumni MA Al-Huffazh 2 Gedongan Cirebon (30 juz & kitab kuning), Paket C, Sarjana Institut PTIQ Jakarta.

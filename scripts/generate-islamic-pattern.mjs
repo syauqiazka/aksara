@@ -107,3 +107,4 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${s
 mkdirSync("public/images/ornaments", { recursive: true });
 writeFileSync("public/images/ornaments/islamic-pattern.svg", svg);
 console.log("✅ Berhasil membuat public/images/ornaments/islamic-pattern.svg");
+

@@ -98,16 +98,23 @@ export default async function ProgramDetailPage({ params }: Props) {
           {/* Main Article (8 Kolom) */}
           <div className="lg:col-span-8 space-y-12">
             {/* Visual Header Mihrab */}
-            <div className="relative aspect-[16/9] w-full rounded-3xl overflow-hidden border-2 border-[var(--gold-500)]/40 shadow-xl bg-[var(--green-950)]">
+            <div
+              className={`relative ${
+                program.slug === "buss-quran"
+                  ? "aspect-[4/3] sm:aspect-square max-h-[640px]"
+                  : "aspect-[16/9]"
+              } w-full rounded-3xl overflow-hidden border-2 border-[var(--gold-500)]/40 shadow-xl bg-[var(--green-950)] flex items-center justify-center`}
+            >
+              <div className="absolute inset-0 bg-islamic-pattern opacity-20 pointer-events-none" />
               <Image
                 src={program.heroImage}
                 alt={program.title}
                 fill
-                className="object-cover"
+                className={program.slug === "buss-quran" ? "object-contain" : "object-cover"}
                 sizes="(max-width: 1024px) 100vw, 800px"
                 priority
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[var(--green-950)]/70 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[var(--green-950)]/40 via-transparent to-transparent pointer-events-none" />
               {program.pricePerUnit && (
                 <div className="absolute bottom-6 right-6 bg-gold-gradient text-[var(--green-950)] text-xs font-bold font-mono px-4 py-1.5 rounded-full shadow-lg">
                   {program.pricePerUnit}

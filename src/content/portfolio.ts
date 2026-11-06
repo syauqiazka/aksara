@@ -6,6 +6,7 @@ export interface PortfolioApp {
   description: string;
   features: string[];
   mockupIcon: string;
+  logoImage?: string;
   status: "Coming Soon";
   playStoreUrl?: string;
   webUrl?: string;
@@ -26,6 +27,7 @@ export const portfolioContent: PortfolioApp[] = [
       "Solusi all-in-one perjalanan spiritual dan intelektual santri",
     ],
     mockupIcon: "Radio",
+    logoImage: "/images/portfolio/kajianqu.webp",
     status: "Coming Soon",
     playStoreUrl: "Akan segera tersedia di Google Play Store",
   },
@@ -43,6 +45,7 @@ export const portfolioContent: PortfolioApp[] = [
       "Fitur daftar target investasi serta website monitoring admin sekolah",
     ],
     mockupIcon: "Wallet",
+    logoImage: "/images/portfolio/banksaku.webp",
     status: "Coming Soon",
     playStoreUrl: "Akan segera tersedia di Google Play Store",
   },
@@ -60,6 +63,7 @@ export const portfolioContent: PortfolioApp[] = [
       "Fitur kepala rumah tangga dengan live lokasi anggota keluarga terdaftar",
     ],
     mockupIcon: "BookCheck",
+    logoImage: "/images/portfolio/diaryqu.webp",
     status: "Coming Soon",
     playStoreUrl: "Akan segera tersedia di Google Play Store",
   },

@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import Image from "next/image";
 import { portfolioContent } from "@/content/portfolio";
 import PageHeader from "@/components/ui/PageHeader";
 import {
@@ -90,9 +91,19 @@ export default function PortofolioPage() {
                   </div>
 
                   {/* App Title & Identity */}
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="w-16 h-16 rounded-2xl bg-[var(--green-950)] text-gold-gradient flex items-center justify-center flex-shrink-0 shadow-lg border border-[var(--gold-500)]/40 group-hover:scale-105 transition-transform">
-                      <IconComponent className="w-8 h-8 text-[var(--gold-400)]" />
+                  <div className="flex items-start gap-4 sm:gap-5 mb-5">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[var(--green-950)] relative overflow-hidden flex-shrink-0 shadow-lg border border-[var(--gold-500)]/40 group-hover:scale-105 transition-transform flex items-center justify-center">
+                      {app.logoImage ? (
+                        <Image
+                          src={app.logoImage}
+                          alt={app.name}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 640px) 64px, 80px"
+                        />
+                      ) : (
+                        <IconComponent className="w-8 h-8 sm:w-9 sm:h-9 text-[var(--gold-400)]" />
+                      )}
                     </div>
                     <div>
                       <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[var(--ink-900)]">
