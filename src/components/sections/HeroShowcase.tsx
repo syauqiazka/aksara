@@ -6,6 +6,7 @@ import {
   MapPin,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
+import IslamicCornerOrnament from "@/components/ui/IslamicCornerOrnament";
 
 interface HeroShowcaseProps {
   totalMushaf?: number;
@@ -15,9 +16,49 @@ interface HeroShowcaseProps {
 export default function HeroShowcase(_props?: HeroShowcaseProps) {
   return (
     <section className="relative min-h-[92vh] flex items-center bg-[var(--green-950)] text-[var(--cream-50)] pt-28 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Background Ambient Glow */}
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-[var(--green-800)]/40 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-[var(--gold-500)]/15 rounded-full blur-3xl pointer-events-none" />
+      {/* 1. Authentic Islamic Geometric Pattern Background Texture (Girih 8-Star Tessellation) */}
+      <div
+        className="absolute inset-0 bg-islamic-pattern opacity-25 pointer-events-none"
+        style={{
+          maskImage:
+            "radial-gradient(ellipse 85% 75% at 50% 50%, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 75%, transparent 100%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse 85% 75% at 50% 50%, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 75%, transparent 100%)",
+        }}
+      />
+
+      {/* 2. Ambient Gold & Emerald Glows */}
+      <div className="absolute -top-40 -right-40 w-[36rem] h-[36rem] bg-[var(--green-800)]/40 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 -left-40 w-[36rem] h-[36rem] bg-[var(--gold-500)]/15 rounded-full blur-3xl pointer-events-none" />
+
+      {/* 3. Grand Islamic Star Mandala Medallion (Right Side Framing Mushaf Jinan) */}
+      <div className="absolute -right-24 sm:-right-16 lg:right-4 top-1/2 -translate-y-1/2 w-[440px] h-[440px] sm:w-[560px] sm:h-[560px] lg:w-[680px] lg:h-[680px] opacity-40 lg:opacity-50 pointer-events-none select-none will-change-transform animate-spin-slow">
+        <Image
+          src="/images/ornaments/islamic-star-mandala.webp"
+          alt=""
+          fill
+          className="object-contain drop-shadow-[0_0_50px_rgba(212,175,55,0.35)]"
+          priority
+        />
+      </div>
+
+      {/* 4. Subtle Ambient Watermark Mandala (Top Left Flank behind Headline) */}
+      <div className="absolute -top-40 -left-40 w-[380px] h-[380px] lg:w-[500px] lg:h-[500px] opacity-10 lg:opacity-12 pointer-events-none select-none will-change-transform animate-spin-reverse-slow">
+        <Image
+          src="/images/ornaments/islamic-star-mandala.webp"
+          alt=""
+          fill
+          className="object-contain"
+        />
+      </div>
+
+      {/* 5. Corner Arabesque Accents */}
+      <div className="absolute top-24 left-4 opacity-30 pointer-events-none select-none hidden sm:block">
+        <IslamicCornerOrnament size={95} />
+      </div>
+      <div className="absolute top-24 right-4 opacity-30 pointer-events-none select-none -scale-x-100 hidden sm:block">
+        <IslamicCornerOrnament size={95} />
+      </div>
 
       <div className="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         {/* Left Column: Headline & Value Proposition */}

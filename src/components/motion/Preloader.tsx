@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import gsap from "gsap";
 import { hasAppLoaded, markAppLoaded } from "@/lib/motion/splash-state";
+import IslamicCornerOrnament from "@/components/ui/IslamicCornerOrnament";
 
 export default function Preloader() {
   const pathname = usePathname();
@@ -20,6 +21,7 @@ export default function Preloader() {
   const logoImgRef = useRef<HTMLDivElement>(null);
   const sheenRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
+  const mandalaRef = useRef<HTMLDivElement>(null);
 
   // SVG Concentric Accent Rings
   const outerRingRef = useRef<SVGCircleElement>(null);
@@ -109,6 +111,26 @@ export default function Preloader() {
         onComplete: handleComplete,
       });
       timelineRef.current = tl;
+
+      // 0. Grand Islamic Star Mandala Medallion Reveal & Celestial Spin (from user motif)
+      if (mandalaRef.current) {
+        tl.to(
+          mandalaRef.current,
+          {
+            opacity: 0.9,
+            scale: 1,
+            duration: 1.2,
+            ease: "power2.out",
+          },
+          0.05
+        );
+        gsap.to(mandalaRef.current, {
+          rotation: 360,
+          duration: 90,
+          repeat: -1,
+          ease: "none",
+        });
+      }
 
       // 1. Double Gold Concentric Accent Rings Draw (0.05s -> 1.1s)
       if (outerRingRef.current) {
@@ -293,8 +315,33 @@ export default function Preloader() {
       {/* Main Full-Screen Green Curtain (Wipes Up at exit) */}
       <div
         ref={curtainRef}
-        className="absolute inset-0 bg-[var(--green-950)] flex items-center justify-center z-10"
+        className="absolute inset-0 bg-[var(--green-950)] flex items-center justify-center z-10 overflow-hidden"
       >
+        {/* Authentic Islamic Geometric Lattice Pattern Texture */}
+        <div
+          className="absolute inset-0 bg-islamic-pattern opacity-25 pointer-events-none"
+          style={{
+            maskImage:
+              "radial-gradient(ellipse 85% 75% at 50% 50%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.55) 70%, rgba(0,0,0,0.15) 100%)",
+            WebkitMaskImage:
+              "radial-gradient(ellipse 85% 75% at 50% 50%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.55) 70%, rgba(0,0,0,0.15) 100%)",
+          }}
+        />
+
+        {/* 4 Corner Islamic Arabesque Ornaments */}
+        <div className="absolute top-4 left-4 opacity-40 pointer-events-none select-none">
+          <IslamicCornerOrnament size={110} />
+        </div>
+        <div className="absolute top-4 right-4 opacity-40 pointer-events-none select-none -scale-x-100">
+          <IslamicCornerOrnament size={110} />
+        </div>
+        <div className="absolute bottom-4 left-4 opacity-40 pointer-events-none select-none -scale-y-100">
+          <IslamicCornerOrnament size={110} />
+        </div>
+        <div className="absolute bottom-4 right-4 opacity-40 pointer-events-none select-none -scale-x-100 -scale-y-100">
+          <IslamicCornerOrnament size={110} />
+        </div>
+
         {/* Central Logo & Inscription */}
         <div
           ref={contentRef}
@@ -305,6 +352,23 @@ export default function Preloader() {
             ref={emblemRef}
             className="relative w-44 h-44 sm:w-52 sm:h-52 flex items-center justify-center mb-6 will-change-transform"
           >
+            {/* Grand Islamic Star Mandala Medallion (from user motif) */}
+            <div
+              ref={mandalaRef}
+              className="absolute -inset-14 sm:-inset-20 pointer-events-none select-none flex items-center justify-center will-change-transform"
+              style={{ opacity: 0, transform: "scale(0.85)" }}
+            >
+              <div className="relative w-64 h-64 sm:w-80 sm:h-80 drop-shadow-[0_0_35px_rgba(212,175,55,0.45)]">
+                <Image
+                  src="/images/ornaments/islamic-star-mandala.webp"
+                  alt="Motif Ornamen Bintang Geometri Islami Sahabat Aksara"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+            </div>
+
             {/* Ambient gold aura glow */}
             <div
               ref={glowRef}

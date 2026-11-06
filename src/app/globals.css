@@ -140,12 +140,28 @@ p {
   }
 }
 
-/* Islamic Geometric Pattern Background */
+/* Islamic Geometric Pattern Background (Authentic Girih 8-fold Star Tessellation) */
 .bg-islamic-pattern {
-  background-image: radial-gradient(rgba(212, 175, 55, 0.12) 1px, transparent 1px),
-    radial-gradient(rgba(212, 175, 55, 0.08) 1px, transparent 1px);
-  background-size: 32px 32px;
-  background-position: 0 0, 16px 16px;
+  background-image: url("/images/ornaments/islamic-pattern.svg");
+  background-repeat: repeat;
+  background-size: 120px 120px;
+}
+
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 120s linear infinite;
+}
+
+.animate-spin-reverse-slow {
+  animation: spinSlow 160s linear infinite reverse;
 }
 
 /* Custom smooth scrollbar */
