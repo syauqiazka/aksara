@@ -23,7 +23,7 @@ test.describe("Batch Perbaikan: Geber 0, Modal Viewport, Legalitas '-', dan Gant
     expect(textContent).not.toContain("12");
   });
 
-  test("2. Legalitas: Badan Hukum, SK Kemenkumham, dan NPWP disetripkan ('-')", async ({ page }) => {
+  test("2. Legalitas: Badan Hukum, SK Kemenkumham, dan NPWP resmi tercantum", async ({ page }) => {
     await page.goto("/tentang");
 
     // Skip preloader if visible
@@ -37,9 +37,9 @@ test.describe("Batch Perbaikan: Geber 0, Modal Viewport, Legalitas '-', dan Gant
     await expect(footer).toBeVisible();
 
     const footerText = await footer.innerText();
-    expect(footerText).toContain("Badan Hukum: -");
-    expect(footerText).toContain("SK Kemenkumham: -");
-    expect(footerText).toContain("NPWP: -");
+    expect(footerText).toContain("Badan Hukum: Yayasan");
+    expect(footerText).toContain("AHU-0022494.AH.01.04. Tahun 2026");
+    expect(footerText).toContain("1000 0000 1186 7419");
   });
 
   test("3. Modal Dokumentasi Kegiatan: Terbuka tepat di tengah viewport via Portal tanpa perlu scroll ke atas", async ({

@@ -1,13 +1,19 @@
 export const organizationContent = {
   brandName: "Yayasan Sahabat Aksara",
-  legalName: "-",
+  legalName: "Yayasan",
   tagline: "Keberkahan Al-Qur'an dan kemajuan teknologi untuk melahirkan generasi yang cerdas, berakhlak mulia, serta mandiri.",
   shortDescription:
     "Yayasan Ajirasa Aksara Semesta (Sahabat Aksara) adalah lembaga nirlaba/sosial yang berkhidmat untuk berkontribusi menghadirkan kebaikan dan kemanfaatan yang berkelanjutan bagi masyarakat melalui aksi pilar Spiritual, Sosial, Pendidikan, dan Teknologi.",
-  npwp: "-",
-  skKemenkumham: "-",
+  npwp: "1000 0000 1186 7419",
+  skKemenkumham: "AHU-0022494.AH.01.04. Tahun 2026",
   aktaPendirian: "Akta Pendirian Nomor 195 tanggal 15 Januari 2024",
   establishedDate: "22 Oktober 2026",
+  email: "ajirasaaksarasemesta@gmail.com",
+  phone: "0822-6217-0018",
+  city: "Bogor",
+  province: "Jawa Barat",
+  address: "Bogor, Jawa Barat, Indonesia",
+  instagram: "https://www.instagram.com/sahabat_aksara_semesta?exln=enR1ZnBkZTA1enp6",
 
   pillars: [
     {
@@ -50,20 +56,20 @@ export const organizationContent = {
 
   founder: {
     name: "Ahmad Dahlan",
-    role: "Pendiri Yayasan Ajirasa Aksara Semesta",
+    role: "Founder Yayasan Ajirasa Aksara Semesta",
     image: "/images/founder-ahmad-dahlan.jpg",
     quote:
       "Keterbatasan atau perbedaan jalur pendidikan bukanlah penghalang untuk terus belajar, berkarya, dan memberikan dampak luas bagi ummat.",
     story: [
-      "Yayasan Ajirasa Aksara Semesta ini didirikan oleh Ahmad Dahlan, putra daerah asal Cirebon Jawa Barat pada akhir tahun 2026. Seorang yang terlahir dari keluarga yang sangat sederhana, yang sangat intens dalam bidang keagamaan, sosial, dan pendidikan.",
+      "Yayasan Ajirasa Aksara Semesta ini didirikan oleh Ahmad Dahlan, putra daerah asal Bogor Jawa Barat pada akhir tahun 2026. Seorang yang terlahir dari keluarga yang sangat sederhana, yang sangat intens dalam bidang keagamaan, sosial, dan pendidikan.",
       "Berawal dari proses kegundahan serta muhasabah terhadap kondisi kehidupan keluarga dan sekitarnya, yang mana banyak sekali keluarga yang sangat membutuhkan uluran tangan dermawan untuk bisa hijrah dan berubah ke arah yang lebih baik lagi, terutama dalam aspek keagamaan, sosial, pendidikan, dan teknologi.",
       "Founder sendiri sejak kecil ditempa dengan gaya kehidupan yang mengajarkan untuk semangat berjuang dan hidup prihatin. Hidup dalam lingkaran daerah minim teknologi dan sangat tertinggal dari daerah-daerah lainnya di Indonesia, yang tentunya menambah ghirah semangat juang pantang menyerah untuk mempersembahkan yang terbaik bagi daerahnya dan umumnya untuk negeri Indonesia.",
-      "Beliau merupakan alumni dari Pondok Pesantren Madrasah Al-Huffazh 2 Gedongan Cirebon, yakni pesantren dengan fokus gemblengan pendidikan keagamaan kitab kuning serta hafalan Al-Qur'an 30 Juz. Beliau memiliki tekad kuat untuk mendedikasikan hidupnya pada syiar Al-Qur'an, pendidikan, dan sosial kemasyarakatan.",
+      "Beliau mendedikasikan masa mudanya dalam gemblengan pendidikan keagamaan pesantren, penguasaan kitab kuning, serta tuntas hafalan Al-Qur'an 30 Juz. Beliau memiliki tekad kuat untuk mendedikasikan hidupnya pada syiar Al-Qur'an, pendidikan, dan sosial kemasyarakatan.",
       "Perjalanan hidupnya tidaklah mudah, sempat putus sekolah setelah lulus dari jenjang SMP dikarenakan faktor keterbatasan ekonomi. Namun karena semangat juang yang begitu tinggi serta tekad untuk mengubah kehidupan keluarga, hal ini dibuktikan melalui kegigihan dalam melanjutkan pendidikan dengan menempuh jalur alternatif Pendidikan Kesetaraan Paket C.",
       "Pengalaman hidup lulusan Sarjana Ilmu Al-Qur’an dan Tafsir Institut PTIQ Jakarta inilah yang menjadi fondasi utama lahirnya Yayasan Ajirasa Aksara Semesta: sebuah gerakan kebaikan yang inklusif, merangkul semua kalangan, dengan semangat melek ilmu teknologi dengan fokus pondasi utama Al-Qur’an.",
     ],
     timeline: [
-      { year: "Pondok Pesantren", title: "Madrasah Al-Huffazh 2 Gedongan", desc: "Mendalami kitab kuning dan gemblengan hafalan Al-Qur'an 30 Juz di Cirebon." },
+      { year: "Pendidikan Keagamaan", title: "Hafalan Al-Qur'an & Kitab Kuning", desc: "Mendalami kitab kuning dan gemblengan intensif hafalan Al-Qur'an 30 Juz." },
       { year: "Fase Perjuangan", title: "Menempuh Jalur Paket C", desc: "Sempat putus sekolah pasca-SMP karena keterbatasan ekonomi, bangkit lewat Pendidikan Kesetaraan Paket C." },
       { year: "Pendidikan Tinggi", title: "Sarjana di Institut PTIQ Jakarta", desc: "Menyelesaikan studi Ilmu Al-Qur'an dan Tafsir untuk memantapkan syiar keumatan." },
       { year: "22 Okt 2026", title: "Berdirinya Yayasan", desc: "Yayasan Ajirasa Aksara Semesta resmi disahkan untuk memadukan khidmat Al-Qur'an dan teknologi." },

@@ -353,7 +353,7 @@ export default async function HomePage() {
                 href="/program/pelatihan-it"
                 className="px-4 py-2 rounded-full bg-[var(--cream-100)] border border-[var(--cream-200)] text-[var(--ink-900)] hover:border-[var(--green-700)] transition-colors"
               >
-                Pelatihan IT Mitra Santri
+                Beasiswa Pelatihan IT Mitra Produktif
               </Link>
               <Link
                 href="/program/pembinaan-umkm"
@@ -416,7 +416,7 @@ export default async function HomePage() {
             <div className="relative w-full max-w-md aspect-[3/4] shape-mihrab overflow-hidden border-4 border-[var(--gold-500)] shadow-2xl bg-[var(--green-950)]">
               <Image
                 src="/images/founder-ahmad-dahlan.jpg"
-                alt="Ahmad Dahlan, Pendiri Yayasan Sahabat Aksara"
+                alt="Ahmad Dahlan, Founder Yayasan Sahabat Aksara"
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 420px"
@@ -427,7 +427,7 @@ export default async function HomePage() {
                   {organizationContent.founder.name}
                 </div>
                 <div className="text-xs text-[var(--cream-200)] mt-0.5">
-                  {organizationContent.founder.role}, Alumni MA Al-Huffazh 2 Cirebon &amp; Institut PTIQ Jakarta
+                  {organizationContent.founder.role}, Sarjana Ilmu Al-Qur&apos;an &amp; Tafsir Institut PTIQ Jakarta asal Bogor
                 </div>
               </div>
             </div>
@@ -489,7 +489,7 @@ export default async function HomePage() {
                 href="/tentang"
                 className="inline-flex items-center gap-2 font-semibold text-[var(--green-800)] hover:text-[var(--gold-700)] text-sm group"
               >
-                <span>Baca Perjalanan Lengkap Pendiri</span>
+                <span>Baca Perjalanan Lengkap Founder</span>
                 <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1.5 transition-transform" />
               </Link>
               <span className="text-[var(--cream-300)]">|</span>

@@ -564,7 +564,7 @@ export default function AdminSettingsPage() {
                       <input
                         id={`bank-branch-${idx}`}
                         type="text"
-                        placeholder="Contoh: KC Cirebon / Kantor Cabang"
+                        placeholder="Contoh: KC Bogor / Kantor Cabang"
                         value={acc.branch}
                         onChange={(e) => {
                           const updated = [...bankAccounts];

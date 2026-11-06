@@ -294,19 +294,6 @@ export default async function DonasiPage() {
             Yayasan Sahabat Aksara menjunjung tinggi amanah donatur. Jika Anda menghendaki nama tidak ditampilkan pada tabel sebaran publik, sistem secara otomatis melabeli nama Anda sebagai <strong>&ldquo;Hamba Allah&rdquo;</strong>, namun nama dedikasi tetap tercetak penuh di sampul mushaf yang diterima oleh santri.
           </p>
         </div>
-
-        {/* Mitra Resmi */}
-        <div className="p-8 rounded-3xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-center space-y-2">
-          <div className="text-xs uppercase tracking-widest text-[var(--gold-700)] font-semibold">
-            Mitra Strategis Penyaluran
-          </div>
-          <h3 className="font-serif text-xl font-bold text-[var(--green-950)]">
-            Madrasah Al-Huffazh Gedongan
-          </h3>
-          <p className="text-xs text-[var(--ink-600)] max-w-md mx-auto">
-            Mitra pondok pesantren rujukan dalam pembinaan kader huffazh dan distribusi mushaf Al-Qur&apos;an.
-          </p>
-        </div>
       </section>
     </div>
   );

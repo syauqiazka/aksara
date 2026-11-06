@@ -42,8 +42,9 @@ export default function Footer() {
             </p>
             <div className="text-xs text-[var(--sage-300)] space-y-1 pt-2 border-t border-[var(--gold-500)]/15">
               <p>Badan Hukum: <span className="text-[var(--cream-100)]">{organizationContent.legalName}</span></p>
-              <p>SK Kemenkumham: <span className="text-[var(--cream-100)]">{organizationContent.skKemenkumham}</span></p>
-              <p>NPWP: <span className="text-[var(--cream-100)]">{organizationContent.npwp}</span></p>
+              <p>Berdiri: <span className="text-[var(--cream-100)]">{organizationContent.establishedDate}</span></p>
+              <p>SK Kemenkumham: <span className="text-[var(--cream-100)] font-mono">{organizationContent.skKemenkumham}</span></p>
+              <p>NPWP: <span className="text-[var(--cream-100)] font-mono">{organizationContent.npwp}</span></p>
             </div>
           </div>
 
@@ -120,19 +121,16 @@ export default function Footer() {
             <ul className="space-y-3 text-sm text-[var(--cream-200)]/90">
               <li className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-[var(--gold-400)] flex-shrink-0 mt-1" />
-                <span>Cirebon, Jawa Barat, Indonesia</span>
+                <span>Bogor, Jawa Barat, Indonesia</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-[var(--gold-400)] flex-shrink-0" />
-                <a href="mailto:kontak@sahabataksara.id" className="hover:text-[var(--gold-300)]">
-                  kontak@sahabataksara.id
+                <a href="mailto:ajirasaaksarasemesta@gmail.com" className="hover:text-[var(--gold-300)]">
+                  ajirasaaksarasemesta@gmail.com
                 </a>
               </li>
               <li className="text-xs text-[var(--sage-300)]">
                 Contact Person: <a href="https://wa.me/6282262170018" target="_blank" rel="noopener noreferrer" className="font-semibold text-[var(--gold-400)] hover:underline">0822-6217-0018</a>
-              </li>
-              <li className="text-xs text-[var(--sage-300)]">
-                Mitra Kami: <span className="text-[var(--cream-100)] font-medium">Madrasah Al-Huffazh Gedongan</span>
               </li>
             </ul>
 
@@ -140,12 +138,12 @@ export default function Footer() {
               <div className="text-xs text-[var(--gold-300)] mb-2 font-medium">Kanal Media Sosial Resmi:</div>
               <div className="flex gap-3 text-xs">
                 <a
-                  href="https://instagram.com/sahabataksara"
+                  href="https://www.instagram.com/sahabat_aksara_semesta?exln=enR1ZnBkZTA1enp6"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-2.5 py-1.5 rounded-lg bg-[var(--green-900)] border border-[var(--gold-500)]/20 hover:border-[var(--gold-400)] text-[var(--cream-100)] flex items-center gap-1 transition-colors"
                 >
-                  <span>@Sahabat Aksara</span>
+                  <span>@sahabat_aksara_semesta</span>
                   <ExternalLink className="w-3 h-3 text-[var(--gold-400)]" />
                 </a>
               </div>

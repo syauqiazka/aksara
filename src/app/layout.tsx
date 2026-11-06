@@ -134,11 +134,12 @@ export default function RootLayout({
         "founder": {
           "@type": "Person",
           "name": "Ahmad Dahlan",
-          "jobTitle": "Pendiri & Pembina Yayasan"
+          "jobTitle": "Founder & Pembina Yayasan"
         },
+        "email": "ajirasaaksarasemesta@gmail.com",
         "address": {
           "@type": "PostalAddress",
-          "addressLocality": "Cirebon",
+          "addressLocality": "Bogor",
           "addressRegion": "Jawa Barat",
           "addressCountry": "ID"
         },
@@ -152,7 +153,7 @@ export default function RootLayout({
           }
         ],
         "sameAs": [
-          "https://instagram.com/sahabataksara",
+          "https://www.instagram.com/sahabat_aksara_semesta?exln=enR1ZnBkZTA1enp6",
           "https://wa.me/6282262170018"
         ],
         "areaServed": "Indonesia",

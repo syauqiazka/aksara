@@ -38,12 +38,12 @@ let bankAccounts: BankAccount[] = [
 let contactInfo: ContactInfo = {
   whatsapp: "0822-6217-0018",
   phone: "0822-6217-0018",
-  email: "kontak@sahabataksara.id",
-  address: "Cirebon, Jawa Barat, Indonesia"
+  email: "ajirasaaksarasemesta@gmail.com",
+  address: "Bogor, Jawa Barat, Indonesia"
 };
 
 let socialLinks: SocialLinks = {
-  instagram: "https://instagram.com/sahabataksara",
+  instagram: "https://www.instagram.com/sahabat_aksara_semesta?exln=enR1ZnBkZTA1enp6",
   youtube: "https://youtube.com/@sahabataksara",
   tiktok: "https://tiktok.com/@sahabataksara"
 };

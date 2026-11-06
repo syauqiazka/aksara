@@ -513,9 +513,9 @@ export default function AdminNewInfakPage() {
                     onChange={(e) => {
                       const val = e.target.value;
                       const matched = [
-                        { name: "Pondok Pesantren Madrasah Al-Huffazh 2 Gedongan", province: "Jawa Barat", city: "Cirebon", address: "Gedongan, Ender, Pangenan, Cirebon, Jawa Barat", maps: "https://maps.google.com" },
-                        { name: "Pesantren Tahfidz Al-Hikmah", province: "Jawa Barat", city: "Bogor", address: "Jl. Pesantren No. 45, Cirebon, Jawa Barat", maps: "" },
-                        { name: "Madrasah Diniyah Nurul Iman", province: "Banten", city: "Serang", address: "Desa Ender, Pangenan, Cirebon, Jawa Barat", maps: "" },
+                        { name: "Pesantren Tahfidz Darul Qur'an Bogor", province: "Jawa Barat", city: "Bogor", address: "Jl. Raya Bogor No. 12, Bogor, Jawa Barat", maps: "https://maps.google.com" },
+                        { name: "Pesantren Tahfidz Al-Hikmah", province: "Jawa Barat", city: "Bogor", address: "Jl. Pesantren No. 45, Bogor, Jawa Barat", maps: "" },
+                        { name: "Madrasah Diniyah Nurul Iman", province: "Banten", city: "Serang", address: "Desa Ender, Serang, Banten", maps: "" },
                       ].find((p) => p.name.toLowerCase() === val.toLowerCase());
 
                       if (matched) {
@@ -534,7 +534,7 @@ export default function AdminNewInfakPage() {
                     placeholder="Contoh: Pondok Pesantren Al-Hikmah"
                   />
                   <datalist id="pesantren-suggestions">
-                    <option value="Pondok Pesantren Madrasah Al-Huffazh 2 Gedongan" />
+                    <option value="Pesantren Tahfidz Darul Qur'an Bogor" />
                     <option value="Pesantren Tahfidz Al-Hikmah" />
                     <option value="Madrasah Diniyah Nurul Iman" />
                   </datalist>

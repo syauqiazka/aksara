@@ -25,7 +25,7 @@ test.describe("Admin Bank Account Management & Public Visibility E2E", () => {
     const testBankName = "Bank Syariah Indonesia (BSI)";
     const testAccountNumber = "7722334455";
     const testHolderName = "Yayasan Ajirasa Aksara Semesta";
-    const testBranchName = "KC Cirebon Siliwangi";
+    const testBranchName = "KC Bogor Pajajaran";
 
     const bankNameInputs = page.locator('input[placeholder*="Bank BCA, Bank BSI"]');
     const lastBankNameInput = bankNameInputs.last();
@@ -39,7 +39,7 @@ test.describe("Admin Bank Account Management & Public Visibility E2E", () => {
     const lastBankHolderInput = bankHolderInputs.last();
     await lastBankHolderInput.fill(testHolderName);
 
-    const bankBranchInputs = page.locator('input[placeholder*="KC Cirebon"]');
+    const bankBranchInputs = page.locator('input[placeholder*="KC Bogor"]');
     const lastBankBranchInput = bankBranchInputs.last();
     await lastBankBranchInput.fill(testBranchName);
 

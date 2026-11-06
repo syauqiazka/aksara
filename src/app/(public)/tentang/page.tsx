@@ -40,17 +40,46 @@ export default function TentangPage() {
         breadcrumbs={[{ label: "Tentang Kami" }]}
       />
 
-      {/* 2. LEGALITAS & BADAN HUKUM STRIP */}
-      <section className="bg-[var(--green-900)] text-[var(--cream-100)] py-6 border-b border-[var(--gold-500)]/20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs">
-          <div className="flex items-center gap-2 text-[var(--gold-400)] font-semibold">
-            <ShieldCheck className="w-4 h-4 text-[var(--gold-400)] flex-shrink-0" />
-            <span>Badan Hukum Resmi Terdaftar:</span>
-            <span className="text-[var(--cream-50)]">{legalName}</span>
+      {/* 2. PROFIL & LEGALITAS LEMBAGA */}
+      <section className="bg-[var(--green-900)] text-[var(--cream-100)] py-8 border-b border-[var(--gold-500)]/20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto space-y-4">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 text-xs border-b border-[var(--gold-500)]/20 pb-4">
+            <div className="flex items-center gap-2 text-[var(--gold-400)] font-semibold text-sm">
+              <ShieldCheck className="w-5 h-5 text-[var(--gold-400)] flex-shrink-0" />
+              <span>Profil Lembaga &amp; Legalitas Resmi</span>
+            </div>
+            <div className="flex items-center gap-2 text-[var(--cream-200)]">
+              <span>Domisili:</span>
+              <strong className="text-[var(--cream-50)]">{organizationContent.address}</strong>
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-6 text-[var(--cream-200)]/90">
-            <div>SK Kemenkumham: <strong className="text-[var(--cream-50)] font-mono">{skKemenkumham}</strong></div>
-            <div>NPWP: <strong className="text-[var(--cream-50)] font-mono">{npwp}</strong></div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-xs">
+            <div className="bg-[var(--green-950)]/60 p-3.5 rounded-xl border border-[var(--gold-500)]/15">
+              <div className="text-[var(--gold-400)] text-[10px] uppercase font-bold tracking-wider mb-1">Badan Hukum</div>
+              <div className="text-[var(--cream-50)] font-medium text-xs sm:text-sm">{legalName}</div>
+            </div>
+            <div className="bg-[var(--green-950)]/60 p-3.5 rounded-xl border border-[var(--gold-500)]/15">
+              <div className="text-[var(--gold-400)] text-[10px] uppercase font-bold tracking-wider mb-1">Tanggal Berdiri</div>
+              <div className="text-[var(--cream-50)] font-medium text-xs sm:text-sm">{organizationContent.establishedDate}</div>
+            </div>
+            <div className="bg-[var(--green-950)]/60 p-3.5 rounded-xl border border-[var(--gold-500)]/15">
+              <div className="text-[var(--gold-400)] text-[10px] uppercase font-bold tracking-wider mb-1">Akta Pendirian</div>
+              <div className="text-[var(--cream-50)] font-medium text-xs leading-snug">{organizationContent.aktaPendirian}</div>
+            </div>
+            <div className="bg-[var(--green-950)]/60 p-3.5 rounded-xl border border-[var(--gold-500)]/15">
+              <div className="text-[var(--gold-400)] text-[10px] uppercase font-bold tracking-wider mb-1">SK Kemenkumham</div>
+              <div className="text-[var(--cream-50)] font-mono text-xs leading-snug">{skKemenkumham}</div>
+            </div>
+            <div className="bg-[var(--green-950)]/60 p-3.5 rounded-xl border border-[var(--gold-500)]/15">
+              <div className="text-[var(--gold-400)] text-[10px] uppercase font-bold tracking-wider mb-1">NPWP Resmi</div>
+              <div className="text-[var(--cream-50)] font-mono text-xs sm:text-sm">{npwp}</div>
+            </div>
+            <div className="bg-[var(--green-950)]/60 p-3.5 rounded-xl border border-[var(--gold-500)]/15">
+              <div className="text-[var(--gold-400)] text-[10px] uppercase font-bold tracking-wider mb-1">Email Resmi</div>
+              <a href={`mailto:${organizationContent.email}`} className="text-[var(--cream-50)] hover:text-[var(--gold-300)] font-mono text-[11px] truncate block">
+                {organizationContent.email}
+              </a>
+            </div>
           </div>
         </div>
       </section>
@@ -146,31 +175,42 @@ export default function TentangPage() {
             <div className="text-xs uppercase tracking-[0.25em] text-[var(--gold-400)] font-sans font-semibold">
               Visi Luhur Yayasan
             </div>
-            <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl font-bold leading-snug [text-wrap:balance] text-gold-gradient">
+            <h2 className="font-serif text-xl sm:text-2xl lg:text-3xl font-semibold leading-relaxed [text-wrap:balance] text-gold-gradient">
               &ldquo;{vision}&rdquo;
             </h2>
           </div>
 
-          {/* Missions Grid (Eliminating Pill AI Slop) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-8 border-t border-[var(--gold-500)]/20">
-            {missions.map((m, idx) => (
-              <div
-                key={idx}
-                className="p-6 sm:p-8 rounded-3xl bg-[var(--green-900)]/60 border border-[var(--gold-500)]/30 space-y-3 hover:border-[var(--gold-400)] transition-colors"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-serif text-2xl font-bold text-gold-gradient">
-                    0{idx + 1}
-                  </span>
-                  <span className="text-xs font-bold uppercase tracking-wider text-[var(--gold-300)]">
-                    {m.title}
-                  </span>
-                </div>
-                <p className="text-sm text-[var(--cream-100)] leading-relaxed font-sans pt-1">
-                  {m.desc}
-                </p>
+          {/* Missions Heading & Grid */}
+          <div className="space-y-8 pt-10 border-t border-[var(--gold-500)]/20">
+            <div className="text-center space-y-2">
+              <div className="text-xs uppercase tracking-[0.25em] text-[var(--gold-400)] font-sans font-semibold">
+                Misi Aksi Lembaga
               </div>
-            ))}
+              <h3 className="font-serif text-2xl sm:text-3xl font-bold text-[var(--cream-50)]">
+                4 Pilar Misi Pengabdian &amp; Peradaban
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {missions.map((m, idx) => (
+                <div
+                  key={idx}
+                  className="p-6 sm:p-8 rounded-3xl bg-[var(--green-900)]/60 border border-[var(--gold-500)]/30 space-y-3 hover:border-[var(--gold-400)] transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-serif text-2xl font-bold text-gold-gradient">
+                      0{idx + 1}
+                    </span>
+                    <span className="text-xs font-bold uppercase tracking-wider text-[var(--gold-300)]">
+                      {m.title}
+                    </span>
+                  </div>
+                  <p className="text-sm text-[var(--cream-100)] leading-relaxed font-sans pt-1">
+                    {m.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
