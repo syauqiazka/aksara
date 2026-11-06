@@ -98,6 +98,7 @@ export const portfolioContent: PortfolioApp[] = [
       "Kanal komunikasi langsung pengurus masjid dengan jamaah sekitar",
     ],
     mockupIcon: "Building2",
+    logoImage: "/images/portfolio/dkm-masjidqu.webp",
     status: "Coming Soon",
     playStoreUrl: "Akan segera tersedia di Google Play Store",
   },
@@ -105,7 +106,7 @@ export const portfolioContent: PortfolioApp[] = [
     id: "sapawargaqu",
     name: "Aplikasi SapawargaQu",
     category: "Komunitas & Pemukiman Warga",
-    tagline: "Manajemen Perumahan, Warga, Fasilitas, & Kas RT/RW",
+    tagline: "Sistem Administrasi dan Pengelolaan Arus Kas Warga",
     description:
       "Platform digital terintegrasi untuk pengelola kawasan hunian (Developer, Badan Pengelola, atau Pengurus RT/RW/Cluster) dalam mengelola data warga, administrasi properti, pemeliharaan fasilitas, serta pelaporan keuangan real-time.",
     features: [
@@ -115,6 +116,7 @@ export const portfolioContent: PortfolioApp[] = [
       "Jembatan komunikasi interaktif antara pengelola dan seluruh penghuni",
     ],
     mockupIcon: "UsersRound",
+    logoImage: "/images/portfolio/sapawargaqu.webp",
     status: "Coming Soon",
     playStoreUrl: "Akan segera tersedia di Google Play Store",
   },
