@@ -5,6 +5,7 @@ import InteractiveLogoHotspots from "@/components/sections/InteractiveLogoHotspo
 import Button from "@/components/ui/Button";
 import PageHeader from "@/components/ui/PageHeader";
 import { Quote, HeartHandshake, ShieldCheck } from "lucide-react";
+import IslamicCornerOrnament from "@/components/ui/IslamicCornerOrnament";
 
 export const metadata: Metadata = {
   title: "Tentang Kami & Makna Filosofis Logo",
@@ -169,6 +170,21 @@ export default function TentangPage() {
       {/* 4. VISI & MISI (Sacral Dark Emerald Section) */}
       <section className="py-24 sm:py-32 bg-[var(--green-950)] text-[var(--cream-50)] px-4 sm:px-6 lg:px-8 relative overflow-hidden border-y border-[var(--gold-500)]/20">
         <div className="absolute inset-0 bg-islamic-pattern opacity-25 pointer-events-none" />
+        {/* Islamic Star Mandala Watermark Silhouette */}
+        <div className="absolute -right-24 top-10 w-[500px] h-[500px] opacity-15 pointer-events-none select-none will-change-transform animate-spin-slow">
+          <Image
+            src="/images/ornaments/islamic-star-mandala.webp"
+            alt=""
+            fill
+            className="object-contain"
+          />
+        </div>
+        <div className="absolute top-6 left-6 opacity-25 pointer-events-none select-none hidden sm:block">
+          <IslamicCornerOrnament size={80} />
+        </div>
+        <div className="absolute top-6 right-6 opacity-25 pointer-events-none select-none -scale-x-100 hidden sm:block">
+          <IslamicCornerOrnament size={80} />
+        </div>
         <div className="relative z-10 max-w-5xl mx-auto space-y-16">
           {/* Vision Statement */}
           <div className="text-center space-y-4 max-w-3xl mx-auto">
@@ -277,6 +293,21 @@ export default function TentangPage() {
       {/* 7. GRAND CALL TO ACTION */}
       <section className="py-24 bg-[var(--green-950)] text-[var(--cream-50)] text-center px-4 relative overflow-hidden">
         <div className="absolute inset-0 bg-islamic-pattern opacity-25 pointer-events-none" />
+        {/* Islamic Star Mandala Watermark Silhouette */}
+        <div className="absolute -left-24 -bottom-24 w-[480px] h-[480px] opacity-15 pointer-events-none select-none will-change-transform animate-spin-slow">
+          <Image
+            src="/images/ornaments/islamic-star-mandala.webp"
+            alt=""
+            fill
+            className="object-contain"
+          />
+        </div>
+        <div className="absolute top-6 left-6 opacity-25 pointer-events-none select-none hidden sm:block">
+          <IslamicCornerOrnament size={80} />
+        </div>
+        <div className="absolute top-6 right-6 opacity-25 pointer-events-none select-none -scale-x-100 hidden sm:block">
+          <IslamicCornerOrnament size={80} />
+        </div>
         <div className="relative z-10 max-w-2xl mx-auto space-y-6">
           <h2 className="font-serif text-3xl sm:text-4xl font-bold leading-tight">
             Ingin Mengambil Bagian dalam Perjalanan Ini?

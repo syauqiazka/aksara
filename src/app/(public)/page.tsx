@@ -19,6 +19,7 @@ import StatCounter from "@/components/motion/StatCounter";
 import HeroShowcase from "@/components/sections/HeroShowcase";
 import IndonesiaMap from "@/components/sections/IndonesiaMap";
 import Button from "@/components/ui/Button";
+import IslamicCornerOrnament from "@/components/ui/IslamicCornerOrnament";
 
 export const revalidate = 60;
 
@@ -60,7 +61,8 @@ export default async function HomePage() {
       <HeroShowcase totalMushaf={stats.totalMushaf} totalMasjid={stats.totalMasjid} />
 
       {/* 2. PROOF & MARQUEE STRIP (Integrated Metrics & Values) */}
-      <section className="relative bg-[var(--green-950)] text-[var(--cream-50)] border-t border-b border-[var(--gold-500)]/20">
+      <section className="relative bg-[var(--green-950)] text-[var(--cream-50)] border-t border-b border-[var(--gold-500)]/20 overflow-hidden">
+        <div className="absolute inset-0 bg-islamic-pattern opacity-15 pointer-events-none" />
         {/* Metric Bar Monolitik */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 divide-y lg:divide-y-0 lg:divide-x divide-[var(--gold-500)]/15">
@@ -373,7 +375,23 @@ export default async function HomePage() {
       </section>
 
       {/* 5. LIVE BUKTI SEBARAN NASIONAL (Full-Bleed Dark Green-950) */}
-      <section className="py-24 sm:py-32 bg-[var(--green-950)] text-[var(--cream-50)] px-4 sm:px-6 lg:px-8 border-b border-[var(--gold-500)]/20">
+      <section className="py-24 sm:py-32 bg-[var(--green-950)] text-[var(--cream-50)] px-4 sm:px-6 lg:px-8 border-b border-[var(--gold-500)]/20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-islamic-pattern opacity-20 pointer-events-none" />
+        {/* Islamic Star Mandala Watermark Silhouette */}
+        <div className="absolute -right-24 -top-24 w-[480px] h-[480px] opacity-15 pointer-events-none select-none will-change-transform animate-spin-slow">
+          <Image
+            src="/images/ornaments/islamic-star-mandala.webp"
+            alt=""
+            fill
+            className="object-contain"
+          />
+        </div>
+        <div className="absolute top-6 left-6 opacity-25 pointer-events-none select-none hidden sm:block">
+          <IslamicCornerOrnament size={80} />
+        </div>
+        <div className="absolute top-6 right-6 opacity-25 pointer-events-none select-none -scale-x-100 hidden sm:block">
+          <IslamicCornerOrnament size={80} />
+        </div>
         <div className="max-w-7xl mx-auto space-y-10">
           <div className="text-center max-w-3xl mx-auto">
             <div className="text-xs uppercase tracking-[0.2em] text-[var(--gold-400)] font-semibold mb-2">
@@ -508,6 +526,29 @@ export default async function HomePage() {
       {/* 7. GRAND CALL TO ACTION (Full-Bleed Dark Green-950) */}
       <section className="py-24 sm:py-32 bg-[var(--green-950)] text-[var(--cream-50)] text-center px-4 relative overflow-hidden">
         <div className="absolute inset-0 bg-islamic-pattern opacity-25 pointer-events-none" />
+        {/* Islamic Star Mandala Watermark Silhouette */}
+        <div className="absolute -left-28 -bottom-28 w-[500px] h-[500px] opacity-15 pointer-events-none select-none will-change-transform animate-spin-slow">
+          <Image
+            src="/images/ornaments/islamic-star-mandala.webp"
+            alt=""
+            fill
+            className="object-contain"
+          />
+        </div>
+        <div className="absolute -right-28 -top-28 w-[500px] h-[500px] opacity-15 pointer-events-none select-none will-change-transform animate-spin-reverse-slow">
+          <Image
+            src="/images/ornaments/islamic-star-mandala.webp"
+            alt=""
+            fill
+            className="object-contain"
+          />
+        </div>
+        <div className="absolute top-6 left-6 opacity-25 pointer-events-none select-none hidden sm:block">
+          <IslamicCornerOrnament size={80} />
+        </div>
+        <div className="absolute top-6 right-6 opacity-25 pointer-events-none select-none -scale-x-100 hidden sm:block">
+          <IslamicCornerOrnament size={80} />
+        </div>
         <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
           <div className="text-xs uppercase tracking-[0.2em] text-[var(--gold-400)] font-semibold mb-4">
             Sedekah Jariyah Mengalir Tiada Putus

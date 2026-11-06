@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Heart, Mail, MapPin, ExternalLink } from "lucide-react";
 import { organizationContent } from "@/content/organization";
+import IslamicCornerOrnament from "@/components/ui/IslamicCornerOrnament";
 
 export default function Footer() {
   const pathname = usePathname();
@@ -14,6 +15,35 @@ export default function Footer() {
 
   return (
     <footer className="relative bg-[var(--green-950)] text-[var(--cream-100)] pt-16 pb-12 overflow-hidden border-t-2 border-[var(--gold-500)]/40">
+      {/* 1. Authentic Islamic Geometric Pattern Background Texture */}
+      <div
+        className="absolute inset-0 bg-islamic-pattern opacity-20 pointer-events-none"
+        style={{
+          maskImage:
+            "radial-gradient(ellipse 90% 80% at 50% 50%, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 75%, transparent 100%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse 90% 80% at 50% 50%, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 75%, transparent 100%)",
+        }}
+      />
+
+      {/* 2. Islamic Star Mandala Watermark Silhouette */}
+      <div className="absolute -right-28 -bottom-28 w-[480px] h-[480px] opacity-15 pointer-events-none select-none will-change-transform animate-spin-slow">
+        <Image
+          src="/images/ornaments/islamic-star-mandala.webp"
+          alt=""
+          fill
+          className="object-contain drop-shadow-[0_0_35px_rgba(212,175,55,0.2)]"
+        />
+      </div>
+
+      {/* 3. Corner Arabesque Accents */}
+      <div className="absolute top-4 left-4 opacity-25 pointer-events-none select-none hidden sm:block">
+        <IslamicCornerOrnament size={80} />
+      </div>
+      <div className="absolute top-4 right-4 opacity-25 pointer-events-none select-none -scale-x-100 hidden sm:block">
+        <IslamicCornerOrnament size={80} />
+      </div>
+
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-[var(--gold-500)]/20">
           {/* Col 1: Identity & Legal */}

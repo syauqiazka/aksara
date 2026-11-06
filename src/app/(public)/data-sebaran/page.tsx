@@ -50,7 +50,8 @@ export default async function DataSebaranPage() {
       />
 
       {/* 2. TOP METRIC STRIP (Full-Width Command Bar) */}
-      <section className="bg-[var(--green-950)] text-[var(--cream-50)] border-b border-[var(--gold-500)]/20 py-8 px-4 sm:px-6 lg:px-8">
+      <section className="bg-[var(--green-950)] text-[var(--cream-50)] border-b border-[var(--gold-500)]/20 py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-islamic-pattern opacity-15 pointer-events-none" />
         <div className="max-w-[1400px] mx-auto grid grid-cols-2 lg:grid-cols-4 gap-6 divide-y lg:divide-y-0 lg:divide-x divide-[var(--gold-500)]/15">
           <div className="pt-2 lg:pt-0 lg:px-6 first:pt-0 first:px-0">
             <StatCounter

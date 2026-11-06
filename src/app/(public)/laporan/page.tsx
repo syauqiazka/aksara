@@ -48,7 +48,8 @@ export default async function LaporanPage() {
       />
 
       {/* 2. AGGREGATE AUDIT BAR */}
-      <section className="bg-[var(--green-950)] text-[var(--cream-50)] border-b border-[var(--gold-500)]/20 py-8 px-4 sm:px-6 lg:px-8">
+      <section className="bg-[var(--green-950)] text-[var(--cream-50)] border-b border-[var(--gold-500)]/20 py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-islamic-pattern opacity-15 pointer-events-none" />
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 divide-y md:divide-y-0 md:divide-x divide-[var(--gold-500)]/20">
           <div className="pt-2 md:pt-0 md:px-6 first:pt-0 first:px-0">
             <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--gold-400)] mb-1">

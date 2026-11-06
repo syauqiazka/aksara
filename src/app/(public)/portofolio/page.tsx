@@ -55,7 +55,8 @@ export default function PortofolioPage() {
       />
 
       {/* 2. PILLAR INTRO BANNER */}
-      <section className="bg-[var(--green-950)] text-[var(--cream-50)] border-b border-[var(--gold-500)]/20 py-8 px-4 sm:px-6 lg:px-8">
+      <section className="bg-[var(--green-950)] text-[var(--cream-50)] border-b border-[var(--gold-500)]/20 py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-islamic-pattern opacity-15 pointer-events-none" />
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs">
           <div className="flex items-center gap-2 text-[var(--gold-400)] font-semibold">
             <span>Karakter Produk Teknologi:</span>

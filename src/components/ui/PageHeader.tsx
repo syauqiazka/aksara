@@ -1,6 +1,8 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronRight } from "lucide-react";
 import React from "react";
+import IslamicCornerOrnament from "@/components/ui/IslamicCornerOrnament";
 
 export interface BreadcrumbItem {
   label: string;
@@ -48,9 +50,38 @@ export default function PageHeader({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
-      {/* Background Ambient Glow */}
-      <div className="absolute -top-32 right-10 w-80 h-80 bg-[var(--green-800)]/30 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-32 left-10 w-80 h-80 bg-[var(--gold-500)]/10 rounded-full blur-3xl pointer-events-none" />
+      {/* 1. Authentic Islamic Geometric Pattern Background Texture */}
+      <div
+        className="absolute inset-0 bg-islamic-pattern opacity-25 pointer-events-none"
+        style={{
+          maskImage:
+            "radial-gradient(ellipse 85% 75% at 50% 50%, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 75%, transparent 100%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse 85% 75% at 50% 50%, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 75%, transparent 100%)",
+        }}
+      />
+
+      {/* 2. Background Ambient Glow */}
+      <div className="absolute -top-32 right-10 w-96 h-96 bg-[var(--green-800)]/30 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 left-10 w-96 h-96 bg-[var(--gold-500)]/12 rounded-full blur-3xl pointer-events-none" />
+
+      {/* 3. Islamic Star Mandala Watermark Silhouette (Right Flank) */}
+      <div className="absolute -right-20 sm:-right-12 top-1/2 -translate-y-1/2 w-[360px] h-[360px] sm:w-[480px] sm:h-[480px] opacity-25 sm:opacity-30 pointer-events-none select-none will-change-transform animate-spin-slow">
+        <Image
+          src="/images/ornaments/islamic-star-mandala.webp"
+          alt=""
+          fill
+          className="object-contain drop-shadow-[0_0_35px_rgba(212,175,55,0.25)]"
+        />
+      </div>
+
+      {/* 4. Corner Arabesque Accents */}
+      <div className="absolute top-24 left-4 opacity-25 pointer-events-none select-none hidden sm:block">
+        <IslamicCornerOrnament size={85} />
+      </div>
+      <div className="absolute top-24 right-4 opacity-25 pointer-events-none select-none -scale-x-100 hidden sm:block">
+        <IslamicCornerOrnament size={85} />
+      </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumbs */}

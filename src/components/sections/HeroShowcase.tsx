@@ -31,13 +31,13 @@ export default function HeroShowcase(_props?: HeroShowcaseProps) {
       <div className="absolute -top-40 -right-40 w-[36rem] h-[36rem] bg-[var(--green-800)]/40 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-40 -left-40 w-[36rem] h-[36rem] bg-[var(--gold-500)]/15 rounded-full blur-3xl pointer-events-none" />
 
-      {/* 3. Grand Islamic Star Mandala Medallion (Right Side Framing Mushaf Jinan) */}
-      <div className="absolute -right-24 sm:-right-16 lg:right-4 top-1/2 -translate-y-1/2 w-[440px] h-[440px] sm:w-[560px] sm:h-[560px] lg:w-[680px] lg:h-[680px] opacity-40 lg:opacity-50 pointer-events-none select-none will-change-transform animate-spin-slow">
+      {/* 3. Grand Islamic Star Mandala Medallion (Right Side Framing Mushaf Jinan - Siluet Elegan) */}
+      <div className="absolute -right-24 sm:-right-16 lg:right-4 top-1/2 -translate-y-1/2 w-[440px] h-[440px] sm:w-[560px] sm:h-[560px] lg:w-[680px] lg:h-[680px] opacity-30 lg:opacity-35 pointer-events-none select-none will-change-transform animate-spin-slow">
         <Image
           src="/images/ornaments/islamic-star-mandala.webp"
           alt=""
           fill
-          className="object-contain drop-shadow-[0_0_50px_rgba(212,175,55,0.35)]"
+          className="object-contain drop-shadow-[0_0_35px_rgba(212,175,55,0.25)]"
           priority
         />
       </div>

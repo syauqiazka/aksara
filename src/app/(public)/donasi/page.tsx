@@ -66,8 +66,9 @@ export default async function DonasiPage() {
         <BankAccountsList initialAccounts={bankAccounts} />
 
         {/* WhatsApp Confirmation Banner */}
-        <div className="p-8 sm:p-10 rounded-3xl bg-[var(--green-950)] text-[var(--cream-50)] border-2 border-[var(--gold-500)]/40 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="space-y-3 text-center md:text-left">
+        <div className="p-8 sm:p-10 rounded-3xl bg-[var(--green-950)] text-[var(--cream-50)] border-2 border-[var(--gold-500)]/40 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+          <div className="absolute inset-0 bg-islamic-pattern opacity-20 pointer-events-none" />
+          <div className="relative z-10 space-y-3 text-center md:text-left">
             <span className="text-xs uppercase tracking-wider text-[var(--gold-400)] font-semibold">
               Layanan Konfirmasi Cepat
             </span>

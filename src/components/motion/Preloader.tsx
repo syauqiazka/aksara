@@ -58,8 +58,9 @@ export default function Preloader() {
     }
     if (curtainRef.current) {
       gsap.to(curtainRef.current, {
-        yPercent: -100,
-        duration: 0.35,
+        scale: 1.35,
+        opacity: 0,
+        duration: 0.4,
         ease: "power2.inOut",
         onComplete: handleComplete,
       });
@@ -117,7 +118,7 @@ export default function Preloader() {
         tl.to(
           mandalaRef.current,
           {
-            opacity: 0.9,
+            opacity: 0.42,
             scale: 1,
             duration: 1.2,
             ease: "power2.out",
@@ -239,45 +240,47 @@ export default function Preloader() {
         );
       }
 
-      // 6. Living Ambient Breathing on Emblem (2.2s -> 4.3s)
+      // 6. Living Ambient Breathing on Emblem (2.0s -> 2.8s)
       if (emblemRef.current) {
         tl.to(
           emblemRef.current,
           {
             scale: 1.03,
-            duration: 1.0,
+            duration: 0.8,
             yoyo: true,
             repeat: 1,
             ease: "sine.inOut",
           },
-          2.2
+          2.0
         );
       }
 
-      // 7. Content Soft Fade Out (4.3s -> 4.55s)
+      // 7. Cinematic Zoom-In Exit Transition (2.8s -> 3.55s)
+      // Content & Emblem zoom in towards the camera/viewer
       if (contentRef.current) {
         tl.to(
           contentRef.current,
           {
+            scale: 1.85,
             opacity: 0,
-            y: -14,
-            duration: 0.25,
+            duration: 0.65,
             ease: "power2.in",
           },
-          4.3
+          2.8
         );
       }
 
-      // 8. Green Curtain Wipe Up (4.55s -> 5.1s)
+      // 8. Green Curtain expands and dissolves into the home page
       if (curtainRef.current) {
         tl.to(
           curtainRef.current,
           {
-            yPercent: -100,
-            duration: 0.55,
-            ease: "power4.inOut",
+            scale: 1.35,
+            opacity: 0,
+            duration: 0.75,
+            ease: "power2.inOut",
           },
-          4.55
+          2.8
         );
       }
     }, containerRef);
@@ -352,13 +355,13 @@ export default function Preloader() {
             ref={emblemRef}
             className="relative w-44 h-44 sm:w-52 sm:h-52 flex items-center justify-center mb-6 will-change-transform"
           >
-            {/* Grand Islamic Star Mandala Medallion (from user motif) */}
+            {/* Grand Islamic Star Mandala Medallion (Silhouette Watermark) */}
             <div
               ref={mandalaRef}
-              className="absolute -inset-14 sm:-inset-20 pointer-events-none select-none flex items-center justify-center will-change-transform"
+              className="absolute -inset-14 sm:-inset-20 pointer-events-none select-none flex items-center justify-center will-change-transform mix-blend-screen"
               style={{ opacity: 0, transform: "scale(0.85)" }}
             >
-              <div className="relative w-64 h-64 sm:w-80 sm:h-80 drop-shadow-[0_0_35px_rgba(212,175,55,0.45)]">
+              <div className="relative w-64 h-64 sm:w-80 sm:h-80 drop-shadow-[0_0_25px_rgba(212,175,55,0.35)]">
                 <Image
                   src="/images/ornaments/islamic-star-mandala.webp"
                   alt="Motif Ornamen Bintang Geometri Islami Sahabat Aksara"
