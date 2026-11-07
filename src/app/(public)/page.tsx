@@ -7,7 +7,8 @@ import {
   BookOpen,
   Building2,
   GraduationCap,
-  CheckCircle2,
+  Laptop,
+  Store,
   FileText,
   MapPin,
   ExternalLink,
@@ -241,21 +242,6 @@ export default async function HomePage() {
                 <p className="text-sm sm:text-base text-[var(--ink-600)] leading-relaxed">
                   Jelajah langsung infak Al-Qur&apos;an sampai ke tangan santri pelosok. Nama donatur, keluarga, atau almarhum tercetak permanen di cover mushaf dengan pemantauan hafalan santri yang diperbarui secara bulanan.
                 </p>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-[var(--cream-200)] text-xs text-[var(--ink-600)]">
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[var(--green-700)] flex-shrink-0 mt-0.5" />
-                    <span>Cetak nama custom di cover</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[var(--green-700)] flex-shrink-0 mt-0.5" />
-                    <span>Monitoring hafalan bulanan</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[var(--green-700)] flex-shrink-0 mt-0.5" />
-                    <span>Data koordinat &amp; foto terbuka</span>
-                  </div>
-                </div>
               </div>
 
               <div className="pt-8 flex flex-col sm:flex-row items-center gap-4">
@@ -281,7 +267,7 @@ export default async function HomePage() {
                     Beasiswa Uang Saku Santri
                   </span>
                   <span className="bg-[var(--green-900)] border border-[var(--gold-500)]/40 text-[var(--gold-300)] text-xs font-bold px-3 py-1 rounded-full">
-                    Mulai Rp 150.000 / Bln
+                    Mulai Rp 200.000 / Bln
                   </span>
                 </div>
 
@@ -295,16 +281,20 @@ export default async function HomePage() {
 
                 <div className="space-y-2 pt-4 border-t border-[var(--green-900)] text-xs text-[var(--cream-200)]">
                   <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--green-900)]/60">
-                    <span>BUSS Ekonomi</span>
-                    <strong className="text-[var(--gold-400)]">Rp 150.000 / bln</strong>
+                    <span>BUSS Kelas Ekonomis</span>
+                    <strong className="text-[var(--gold-400)]">Rp 200.000 / bln</strong>
                   </div>
                   <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--green-900)]/60">
-                    <span>BUSS Bisnis</span>
-                    <strong className="text-[var(--gold-400)]">Rp 300.000 / bln</strong>
+                    <span>BUSS Kelas Bisnis</span>
+                    <strong className="text-[var(--gold-400)]">Rp 400.000 / bln</strong>
                   </div>
                   <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--green-900)]/60">
-                    <span>BUSS Eksekutif</span>
-                    <strong className="text-[var(--gold-400)]">Rp 500.000 / bln</strong>
+                    <span>BUSS Kelas Eksekutif</span>
+                    <strong className="text-[var(--gold-400)]">Rp 600.000 / bln</strong>
+                  </div>
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--green-900)]/60">
+                    <span>BUSS Kelas Luxury</span>
+                    <strong className="text-[var(--gold-400)]">Rp 1.000.000 / bln</strong>
                   </div>
                 </div>
               </div>
@@ -353,21 +343,24 @@ export default async function HomePage() {
               </Link>
               <Link
                 href="/program/pelatihan-it"
-                className="px-4 py-2 rounded-full bg-[var(--cream-100)] border border-[var(--cream-200)] text-[var(--ink-900)] hover:border-[var(--green-700)] transition-colors"
+                className="px-4 py-2 rounded-full bg-[var(--cream-100)] border border-[var(--cream-200)] text-[var(--ink-900)] hover:border-[var(--green-700)] transition-colors flex items-center gap-1.5"
               >
-                Beasiswa Pelatihan IT Mitra Produktif
+                <Laptop className="w-3.5 h-3.5 text-[var(--green-700)]" />
+                <span>Beasiswa Pelatihan IT Mitra Produktif</span>
               </Link>
               <Link
                 href="/program/pembinaan-umkm"
-                className="px-4 py-2 rounded-full bg-[var(--cream-100)] border border-[var(--cream-200)] text-[var(--ink-900)] hover:border-[var(--green-700)] transition-colors"
+                className="px-4 py-2 rounded-full bg-[var(--cream-100)] border border-[var(--cream-200)] text-[var(--ink-900)] hover:border-[var(--gold-600)] transition-colors flex items-center gap-1.5"
               >
-                Pembinaan UMKM Umat
+                <Store className="w-3.5 h-3.5 text-[var(--gold-700)]" />
+                <span>Pembinaan UMKM Umat</span>
               </Link>
               <Link
                 href="/program/bantuan-tematik"
-                className="px-4 py-2 rounded-full bg-[var(--cream-100)] border border-[var(--cream-200)] text-[var(--ink-900)] hover:border-[var(--green-700)] transition-colors"
+                className="px-4 py-2 rounded-full bg-[var(--cream-100)] border border-[var(--cream-200)] text-[var(--ink-900)] hover:border-[var(--green-700)] transition-colors flex items-center gap-1.5"
               >
-                Bantuan Tematik Tanggap Bencana
+                <HeartHandshake className="w-3.5 h-3.5 text-[var(--green-700)]" />
+                <span>Bantuan Tematik Tanggap Bencana</span>
               </Link>
             </div>
           </div>

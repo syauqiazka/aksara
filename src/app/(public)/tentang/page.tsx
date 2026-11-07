@@ -33,59 +33,30 @@ export default function TentangPage() {
 
   return (
     <div className="flex flex-col w-full bg-[var(--cream-50)] text-[var(--ink-900)]">
-      {/* 1. PAGE HEADER DENGAN BREADCRUMB RESMI */}
+      {/* 1. PAGE HEADER DENGAN BREADCRUMB RESMI & PROFIL LEGALITAS LEMBAGA */}
       <PageHeader
         eyebrow="Profil &amp; Rekam Jejak Lembaga"
         title="Berkhidmat Menghidupkan Nur Al-Qur'an di Seluruh Penjuru Semesta"
-        subtitle="Yayasan Sahabat Aksara (Yayasan Ajirasa Aksara Semesta) mendedikasikan ikhtiar dakwah, pendidikan, sosial, dan teknologi untuk kemandirian umat."
+        subtitle={
+          <div className="space-y-4">
+            <p>
+              Yayasan Sahabat Aksara (Yayasan Ajirasa Aksara Semesta) mendedikasikan ikhtiar dakwah, pendidikan, sosial, dan teknologi untuk kemandirian umat.
+            </p>
+            <div className="pt-3 border-t border-[var(--gold-500)]/25 text-xs sm:text-sm text-[var(--cream-100)] leading-relaxed space-y-1.5">
+              <div className="text-[var(--gold-300)] font-semibold flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-[var(--gold-400)] flex-shrink-0" />
+                <span>Profil Lembaga &amp; Legalitas Resmi:</span>
+              </div>
+              <p className="text-[var(--cream-200)] text-xs sm:text-[13px] leading-relaxed">
+                Resmi berdiri pada <strong className="text-[var(--cream-50)] font-semibold">{organizationContent.establishedDate}</strong> berkedudukan di <strong className="text-[var(--cream-50)] font-semibold">{organizationContent.address}</strong>. Badan hukum <strong className="text-[var(--cream-50)] font-semibold">{legalName}</strong> disahkan melalui <strong className="text-[var(--cream-50)] font-semibold">{organizationContent.aktaPendirian}</strong>, SK Kemenkumham Nomor <span className="font-mono text-[var(--gold-300)] font-semibold">{skKemenkumham}</span>, NPWP Resmi <span className="font-mono text-[var(--gold-300)] font-semibold">{npwp}</span>, serta email resmi <a href={`mailto:${organizationContent.email}`} className="text-[var(--gold-300)] hover:underline font-mono">{organizationContent.email}</a>.
+              </p>
+            </div>
+          </div>
+        }
         breadcrumbs={[{ label: "Tentang Kami" }]}
       />
 
-      {/* 2. PROFIL & LEGALITAS LEMBAGA */}
-      <section className="bg-[var(--green-900)] text-[var(--cream-100)] py-8 border-b border-[var(--gold-500)]/20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto space-y-4">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 text-xs border-b border-[var(--gold-500)]/20 pb-4">
-            <div className="flex items-center gap-2 text-[var(--gold-400)] font-semibold text-sm">
-              <ShieldCheck className="w-5 h-5 text-[var(--gold-400)] flex-shrink-0" />
-              <span>Profil Lembaga &amp; Legalitas Resmi</span>
-            </div>
-            <div className="flex items-center gap-2 text-[var(--cream-200)]">
-              <span>Domisili:</span>
-              <strong className="text-[var(--cream-50)]">{organizationContent.address}</strong>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-xs">
-            <div className="bg-[var(--green-950)]/60 p-3.5 rounded-xl border border-[var(--gold-500)]/15">
-              <div className="text-[var(--gold-400)] text-[10px] uppercase font-bold tracking-wider mb-1">Badan Hukum</div>
-              <div className="text-[var(--cream-50)] font-medium text-xs sm:text-sm">{legalName}</div>
-            </div>
-            <div className="bg-[var(--green-950)]/60 p-3.5 rounded-xl border border-[var(--gold-500)]/15">
-              <div className="text-[var(--gold-400)] text-[10px] uppercase font-bold tracking-wider mb-1">Tanggal Berdiri</div>
-              <div className="text-[var(--cream-50)] font-medium text-xs sm:text-sm">{organizationContent.establishedDate}</div>
-            </div>
-            <div className="bg-[var(--green-950)]/60 p-3.5 rounded-xl border border-[var(--gold-500)]/15">
-              <div className="text-[var(--gold-400)] text-[10px] uppercase font-bold tracking-wider mb-1">Akta Pendirian</div>
-              <div className="text-[var(--cream-50)] font-medium text-xs leading-snug">{organizationContent.aktaPendirian}</div>
-            </div>
-            <div className="bg-[var(--green-950)]/60 p-3.5 rounded-xl border border-[var(--gold-500)]/15">
-              <div className="text-[var(--gold-400)] text-[10px] uppercase font-bold tracking-wider mb-1">SK Kemenkumham</div>
-              <div className="text-[var(--cream-50)] font-mono text-xs leading-snug">{skKemenkumham}</div>
-            </div>
-            <div className="bg-[var(--green-950)]/60 p-3.5 rounded-xl border border-[var(--gold-500)]/15">
-              <div className="text-[var(--gold-400)] text-[10px] uppercase font-bold tracking-wider mb-1">NPWP Resmi</div>
-              <div className="text-[var(--cream-50)] font-mono text-xs sm:text-sm">{npwp}</div>
-            </div>
-            <div className="bg-[var(--green-950)]/60 p-3.5 rounded-xl border border-[var(--gold-500)]/15">
-              <div className="text-[var(--gold-400)] text-[10px] uppercase font-bold tracking-wider mb-1">Email Resmi</div>
-              <a href={`mailto:${organizationContent.email}`} className="text-[var(--cream-50)] hover:text-[var(--gold-300)] font-mono text-[11px] truncate block">
-                {organizationContent.email}
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. KISAH & LATAR BELAKANG LEMBAGA (Scrollytelling Editorial) */}
+      {/* 2. KISAH & LATAR BELAKANG LEMBAGA (Scrollytelling Editorial) */}
       <section className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
           {/* Sticky Left: Founder Portrait & Quote */}

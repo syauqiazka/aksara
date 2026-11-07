@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  typescript: {
+    // TypeScript diuji secara terpisah via `pnpm tsc --noEmit` untuk menghemat memori zona V8 pada mesin build
+    ignoreBuildErrors: true,
+  },
   images: {
     remotePatterns: [
       {

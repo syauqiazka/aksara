@@ -11,7 +11,7 @@ export interface BreadcrumbItem {
 
 export interface PageHeaderProps {
   title: string;
-  subtitle?: string;
+  subtitle?: React.ReactNode;
   eyebrow?: string;
   breadcrumbs: BreadcrumbItem[];
   actions?: React.ReactNode;
@@ -130,9 +130,9 @@ export default function PageHeader({
               {title}
             </h1>
             {subtitle && (
-              <p className="text-sm sm:text-base text-[var(--cream-100)]/90 leading-relaxed font-sans pt-1">
+              <div className="text-sm sm:text-base text-[var(--cream-100)]/90 leading-relaxed font-sans pt-1">
                 {subtitle}
-              </p>
+              </div>
             )}
           </div>
 
