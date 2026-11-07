@@ -67,12 +67,49 @@ export const db = {
 
     try {
       const client = getClient();
-      const { santri_list: _sl, photos: _ph, ...jinanData } = item;
+      const { santri_list: _sl, photos: _ph, santri_count: _sc, ...jinanData } = item;
       const query = id
         ? client.from("infak_jinan").update({ ...jinanData, updated_at: new Date().toISOString() }).eq("id", id)
         : client.from("infak_jinan").insert(jinanData);
       const { data, error } = await query.select().single();
       throwIfError(error, id ? "memperbarui data infak jinan" : "menambahkan data infak jinan");
+
+      // Simpan santri binaan jika ada
+      if (_sl && _sl.length > 0 && data?.id) {
+        if (id) {
+          await client.from("infak_jinan_santri").delete().eq("infak_id", id);
+        }
+        for (const s of _sl) {
+          const { hafalan_updates, latest_surah: _ls, latest_ayat: _la, latest_juz: _lj, ...santriRow } = s;
+          const { data: insertedSantri } = await client
+            .from("infak_jinan_santri")
+            .insert({ ...santriRow, infak_id: data.id })
+            .select()
+            .single();
+
+          if (insertedSantri && hafalan_updates && hafalan_updates.length > 0) {
+            for (const h of hafalan_updates) {
+              const { id: _hid, ...hRow } = h;
+              await client.from("santri_hafalan_updates").insert({
+                ...hRow,
+                santri_id: insertedSantri.id,
+              });
+            }
+          }
+        }
+      }
+
+      // Simpan foto serah terima jika ada
+      if (_ph && _ph.length > 0 && data?.id) {
+        if (id) {
+          await client.from("infak_jinan_photos").delete().eq("infak_id", id);
+        }
+        for (const p of _ph) {
+          const { id: _pid, ...pRow } = p;
+          await client.from("infak_jinan_photos").insert({ ...pRow, infak_id: data.id });
+        }
+      }
+
       return data as InfakJinanRecord;
     } catch (err) {
       console.warn("Supabase saveInfakJinan fallback ke localStore:", err);
