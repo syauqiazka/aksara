@@ -67,12 +67,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             required={required}
             className={`
               h-12
+              min-h-[48px]
               w-full
               ${startIcon ? "pl-11" : "px-4"}
               ${endIcon ? "pr-11" : "px-4"}
-              rounded-lg
+              rounded-xl
               border
-              text-sm
+              text-base md:text-sm
               transition-colors
               placeholder:text-[var(--ink-400)]
               focus:outline-none focus:ring-2

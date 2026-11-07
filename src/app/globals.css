@@ -189,3 +189,23 @@ p {
 .tabular-numbers {
   font-variant-numeric: tabular-nums;
 }
+
+/* Cross-device dropdown and form control consistency (HP, Tablet, Laptop) */
+select {
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+}
+
+select::-ms-expand {
+  display: none;
+}
+
+/* Prevent iOS & mobile WebKit auto-zoom on focus while keeping smooth tap targets */
+@media (max-width: 768px) {
+  select,
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea {
+    font-size: 16px !important;
+  }
+}

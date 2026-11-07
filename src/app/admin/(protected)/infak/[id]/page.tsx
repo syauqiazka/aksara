@@ -9,9 +9,13 @@ import {
   Plus,
   AlertCircle,
   Copy,
+  Camera,
 } from "lucide-react";
 import Select from "@/components/ui/Select";
 import Input from "@/components/ui/Input";
+import ImageUploader from "@/components/admin/ImageUploader";
+import { uploadPendingFileOnSave } from "@/lib/upload-helper";
+import { PROVINCES_38 } from "@/lib/provinces-38";
 import { InfakJinanRecord, InfakJinanSantri } from "@/lib/db/types";
 import { QURAN_SURAHS, getSuggestedJuz, validateAyatNumber } from "@/lib/quran-surahs";
 import { cleanNumericString } from "@/lib/numeric-utils";
@@ -28,6 +32,8 @@ export default function AdminEditInfakPage() {
   const [success, setSuccess] = useState<string | null>(null);
 
   const [record, setRecord] = useState<InfakJinanRecord | null>(null);
+  const [photoUrl, setPhotoUrl] = useState<string>("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const [formData, setFormData] = useState({
     mushaf_no: "",
@@ -37,6 +43,8 @@ export default function AdminEditInfakPage() {
     donor_phone: "",
     dedication_name: "",
     pesantren_name: "",
+    pesantren_province: "",
+    pesantren_city: "",
     address: "",
     distributed_at: "",
     maps_url: "",
@@ -62,6 +70,8 @@ export default function AdminEditInfakPage() {
       const found = list.find((i) => i.id === id);
       if (found) {
         setRecord(found);
+        const existingPhoto = found.photos && found.photos.length > 0 ? found.photos[0].url : "";
+        setPhotoUrl(existingPhoto);
         setFormData({
           mushaf_no: found.mushaf_no.toString(),
           donor_name: found.donor_name,
@@ -70,6 +80,8 @@ export default function AdminEditInfakPage() {
           donor_phone: found.donor_phone || "",
           dedication_name: found.dedication_name,
           pesantren_name: found.pesantren_name,
+          pesantren_province: found.pesantren_province || "",
+          pesantren_city: found.pesantren_city || "",
           address: found.address,
           distributed_at: found.distributed_at,
           maps_url: found.maps_url || "",
@@ -152,26 +164,42 @@ export default function AdminEditInfakPage() {
     setSuccess(null);
 
     const rawMushafNo = parseInt(formData.mushaf_no, 10);
-    const candidatePayload = {
-      ...formData,
-      mushaf_no: isNaN(rawMushafNo) ? 0 : rawMushafNo,
-      donor_phone: formData.donor_phone || null,
-      maps_url: formData.maps_url || null,
-      photos: record?.photos || [],
-      santri_list: record?.santri_list || [],
-    };
-
-    const clientValidation = infakJinanSchema.safeParse(candidatePayload);
-    if (!clientValidation.success) {
-      setError(formatZodError(clientValidation.error));
-      setSaving(false);
-      if (typeof window !== "undefined") {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-      return;
-    }
+    let uploadRollback: (() => Promise<void>) | null = null;
+    let uploadCommit: (() => Promise<void>) | null = null;
 
     try {
+      let finalPhotos = photoUrl
+        ? [{ url: photoUrl, caption: `Serah Terima Mushaf #${formData.mushaf_no || "1"}`, sort: 1 }]
+        : [];
+
+      if (selectedFile) {
+        const { url, rollback, commit } = await uploadPendingFileOnSave(selectedFile);
+        uploadRollback = rollback;
+        uploadCommit = commit;
+        if (url) {
+          finalPhotos = [{ url, caption: `Serah Terima Mushaf #${formData.mushaf_no || "1"}`, sort: 1 }];
+        }
+      }
+
+      const candidatePayload = {
+        ...formData,
+        mushaf_no: isNaN(rawMushafNo) ? 0 : rawMushafNo,
+        donor_phone: formData.donor_phone || null,
+        maps_url: formData.maps_url || null,
+        photos: finalPhotos,
+        santri_list: record?.santri_list || [],
+      };
+
+      const clientValidation = infakJinanSchema.safeParse(candidatePayload);
+      if (!clientValidation.success) {
+        setError(formatZodError(clientValidation.error));
+        setSaving(false);
+        if (typeof window !== "undefined") {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+        return;
+      }
+
       const res = await fetch("/api/admin/infak", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -184,10 +212,20 @@ export default function AdminEditInfakPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal memperbarui donasi");
 
-      setSuccess("Data donasi berhasil diperbarui.");
+      if (uploadCommit) {
+        await uploadCommit();
+      }
+
+      setSelectedFile(null);
+      setSuccess("Data donasi & foto serah terima berhasil diperbarui.");
       router.refresh();
       loadData();
     } catch (err) {
+      if (uploadRollback) {
+        try {
+          await uploadRollback();
+        } catch {}
+      }
       setError(err instanceof Error ? err.message : "Terjadi kesalahan");
       if (typeof window !== "undefined") {
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -411,6 +449,34 @@ export default function AdminEditInfakPage() {
             </div>
           </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
+                Provinsi Lembaga (Peta Sebaran) *
+              </label>
+              <Select
+                value={formData.pesantren_province || ""}
+                onChange={(e) => setFormData({ ...formData, pesantren_province: e.target.value })}
+                options={[
+                  { value: "", label: "-- Pilih Provinsi (38 Provinsi) --" },
+                  ...PROVINCES_38.map((p) => ({ value: p.name, label: p.name })),
+                ]}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
+                Kota / Kabupaten Lembaga
+              </label>
+              <Input
+                type="text"
+                value={formData.pesantren_city || ""}
+                onChange={(e) => setFormData({ ...formData, pesantren_city: e.target.value })}
+                placeholder="Contoh: Cirebon, Bogor"
+              />
+            </div>
+          </div>
+
           <div>
             <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
               Alamat Lengkap Pesantren *
@@ -448,6 +514,27 @@ export default function AdminEditInfakPage() {
                 ]}
               />
             </div>
+          </div>
+
+          {/* DOKUMENTASI FOTO SERAH TERIMA */}
+          <div className="pt-4 border-t border-[var(--cream-200)] space-y-2">
+            <div className="flex items-center gap-2 mb-1">
+              <Camera className="w-4 h-4 text-[var(--green-800)]" />
+              <label className="block text-xs font-bold text-[var(--ink-900)]">
+                Foto Dokumentasi Serah Terima Mushaf
+              </label>
+            </div>
+            <p className="text-[11px] text-[var(--ink-600)] mb-3">
+              Foto dokumentasi yang tampil di halaman publik. Anda dapat mengganti atau menghapus foto kapan saja.
+            </p>
+            <ImageUploader
+              label="Foto Dokumentasi (WebP Otomatis)"
+              value={photoUrl}
+              onChange={(url) => setPhotoUrl(url)}
+              file={selectedFile}
+              onFileChange={(f) => setSelectedFile(f)}
+              helperText="Upload foto baru untuk memperbarui dokumentasi serah terima mushaf yang telah dipublish."
+            />
           </div>
 
           <div className="pt-2 text-right">

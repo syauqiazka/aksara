@@ -11,3 +11,4 @@ GRANT ALL ON public.infak_jinan TO postgres, service_role;
 GRANT ALL ON public.infak_jinan_santri TO postgres, service_role;
 GRANT ALL ON public.infak_jinan_photos TO postgres, service_role;
 GRANT ALL ON public.santri_hafalan_updates TO postgres, service_role;
+

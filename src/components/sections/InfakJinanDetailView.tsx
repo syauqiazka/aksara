@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { formatTanggal } from "@/lib/format-date";
 import Image from "next/image";
@@ -27,6 +27,32 @@ interface Props {
 export default function InfakJinanDetailView({ donation, santri }: Props) {
   const [activeSantriTimeline, setActiveSantriTimeline] = useState<PublicInfakJinanSantri | null>(null);
   const [showPhotoGallery, setShowPhotoGallery] = useState(false);
+
+  // Kunci scroll halaman saat popup aktif agar fokus pada modal
+  useEffect(() => {
+    if (activeSantriTimeline || showPhotoGallery) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [activeSantriTimeline, showPhotoGallery]);
+
+  const handleOpenTimeline = (s: PublicInfakJinanSantri) => {
+    setActiveSantriTimeline(s);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handleOpenPhotoGallery = () => {
+    setShowPhotoGallery(true);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
 
   return (
     <div className="space-y-10 animate-fade-in">
@@ -57,7 +83,7 @@ export default function InfakJinanDetailView({ donation, santri }: Props) {
           <div className="flex items-center gap-2">
             {donation.photos && donation.photos.length > 0 && (
               <button
-                onClick={() => setShowPhotoGallery(true)}
+                onClick={handleOpenPhotoGallery}
                 className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[var(--green-800)]/80 hover:bg-[var(--green-800)] text-[var(--cream-50)] text-xs font-semibold border border-[var(--gold-400)]/40 transition-colors"
               >
                 <ImageIcon className="w-3.5 h-3.5 text-[var(--gold-300)]" />
@@ -91,7 +117,7 @@ export default function InfakJinanDetailView({ donation, santri }: Props) {
               &ldquo;{donation.dedication_name}&rdquo;
             </p>
             <p className="text-xs text-[var(--sage-300)]">
-              Pahala jariyah disalurkan untuk santri penghafal Al-Qur&apos;an.
+              Pahala Jariyah &amp; Ziyadah doa terkhususkan untuk Beliau.
             </p>
           </div>
 
@@ -200,8 +226,8 @@ export default function InfakJinanDetailView({ donation, santri }: Props) {
                       </td>
                       <td className="py-4 px-6 text-center">
                         <button
-                          onClick={() => setActiveSantriTimeline(s)}
-                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[var(--gold-500)] text-[var(--green-950)] text-xs font-semibold bg-[var(--cream-100)] hover:bg-gold-gradient transition-all shadow-xs"
+                          onClick={() => handleOpenTimeline(s)}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[var(--gold-500)] text-[var(--green-950)] text-xs font-semibold bg-[var(--cream-100)] hover:bg-gold-gradient transition-all shadow-xs cursor-pointer"
                         >
                           <Clock className="w-3.5 h-3.5 text-[var(--gold-700)]" />
                           <span>Riwayat ({s.hafalan_updates.length})</span>
@@ -239,8 +265,8 @@ export default function InfakJinanDetailView({ donation, santri }: Props) {
                   </div>
 
                   <button
-                    onClick={() => setActiveSantriTimeline(s)}
-                    className="w-full py-2.5 rounded-full bg-[var(--green-800)] text-[var(--cream-50)] text-xs font-semibold text-center hover:bg-[var(--green-700)] transition-colors shadow-xs flex items-center justify-center gap-1.5"
+                    onClick={() => handleOpenTimeline(s)}
+                    className="w-full py-2.5 rounded-full bg-[var(--green-800)] text-[var(--cream-50)] text-xs font-semibold text-center hover:bg-[var(--green-700)] transition-colors shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Clock className="w-3.5 h-3.5 text-[var(--gold-300)]" />
                     <span>Riwayat Progres Bulanan ({s.hafalan_updates.length})</span>
@@ -257,11 +283,11 @@ export default function InfakJinanDetailView({ donation, santri }: Props) {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in"
+          className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-xs p-3 sm:p-6 animate-fade-in flex items-start sm:items-center justify-center"
           onClick={() => setActiveSantriTimeline(null)}
         >
           <div
-            className="bg-[var(--cream-50)] rounded-3xl max-w-xl w-full max-h-[85vh] overflow-y-auto border border-[var(--gold-500)]/40 shadow-2xl p-6 sm:p-8 space-y-5"
+            className="relative bg-[var(--cream-50)] rounded-3xl max-w-xl w-full my-auto max-h-[90vh] overflow-y-auto border border-[var(--gold-500)]/40 shadow-2xl p-5 sm:p-8 space-y-5"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between pb-3 border-b border-[var(--cream-200)]">
@@ -329,11 +355,11 @@ export default function InfakJinanDetailView({ donation, santri }: Props) {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in"
+          className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-xs p-3 sm:p-6 animate-fade-in flex items-start sm:items-center justify-center"
           onClick={() => setShowPhotoGallery(false)}
         >
           <div
-            className="bg-[var(--cream-50)] rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-y-auto border border-[var(--gold-500)]/40 shadow-2xl p-6 sm:p-8 space-y-4"
+            className="relative bg-[var(--cream-50)] rounded-3xl max-w-2xl w-full my-auto max-h-[90vh] overflow-y-auto border border-[var(--gold-500)]/40 shadow-2xl p-5 sm:p-8 space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between pb-3 border-b border-[var(--cream-200)]">
