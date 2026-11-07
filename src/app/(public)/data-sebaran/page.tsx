@@ -76,7 +76,7 @@ export default async function DataSebaranPage() {
           </div>
           <div className="pt-2 lg:pt-0 lg:px-6">
             <StatCounter
-              end={bussData.length + yatimData.length + infakJinan.length}
+              end={bussData.length + yatimData.length + infakJinan.length + geberData.length}
               label="Aksi Penyaluran"
               sublabel="100% Terverifikasi Terbuka"
             />

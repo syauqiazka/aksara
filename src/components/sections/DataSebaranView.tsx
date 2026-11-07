@@ -47,9 +47,6 @@ export default function DataSebaranView({
   initialYatim,
   initialGeber,
 }: DataSebaranViewProps) {
-  // Flag untuk Geber Masjid (disembunyikan dari publik kecuali diaktifkan via env)
-  const showGeberTab = process.env.NEXT_PUBLIC_SHOW_GEBER_SEBARAN === "true";
-
   const [activeTab, setActiveTab] = useState<TabType>("jinan");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedYear, setSelectedYear] = useState<string>("all");
@@ -90,8 +87,14 @@ export default function DataSebaranView({
     const list = new Set<string>();
     initialBuss.forEach((b) => list.add(b.year.toString()));
     initialYatim.forEach((y) => list.add(y.year.toString()));
+    initialGeber.forEach((g) => {
+      if (g.activity_date) {
+        const y = g.activity_date.substring(0, 4);
+        if (y) list.add(y);
+      }
+    });
     return Array.from(list).sort().reverse();
-  }, [initialBuss, initialYatim]);
+  }, [initialBuss, initialYatim, initialGeber]);
 
   const origins = useMemo(() => {
     const list = new Set<string>();
@@ -179,18 +182,24 @@ export default function DataSebaranView({
     });
   }, [initialYatim, searchQuery, selectedYear]);
 
-  // Tab 4 (Optional): Filtered Geber
+  // Tab 4: Filtered Geber
   const filteredGeber = useMemo(() => {
     return initialGeber.filter((item) => {
       const q = searchQuery.toLowerCase().trim();
-      return (
+      const matchesSearch =
         q === "" ||
         item.mosque_name.toLowerCase().includes(q) ||
         item.city.toLowerCase().includes(q) ||
-        item.province.toLowerCase().includes(q)
-      );
+        item.province.toLowerCase().includes(q) ||
+        (item.address && item.address.toLowerCase().includes(q)) ||
+        (item.activity_notes && item.activity_notes.toLowerCase().includes(q));
+
+      const itemYear = item.activity_date ? item.activity_date.substring(0, 4) : "";
+      const matchesYear = selectedYear === "all" || itemYear === selectedYear;
+
+      return matchesSearch && matchesYear;
     });
-  }, [initialGeber, searchQuery]);
+  }, [initialGeber, searchQuery, selectedYear]);
 
   // Pagination calculation
   const currentDataset = useMemo(() => {
@@ -288,20 +297,18 @@ export default function DataSebaranView({
           <span>Yatim Berdikari ({initialYatim.length})</span>
         </button>
 
-        {/* Optional Tab D: Geber Masjid (If Flag Enabled) */}
-        {showGeberTab && (
-          <button
-            onClick={() => handleTabSwitch("geber")}
-            className={`px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl font-serif text-sm sm:text-base font-bold transition-all duration-300 flex items-center justify-center gap-2.5 border ${
-              activeTab === "geber"
-                ? "bg-[var(--green-950)] text-gold-gradient border-[var(--gold-400)] shadow-xl scale-105"
-                : "bg-[var(--cream-100)] text-[var(--ink-600)] border-[var(--cream-200)] hover:bg-[var(--cream-200)]"
-            }`}
-          >
-            <Building2 className="w-5 h-5 text-[var(--gold-400)]" />
-            <span>Geber Masjid ({initialGeber.length})</span>
-          </button>
-        )}
+        {/* Tab D: Geber Masjid */}
+        <button
+          onClick={() => handleTabSwitch("geber")}
+          className={`px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl font-serif text-sm sm:text-base font-bold transition-all duration-300 flex items-center justify-center gap-2.5 border ${
+            activeTab === "geber"
+              ? "bg-[var(--green-950)] text-gold-gradient border-[var(--gold-400)] shadow-xl scale-105"
+              : "bg-[var(--cream-100)] text-[var(--ink-600)] border-[var(--cream-200)] hover:bg-[var(--cream-200)]"
+          }`}
+        >
+          <Building2 className="w-5 h-5 text-[var(--gold-400)]" />
+          <span>Geber Masjid ({initialGeber.length})</span>
+        </button>
       </div>
 
       {/* 3. Search & Filter Bar (Sticky Toolbar) */}
@@ -325,13 +332,15 @@ export default function DataSebaranView({
                   ? "Cari nomor mushaf, nama donatur, santri, atau pesantren..."
                   : activeTab === "buss"
                   ? "Cari nama santri, asal, pesantren, atau donatur..."
+                  : activeTab === "geber"
+                  ? "Cari nama masjid, kota, provinsi, atau catatan kegiatan..."
                   : "Cari nama kegiatan atau penyelenggara..."
               }
             />
           </div>
 
-          {/* Year Filter (for BUSS & Yatim) */}
-          {(activeTab === "buss" || activeTab === "yatim") && (
+          {/* Year Filter (for BUSS, Yatim & Geber) */}
+          {(activeTab === "buss" || activeTab === "yatim" || activeTab === "geber") && (
             <div className="w-full md:w-52">
               <Select
                 value={selectedYear}
@@ -912,42 +921,149 @@ export default function DataSebaranView({
             )}
 
             {/* ======================================================== */}
-            {/* TAB D: GEBER MASJID (Hanya tampil jika env diaktifkan)   */}
+            {/* TAB D: GEBER MASJID                                      */}
             {/* ======================================================== */}
-            {showGeberTab && activeTab === "geber" && (
-              <div className="overflow-x-auto rounded-3xl border border-[var(--cream-200)] shadow-sm bg-[var(--cream-50)]">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="bg-[var(--green-950)] text-[var(--cream-50)] font-serif uppercase tracking-wider text-[11px]">
-                      <th className="py-4 px-3 text-center">No.</th>
-                      <th className="py-4 px-4">Nama Masjid</th>
-                      <th className="py-4 px-4">Lokasi &amp; Alamat</th>
-                      <th className="py-4 px-3">Tanggal Kegiatan</th>
-                      <th className="py-4 px-3 text-center">Relawan</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[var(--cream-200)] text-[var(--ink-900)]">
-                    {(paginatedData as GeberMasjidDistribution[]).map((item, idx) => (
-                      <tr key={item.id} className="hover:bg-[var(--cream-100)] transition-colors">
-                        <td className="py-4 px-3 text-center font-mono text-[var(--ink-600)]">
-                          {idx + 1}
-                        </td>
-                        <td className="py-4 px-4 font-semibold text-[var(--green-950)]">
-                          {item.mosque_name}
-                        </td>
-                        <td className="py-4 px-4">
-                          <div>{item.city}, {item.province}</div>
-                          <div className="text-[10px] text-[var(--ink-600)] line-clamp-1">{item.address}</div>
-                        </td>
-                        <td className="py-4 px-3 text-[var(--ink-600)]">{formatTanggal(item.activity_date)}</td>
-                        <td className="py-4 px-3 text-center font-bold text-[var(--green-800)]">
-                          {item.participants} orang
-                        </td>
+            {activeTab === "geber" && (
+              <>
+                {/* Desktop View */}
+                <div className="hidden lg:block overflow-x-auto rounded-3xl border border-[var(--cream-200)] shadow-sm bg-[var(--cream-50)]">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-[var(--green-950)] text-[var(--cream-50)] font-serif uppercase tracking-wider text-[11px]">
+                        <th className="py-4 px-3 text-center">No.</th>
+                        <th className="py-4 px-4">Nama Masjid</th>
+                        <th className="py-4 px-4">Lokasi &amp; Alamat</th>
+                        <th className="py-4 px-3">Tanggal Kegiatan</th>
+                        <th className="py-4 px-3 text-center">Relawan</th>
+                        <th className="py-4 px-4 text-center">Dokumentasi</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-[var(--cream-200)] text-[var(--ink-900)]">
+                      {(paginatedData as GeberMasjidDistribution[]).map((item, idx) => {
+                        const displayIndex = (currentPage - 1) * pageSize + idx + 1;
+                        const hasPhotos = item.photo_urls && item.photo_urls.length > 0;
+                        return (
+                          <tr key={item.id} className="hover:bg-[var(--cream-100)] transition-colors">
+                            <td className="py-4 px-3 text-center font-mono text-[var(--ink-600)]">
+                              {displayIndex}
+                            </td>
+                            <td className="py-4 px-4">
+                              <span className="font-semibold text-[var(--green-950)] text-sm block">
+                                {item.mosque_name}
+                              </span>
+                              {item.activity_notes && (
+                                <span className="text-[11px] text-[var(--ink-500)] line-clamp-1 mt-0.5">
+                                  {item.activity_notes}
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-4 px-4">
+                              <div className="font-medium text-[var(--ink-800)]">{item.city}, {item.province}</div>
+                              {item.address && (
+                                <div className="text-[10px] text-[var(--ink-600)] line-clamp-1">{item.address}</div>
+                              )}
+                            </td>
+                            <td className="py-4 px-3 text-[var(--ink-600)] whitespace-nowrap">
+                              {formatTanggal(item.activity_date)}
+                            </td>
+                            <td className="py-4 px-3 text-center font-bold text-[var(--green-800)] whitespace-nowrap">
+                              {item.participants} orang
+                            </td>
+                            <td className="py-4 px-4 text-center">
+                              {hasPhotos ? (
+                                <button
+                                  onClick={() =>
+                                    setActiveGalleryModal({
+                                      title: item.mosque_name,
+                                      subtitle: `Aksi Geber Masjid di ${item.city}, ${item.province} (${formatTanggal(item.activity_date)})`,
+                                      photos: item.photo_urls,
+                                      description: item.activity_notes || `Pembersihan sarana ibadah masjid bersama ${item.participants} relawan.`,
+                                    })
+                                  }
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--green-800)] text-[var(--cream-50)] text-[11px] font-medium hover:bg-[var(--green-700)] transition-colors cursor-pointer"
+                                >
+                                  <ImageIcon className="w-3.5 h-3.5" />
+                                  <span>Lihat Foto ({item.photo_urls.length})</span>
+                                </button>
+                              ) : (
+                                <span className="text-[11px] text-[var(--ink-400)] italic">
+                                  Dokumentasi proses
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile View */}
+                <div className="lg:hidden space-y-4">
+                  {(paginatedData as GeberMasjidDistribution[]).map((item, idx) => {
+                    const displayIndex = (currentPage - 1) * pageSize + idx + 1;
+                    const hasPhotos = item.photo_urls && item.photo_urls.length > 0;
+                    return (
+                      <div
+                        key={item.id}
+                        className="p-5 rounded-3xl bg-[var(--cream-100)] border border-[var(--cream-200)] shadow-sm space-y-3"
+                      >
+                        <div className="flex items-center justify-between pb-2 border-b border-[var(--cream-200)] text-xs">
+                          <span className="font-mono text-[var(--ink-600)]">
+                            No. {displayIndex}
+                          </span>
+                          <span className="text-[var(--ink-600)] flex items-center gap-1">
+                            <Calendar className="w-3 h-3 text-[var(--green-700)]" />
+                            {formatTanggal(item.activity_date)}
+                          </span>
+                        </div>
+
+                        <div>
+                          <h4 className="font-serif text-base font-bold text-[var(--green-950)]">
+                            {item.mosque_name}
+                          </h4>
+                          <p className="text-xs text-[var(--ink-700)] mt-1 flex items-center gap-1">
+                            <MapPin className="w-3 h-3 text-[var(--gold-600)] shrink-0" />
+                            <span>{item.city}, {item.province}</span>
+                          </p>
+                          {item.address && (
+                            <p className="text-[11px] text-[var(--ink-600)] mt-0.5">
+                              {item.address}
+                            </p>
+                          )}
+                          {item.activity_notes && (
+                            <p className="text-xs text-[var(--ink-600)] mt-2 leading-relaxed bg-[var(--cream-50)] p-3 rounded-xl border border-[var(--cream-200)]">
+                              {item.activity_notes}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="text-xs text-[var(--ink-800)] flex items-center justify-between pt-1">
+                          <span>Relawan Terlibat:</span>
+                          <strong className="text-[var(--green-900)]">{item.participants} orang</strong>
+                        </div>
+
+                        {hasPhotos && (
+                          <button
+                            onClick={() =>
+                              setActiveGalleryModal({
+                                title: item.mosque_name,
+                                subtitle: `Aksi Geber Masjid di ${item.city}, ${item.province} (${formatTanggal(item.activity_date)})`,
+                                photos: item.photo_urls,
+                                description: item.activity_notes || `Pembersihan sarana ibadah masjid bersama ${item.participants} relawan.`,
+                              })
+                            }
+                            className="w-full py-2.5 rounded-full bg-[var(--green-800)] text-[var(--cream-50)] text-xs font-semibold text-center hover:bg-[var(--green-700)] transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                          >
+                            <ImageIcon className="w-3.5 h-3.5" />
+                            <span>Lihat Dokumentasi Kegiatan ({item.photo_urls.length} Foto)</span>
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
             )}
 
             {/* 5. Pagination Controls */}

@@ -177,7 +177,7 @@ export function formatZodError(err: unknown): string {
           .map((i: { message?: string }) => i.message || JSON.stringify(i))
           .join(". ");
       }
-    } catch {}
+    } catch { }
     return err.message;
   }
   return "Terjadi kesalahan validasi data";
@@ -194,7 +194,7 @@ export function formatHumanError(raw: string): string {
           .map((item: { message?: string }) => item.message || JSON.stringify(item))
           .join(", ");
       }
-    } catch {}
+    } catch { }
   }
   return raw;
 }
