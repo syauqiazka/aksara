@@ -184,5 +184,49 @@ test.describe("Verifikasi 5 Item Revisi User", () => {
     const hoverTooltip = page.locator(".pointer-events-none.absolute.z-30");
     await expect(hoverTooltip).toHaveCount(0);
   });
+
+  test("8. Tentang Kami: Subtitle tidak lagi memuat 'Akta Pendirian Nomor 195'", async ({
+    page,
+  }) => {
+    await page.goto("/tentang");
+
+    const skipBtn = page.getByRole("button", { name: /Lewati/i });
+    if (await skipBtn.isVisible({ timeout: 1500 }).catch(() => false)) {
+      await skipBtn.click();
+    }
+
+    const header = page.locator("#main-content header, #main-content section").first();
+    await expect(header).toBeVisible();
+    await expect(header.getByText("Akta Pendirian Nomor 195")).not.toBeVisible();
+  });
+
+  test("9. Program BUSS Al-Qur'an: Seluruh 4 kategori disamakan redaksinya menggunakan 'Bantuan Uang Saku Santri'", async ({
+    page,
+  }) => {
+    await page.goto("/program/buss-quran");
+
+    const skipBtn = page.getByRole("button", { name: /Lewati/i });
+    if (await skipBtn.isVisible({ timeout: 1500 }).catch(() => false)) {
+      await skipBtn.click();
+    }
+
+    await expect(
+      page.getByText("BUSS Kelas Ekonomis: Bantuan Uang Saku Santri Rp 200.000,- / Bulan / Santri.")
+    ).toBeVisible();
+    await expect(
+      page.getByText("BUSS Kelas Bisnis: Bantuan Uang Saku Santri Rp 400.000,- / Bulan / Santri.")
+    ).toBeVisible();
+    await expect(
+      page.getByText("BUSS Kelas Eksekutif: Bantuan Uang Saku Santri Rp 600.000,- / Bulan / Santri.")
+    ).toBeVisible();
+    await expect(
+      page.getByText("BUSS Kelas Luxury: Bantuan Uang Saku Santri Rp 1.000.000,- / Bulan / Santri.")
+    ).toBeVisible();
+
+    // Pastikan redaksi lama tidak ada
+    await expect(page.getByText("Dukungan sarana belajar")).not.toBeVisible();
+    await expect(page.getByText("Kafalah santri tahfidz")).not.toBeVisible();
+    await expect(page.getByText("Beasiswa penuh dan pembinaan intensif")).not.toBeVisible();
+  });
 });
 

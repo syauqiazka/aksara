@@ -37,7 +37,7 @@ export default function TentangPage() {
       <PageHeader
         eyebrow="Profil &amp; Rekam Jejak Lembaga"
         title="Berkhidmat Menghidupkan Nur Al-Qur'an di Seluruh Penjuru Semesta"
-        subtitle={`Yayasan Sahabat Aksara (Yayasan Ajirasa Aksara Semesta) mendedikasikan ikhtiar dakwah, pendidikan, sosial, dan teknologi untuk kemandirian umat. Resmi berdiri pada ${organizationContent.establishedDate} berkedudukan di ${organizationContent.address}, dengan badan hukum ${legalName} yang disahkan melalui ${organizationContent.aktaPendirian}, SK Kemenkumham Nomor ${skKemenkumham}, NPWP Resmi ${npwp}, serta email resmi ${organizationContent.email}.`}
+        subtitle={`Yayasan Sahabat Aksara (Yayasan Ajirasa Aksara Semesta) mendedikasikan ikhtiar dakwah, pendidikan, sosial, dan teknologi untuk kemandirian umat. Resmi berdiri pada ${organizationContent.establishedDate} berkedudukan di ${organizationContent.address}, dengan badan hukum ${legalName} yang disahkan melalui SK Kemenkumham Nomor ${skKemenkumham}, NPWP Resmi ${npwp}, serta email resmi ${organizationContent.email}.`}
         breadcrumbs={[{ label: "Tentang Kami" }]}
       />
 
