@@ -43,14 +43,76 @@ export const db = {
       if (error || !data) {
         return localStore.getInfakJinan(onlyPublished);
       }
-      return data as InfakJinanRecord[];
+      return data.map((raw) => {
+        const d = raw as Record<string, unknown>;
+        const rawSantriList = Array.isArray(d.santri_list) ? d.santri_list : [];
+        const santriList = rawSantriList.length > 0
+          ? rawSantriList
+          : (typeof d.santri_name === "string" && d.santri_name
+              ? [{
+                  id: `${String(d.id)}-santri-1`,
+                  infak_id: String(d.id),
+                  name: d.santri_name,
+                  phone: typeof d.santri_phone === "string" ? d.santri_phone : null,
+                  sort: 1,
+                  status: (d.status || "published") as "draft" | "published",
+                  hafalan_updates: [],
+                }]
+              : []);
+
+        return {
+          ...d,
+          santri_list: santriList,
+          santri_count: santriList.length,
+          photos: Array.isArray(d.photos) ? d.photos : [],
+        } as unknown as InfakJinanRecord;
+      });
     } catch {
       return localStore.getInfakJinan(onlyPublished);
     }
   },
 
   async getInfakJinanById(id: string): Promise<InfakJinanRecord | null> {
-    return localStore.getInfakJinanById(id) || null;
+    if (!isSupabaseConfigured || !adminSupabase) {
+      return localStore.getInfakJinanById(id) || null;
+    }
+    try {
+      const client = getClient();
+      const { data, error } = await client
+        .from("infak_jinan")
+        .select("*, photos:infak_jinan_photos(*), santri_list:infak_jinan_santri(*, hafalan_updates:santri_hafalan_updates(*))")
+        .eq("id", id)
+        .maybeSingle();
+
+      if (error || !data) {
+        return localStore.getInfakJinanById(id) || null;
+      }
+
+      const d = data as Record<string, unknown>;
+      const rawSantriList = Array.isArray(d.santri_list) ? d.santri_list : [];
+      const santriList = rawSantriList.length > 0
+        ? rawSantriList
+        : (typeof d.santri_name === "string" && d.santri_name
+            ? [{
+                id: `${String(d.id)}-santri-1`,
+                infak_id: String(d.id),
+                name: d.santri_name,
+                phone: typeof d.santri_phone === "string" ? d.santri_phone : null,
+                sort: 1,
+                status: (d.status || "published") as "draft" | "published",
+                hafalan_updates: [],
+              }]
+            : []);
+
+      return {
+        ...d,
+        santri_list: santriList,
+        santri_count: santriList.length,
+        photos: Array.isArray(d.photos) ? d.photos : [],
+      } as unknown as InfakJinanRecord;
+    } catch {
+      return localStore.getInfakJinanById(id) || null;
+    }
   },
 
   async saveInfakJinan(item: Omit<InfakJinanRecord, "id" | "created_at" | "updated_at">, id?: string): Promise<InfakJinanRecord> {
@@ -68,51 +130,98 @@ export const db = {
     try {
       const client = getClient();
       const { santri_list: _sl, photos: _ph, santri_count: _sc, ...jinanData } = item;
+
+      // Sediakan fallback santri_name & santri_phone agar kompatibel dengan tabel Postgres
+      // yang memiliki kolom santri_name NOT NULL dari skema awal
+      const defaultSantriName = (_sl && _sl.length > 0 && _sl[0]?.name?.trim()) || "Santri Binaan";
+      const defaultSantriPhone = (_sl && _sl.length > 0 && _sl[0]?.phone) || null;
+
+      const payload = {
+        ...jinanData,
+        santri_name: (item as unknown as { santri_name?: string }).santri_name || defaultSantriName,
+        santri_phone: (item as unknown as { santri_phone?: string }).santri_phone || defaultSantriPhone,
+      };
+
       const query = id
-        ? client.from("infak_jinan").update({ ...jinanData, updated_at: new Date().toISOString() }).eq("id", id)
-        : client.from("infak_jinan").insert(jinanData);
+        ? client.from("infak_jinan").update({ ...payload, updated_at: new Date().toISOString() }).eq("id", id)
+        : client.from("infak_jinan").insert(payload);
       const { data, error } = await query.select().single();
       throwIfError(error, id ? "memperbarui data infak jinan" : "menambahkan data infak jinan");
 
-      // Simpan santri binaan jika ada
+      // Simpan santri binaan jika ada ke tabel anak
       if (_sl && _sl.length > 0 && data?.id) {
         if (id) {
           await client.from("infak_jinan_santri").delete().eq("infak_id", id);
         }
         for (const s of _sl) {
-          const { hafalan_updates, latest_surah: _ls, latest_ayat: _la, latest_juz: _lj, ...santriRow } = s;
-          const { data: insertedSantri } = await client
+          const { hafalan_updates } = s;
+          const santriCleanRow = {
+            name: s.name?.trim() || "Santri Binaan",
+            phone: s.phone || null,
+            sort: typeof s.sort === "number" ? s.sort : 1,
+            status: s.status || "published",
+            infak_id: data.id,
+          };
+
+          const { data: insertedSantri, error: santriErr } = await client
             .from("infak_jinan_santri")
-            .insert({ ...santriRow, infak_id: data.id })
+            .insert(santriCleanRow)
             .select()
             .single();
 
+          if (santriErr) {
+            console.warn("[database] simpan infak_jinan_santri warning:", santriErr.message);
+          }
+
           if (insertedSantri && hafalan_updates && hafalan_updates.length > 0) {
             for (const h of hafalan_updates) {
-              const { id: _hid, ...hRow } = h;
-              await client.from("santri_hafalan_updates").insert({
-                ...hRow,
+              const hafalanCleanRow = {
                 santri_id: insertedSantri.id,
-              });
+                updated_on: h.updated_on || new Date().toISOString().split("T")[0],
+                surah_no: Number(h.surah_no) || 1,
+                surah_name: String(h.surah_name || "Al-Fatihah"),
+                ayat: Number(h.ayat) || 1,
+                juz: Number(h.juz) || 1,
+                notes: h.notes || null,
+              };
+              const { error: hafalanErr } = await client
+                .from("santri_hafalan_updates")
+                .insert(hafalanCleanRow);
+              if (hafalanErr) {
+                console.warn("[database] simpan santri_hafalan_updates warning:", hafalanErr.message);
+              }
             }
           }
         }
       }
 
-      // Simpan foto serah terima jika ada
+      // Simpan foto serah terima jika ada ke tabel anak
       if (_ph && _ph.length > 0 && data?.id) {
         if (id) {
           await client.from("infak_jinan_photos").delete().eq("infak_id", id);
         }
         for (const p of _ph) {
-          const { id: _pid, ...pRow } = p;
-          await client.from("infak_jinan_photos").insert({ ...pRow, infak_id: data.id });
+          const photoCleanRow = {
+            infak_id: data.id,
+            url: p.url,
+            caption: p.caption || null,
+            sort: typeof p.sort === "number" ? p.sort : 1,
+          };
+          const { error: photoErr } = await client.from("infak_jinan_photos").insert(photoCleanRow);
+          if (photoErr) {
+            console.warn("[database] simpan infak_jinan_photos warning:", photoErr.message);
+          }
         }
       }
 
       return data as InfakJinanRecord;
     } catch (err) {
-      console.warn("Supabase saveInfakJinan fallback ke localStore:", err);
+      console.error("Supabase saveInfakJinan error:", err);
+      // Jika di serverless/production atau database terhubung, jangan telan error
+      // agar UI admin menampilkan pesan kegagalan secara transparan
+      if (process.env.NODE_ENV === "production") {
+        throw err;
+      }
       if (id) {
         const existing = localStore.getInfakJinanById(id);
         if (existing) {
