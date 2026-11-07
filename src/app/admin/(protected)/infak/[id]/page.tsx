@@ -15,6 +15,7 @@ import Input from "@/components/ui/Input";
 import { InfakJinanRecord, InfakJinanSantri } from "@/lib/db/types";
 import { QURAN_SURAHS, getSuggestedJuz, validateAyatNumber } from "@/lib/quran-surahs";
 import { cleanNumericString } from "@/lib/numeric-utils";
+import { infakJinanSchema, formatZodError, formatHumanError } from "@/lib/validation/schemas";
 
 export default function AdminEditInfakPage() {
   const router = useRouter();
@@ -150,18 +151,33 @@ export default function AdminEditInfakPage() {
     setError(null);
     setSuccess(null);
 
+    const rawMushafNo = parseInt(formData.mushaf_no, 10);
+    const candidatePayload = {
+      ...formData,
+      mushaf_no: isNaN(rawMushafNo) ? 0 : rawMushafNo,
+      donor_phone: formData.donor_phone || null,
+      maps_url: formData.maps_url || null,
+      photos: record?.photos || [],
+      santri_list: record?.santri_list || [],
+    };
+
+    const clientValidation = infakJinanSchema.safeParse(candidatePayload);
+    if (!clientValidation.success) {
+      setError(formatZodError(clientValidation.error));
+      setSaving(false);
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      return;
+    }
+
     try {
       const res = await fetch("/api/admin/infak", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id,
-          ...formData,
-          mushaf_no: parseInt(formData.mushaf_no, 10),
-          donor_phone: formData.donor_phone || null,
-          maps_url: formData.maps_url || null,
-          photos: record?.photos || [],
-          santri_list: record?.santri_list || [],
+          ...candidatePayload,
         }),
       });
 
@@ -173,6 +189,9 @@ export default function AdminEditInfakPage() {
       loadData();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Terjadi kesalahan");
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     } finally {
       setSaving(false);
     }
@@ -240,10 +259,25 @@ export default function AdminEditInfakPage() {
       {error && (
         <div
           role="alert"
-          className="p-4 rounded-xl bg-red-50 border border-red-200 text-xs text-red-900 flex items-center gap-2"
+          className="p-4 sm:p-5 rounded-2xl bg-red-50 border border-red-200 text-xs sm:text-sm text-red-900 shadow-sm flex items-start gap-3"
         >
-          <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
-          <span>{error}</span>
+          <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+          <div className="space-y-1.5 flex-1">
+            <p className="font-semibold text-red-950">
+              Mohon lengkapi formulir sebelum menyimpan:
+            </p>
+            <div className="text-red-800 leading-relaxed space-y-1">
+              {formatHumanError(error)
+                .split(". ")
+                .filter(Boolean)
+                .map((msg, idx) => (
+                  <p key={idx} className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 inline-block" />
+                    <span>{msg.replace(/\.$/, "")}</span>
+                  </p>
+                ))}
+            </div>
+          </div>
         </div>
       )}
 

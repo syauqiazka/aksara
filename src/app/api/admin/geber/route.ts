@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db/admin-api";
-import { geberSchema } from "@/lib/validation/schemas";
+import { geberSchema, formatZodError } from "@/lib/validation/schemas";
 import { getAdminSession } from "@/lib/auth";
 import { commitUpload, deleteBlobFromStorage } from "@/lib/storage";
 
@@ -46,8 +46,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(result);
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Validation failed";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return NextResponse.json({ error: formatZodError(err) }, { status: 400 });
   }
 }
 
@@ -94,8 +93,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(result);
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Update failed";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return NextResponse.json({ error: formatZodError(err) }, { status: 400 });
   }
 }
 

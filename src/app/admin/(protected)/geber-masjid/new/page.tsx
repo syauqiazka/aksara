@@ -7,6 +7,7 @@ import { ArrowLeft, Save, AlertCircle } from "lucide-react";
 import ImageUploader from "@/components/admin/ImageUploader";
 import { uploadPendingFileOnSave } from "@/lib/upload-helper";
 import { cleanNumericString } from "@/lib/numeric-utils";
+import { formatHumanError } from "@/lib/validation/schemas";
 
 export default function AdminNewGeberPage() {
   const router = useRouter();
@@ -116,7 +117,7 @@ export default function AdminNewGeberPage() {
       {error && (
         <div className="p-4 rounded-2xl bg-[var(--danger)]/15 border border-[var(--danger)]/30 text-xs text-[var(--danger)] flex items-center gap-2">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span>{error}</span>
+          <span>{formatHumanError(error)}</span>
         </div>
       )}
 

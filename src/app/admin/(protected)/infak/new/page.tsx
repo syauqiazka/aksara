@@ -23,6 +23,7 @@ import { uploadPendingFileOnSave } from "@/lib/upload-helper";
 import { QURAN_SURAHS, getSuggestedJuz, validateAyatNumber } from "@/lib/quran-surahs";
 import { cleanNumericString } from "@/lib/numeric-utils";
 import { PROVINCES_38 } from "@/lib/provinces-38";
+import { infakJinanSchema, formatZodError, formatHumanError } from "@/lib/validation/schemas";
 
 interface SantriFormItem {
   id: string;
@@ -209,6 +210,46 @@ export default function AdminNewInfakPage() {
       }
     }
 
+    // Client-side pre-validation
+    const rawMushafNo = parseInt(formData.mushaf_no, 10);
+    const candidatePayload = {
+      ...formData,
+      status: targetStatus,
+      mushaf_no: isNaN(rawMushafNo) ? 0 : rawMushafNo,
+      donor_phone: formData.donor_phone || null,
+      maps_url: formData.maps_url || null,
+      photos: [],
+      santri_list: activeSantri.map((s, idx) => {
+        const surah = QURAN_SURAHS.find((q) => q.number === s.initial_surah_no);
+        return {
+          id: s.id,
+          name: s.name,
+          phone: s.phone || null,
+          sort: idx + 1,
+          status: targetStatus,
+          initial_surah_no: s.initial_surah_no,
+          initial_surah_name: surah?.nameLatin || "Al-Fatihah",
+          initial_ayat: parseInt(s.initial_ayat, 10) || 1,
+          initial_juz: parseInt(s.initial_juz, 10) || 1,
+        };
+      }),
+    };
+
+    const clientValidation = infakJinanSchema.safeParse(candidatePayload);
+    if (!clientValidation.success) {
+      setOpenSections((prev) => ({
+        ...prev,
+        step1: true,
+        step2: true,
+      }));
+      setError(formatZodError(clientValidation.error));
+      setLoading(false);
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      return;
+    }
+
     let uploadRollback: (() => Promise<void>) | null = null;
 
     try {
@@ -222,26 +263,8 @@ export default function AdminNewInfakPage() {
         }
 
         const payload = {
-          ...formData,
-          status: targetStatus,
-          mushaf_no: parseInt(formData.mushaf_no, 10),
-          donor_phone: formData.donor_phone || null,
-          maps_url: formData.maps_url || null,
+          ...candidatePayload,
           photos,
-          santri_list: activeSantri.map((s, idx) => {
-            const surah = QURAN_SURAHS.find((q) => q.number === s.initial_surah_no);
-            return {
-              id: s.id,
-              name: s.name,
-              phone: s.phone || null,
-              sort: idx + 1,
-              status: targetStatus,
-              initial_surah_no: s.initial_surah_no,
-              initial_surah_name: surah?.nameLatin || "Al-Fatihah",
-              initial_ayat: parseInt(s.initial_ayat, 10) || 1,
-              initial_juz: parseInt(s.initial_juz, 10) || 1,
-            };
-          }),
         };
 
         const res = await fetch("/api/admin/infak", {
@@ -258,26 +281,8 @@ export default function AdminNewInfakPage() {
         await commit();
       } else {
         const payload = {
-          ...formData,
-          status: targetStatus,
-          mushaf_no: parseInt(formData.mushaf_no, 10),
-          donor_phone: formData.donor_phone || null,
-          maps_url: formData.maps_url || null,
+          ...candidatePayload,
           photos: [],
-          santri_list: activeSantri.map((s, idx) => {
-            const surah = QURAN_SURAHS.find((q) => q.number === s.initial_surah_no);
-            return {
-              id: s.id,
-              name: s.name,
-              phone: s.phone || null,
-              sort: idx + 1,
-              status: targetStatus,
-              initial_surah_no: s.initial_surah_no,
-              initial_surah_name: surah?.nameLatin || "Al-Fatihah",
-              initial_ayat: parseInt(s.initial_ayat, 10) || 1,
-              initial_juz: parseInt(s.initial_juz, 10) || 1,
-            };
-          }),
         };
 
         const res = await fetch("/api/admin/infak", {
@@ -303,6 +308,9 @@ export default function AdminNewInfakPage() {
         }
       }
       setError(err instanceof Error ? err.message : "Terjadi kesalahan sistem saat menyimpan.");
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     } finally {
       setLoading(false);
     }
@@ -332,10 +340,25 @@ export default function AdminNewInfakPage() {
       {error && (
         <div
           role="alert"
-          className="p-4 rounded-xl bg-red-50 border border-red-200 text-xs text-red-900 flex items-center gap-2"
+          className="p-4 sm:p-5 rounded-2xl bg-red-50 border border-red-200 text-xs sm:text-sm text-red-900 shadow-sm flex items-start gap-3"
         >
-          <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
-          <span>{error}</span>
+          <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+          <div className="space-y-1.5 flex-1">
+            <p className="font-semibold text-red-950">
+              Mohon lengkapi formulir sebelum menyimpan:
+            </p>
+            <div className="text-red-800 leading-relaxed space-y-1">
+              {formatHumanError(error)
+                .split(". ")
+                .filter(Boolean)
+                .map((msg, idx) => (
+                  <p key={idx} className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 inline-block" />
+                    <span>{msg.replace(/\.$/, "")}</span>
+                  </p>
+                ))}
+            </div>
+          </div>
         </div>
       )}
 

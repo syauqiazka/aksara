@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db/admin-api";
-import { campaignSchema } from "@/lib/validation/schemas";
+import { campaignSchema, formatZodError } from "@/lib/validation/schemas";
 import { getAdminSession } from "@/lib/auth";
 
 export async function GET() {
@@ -36,8 +36,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(result);
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Validasi data gagal";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return NextResponse.json({ error: formatZodError(err) }, { status: 400 });
   }
 }
 
@@ -64,8 +63,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(result);
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Pembaruan data gagal";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return NextResponse.json({ error: formatZodError(err) }, { status: 400 });
   }
 }
 

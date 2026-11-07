@@ -165,4 +165,38 @@ export const yatimActivitySchema = z.object({
 
 export type YatimActivityInput = z.infer<typeof yatimActivitySchema>;
 
+export function formatZodError(err: unknown): string {
+  if (err instanceof z.ZodError) {
+    return err.issues.map((i) => i.message).join(". ");
+  }
+  if (err instanceof Error) {
+    try {
+      const parsed = JSON.parse(err.message);
+      if (Array.isArray(parsed)) {
+        return parsed
+          .map((i: { message?: string }) => i.message || JSON.stringify(i))
+          .join(". ");
+      }
+    } catch {}
+    return err.message;
+  }
+  return "Terjadi kesalahan validasi data";
+}
+
+export function formatHumanError(raw: string): string {
+  if (!raw) return "";
+  const trimmed = raw.trim();
+  if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return parsed
+          .map((item: { message?: string }) => item.message || JSON.stringify(item))
+          .join(", ");
+      }
+    } catch {}
+  }
+  return raw;
+}
+
 
