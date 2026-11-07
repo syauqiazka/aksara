@@ -3,7 +3,12 @@
 import React, { useState, useRef, useCallback, useMemo } from "react";
 import { MapPin, X, Layers } from "lucide-react";
 import { INDONESIA_ISLANDS, IslandId, IslandInfo } from "./indonesiaMapData";
-import { PublicInfakJinanRecord } from "@/lib/db/types";
+import {
+  PublicInfakJinanRecord,
+  PublicBussDistribution,
+  YatimActivity,
+  GeberMasjidDistribution,
+} from "@/lib/db/types";
 import { getIslandByProvince } from "@/lib/provinces-38";
 import { formatTanggal } from "@/lib/format-date";
 
@@ -20,9 +25,17 @@ export interface MapPinPoint {
 }
 
 export interface IndonesiaMapProps {
+  /** Tab aktif dari Data Sebaran */
+  activeTab?: "jinan" | "buss" | "yatim" | "geber";
   /** Real published Infak Jinan data */
   jinanData?: PublicInfakJinanRecord[];
-  /** Callback when island is clicked to filter table below */
+  /** Real published BUSS data */
+  bussData?: PublicBussDistribution[];
+  /** Real published Yatim activities */
+  yatimData?: YatimActivity[];
+  /** Real published Geber Masjid data */
+  geberData?: GeberMasjidDistribution[];
+  /** Callback saat pulau dipilih untuk menyaring tabel di bawah */
   onSelectIsland?: (islandId: IslandId | null, provinceName?: string | null) => void;
   /** Extra CSS classes */
   className?: string;
@@ -57,7 +70,11 @@ export function projectCoordinates(lng: number, lat: number) {
 }
 
 export default function IndonesiaMap({
+  activeTab = "jinan",
   jinanData = [],
+  bussData = [],
+  yatimData = [],
+  geberData = [],
   onSelectIsland,
   className = "",
 }: IndonesiaMapProps) {
@@ -69,18 +86,115 @@ export default function IndonesiaMap({
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Hitung statistik aktual dari jinanData per pulau (murni dari data database)
+  // Metadata dinamis sesuai tab program yang sedang dipilih
+  const headerMeta = useMemo(() => {
+    switch (activeTab) {
+      case "geber":
+        return {
+          title: "Sebaran Aksi Geber Masjid",
+          legend: `Titik Aksi (${geberData.length})`,
+          emptyMsg: "Belum ada aksi Geber Masjid yang berstatus publikasi di wilayah ini.",
+          primaryLabel: "Masjid",
+          secondaryLabel: "Relawan",
+          tertiaryLabel: "",
+          pinPrimaryLabel: "Relawan Terlibat",
+          pinSecondaryLabel: "Tanggal Aksi",
+        };
+      case "buss":
+        return {
+          title: "Sebaran Beasiswa Santri BUSS Al-Qur'an",
+          legend: `Titik Santri (${bussData.length})`,
+          emptyMsg: "Belum ada santri penerima beasiswa BUSS di wilayah ini.",
+          primaryLabel: "Santri",
+          secondaryLabel: "",
+          tertiaryLabel: "",
+          pinPrimaryLabel: "Hafalan Santri",
+          pinSecondaryLabel: "Tahun Program",
+        };
+      case "yatim":
+        return {
+          title: "Sebaran Penyaluran Yatim Berdikari",
+          legend: `Titik Penyaluran (${yatimData.length})`,
+          emptyMsg: "Belum ada kegiatan Yatim Berdikari di wilayah ini.",
+          primaryLabel: "Kegiatan",
+          secondaryLabel: "",
+          tertiaryLabel: "",
+          pinPrimaryLabel: "Periode",
+          pinSecondaryLabel: "Tanggal Aksi",
+        };
+      default:
+        return {
+          title: "Sebaran Infak Al-Qur'an Jinan",
+          legend: `Titik Penyaluran (${jinanData.length})`,
+          emptyMsg: "Belum ada penyaluran infak Al-Qur'an Jinan yang berstatus publikasi di wilayah ini.",
+          primaryLabel: "Mushaf",
+          secondaryLabel: "Santri",
+          tertiaryLabel: "Pesantren",
+          pinPrimaryLabel: "Amanah Mushaf",
+          pinSecondaryLabel: "Penyaluran",
+        };
+    }
+  }, [activeTab, jinanData.length, bussData.length, yatimData.length, geberData.length]);
+
+  // Hitung statistik aktual dinamis per pulau berdasarkan data tab aktif
   const islandStats = useMemo(() => {
-    const stats: Record<string, { mushafCount: number; santriCount: number; pesantrenCount: number }> = {
-      sumatra: { mushafCount: 0, santriCount: 0, pesantrenCount: 0 },
-      jawa: { mushafCount: 0, santriCount: 0, pesantrenCount: 0 },
-      kalimantan: { mushafCount: 0, santriCount: 0, pesantrenCount: 0 },
-      sulawesi: { mushafCount: 0, santriCount: 0, pesantrenCount: 0 },
-      "nusa-tenggara": { mushafCount: 0, santriCount: 0, pesantrenCount: 0 },
-      maluku: { mushafCount: 0, santriCount: 0, pesantrenCount: 0 },
-      papua: { mushafCount: 0, santriCount: 0, pesantrenCount: 0 },
+    const stats: Record<string, { primaryCount: number; secondaryCount: number; tertiaryCount: number }> = {
+      sumatra: { primaryCount: 0, secondaryCount: 0, tertiaryCount: 0 },
+      jawa: { primaryCount: 0, secondaryCount: 0, tertiaryCount: 0 },
+      kalimantan: { primaryCount: 0, secondaryCount: 0, tertiaryCount: 0 },
+      sulawesi: { primaryCount: 0, secondaryCount: 0, tertiaryCount: 0 },
+      "nusa-tenggara": { primaryCount: 0, secondaryCount: 0, tertiaryCount: 0 },
+      maluku: { primaryCount: 0, secondaryCount: 0, tertiaryCount: 0 },
+      papua: { primaryCount: 0, secondaryCount: 0, tertiaryCount: 0 },
     };
 
+    if (activeTab === "geber") {
+      geberData.forEach((item) => {
+        let island = getIslandByProvince(item.province || "");
+        if (!island) {
+          const addr = (item.address || item.city || "").toLowerCase();
+          if (addr.includes("jawa") || addr.includes("bekasi") || addr.includes("cikarang") || addr.includes("cirebon") || addr.includes("bogor") || addr.includes("banten") || addr.includes("jakarta")) {
+            island = "jawa";
+          } else if (addr.includes("sumatra") || addr.includes("aceh") || addr.includes("medan")) {
+            island = "sumatra";
+          }
+        }
+        let key: IslandId = "jawa";
+        if (island === "bali-nusa") key = "nusa-tenggara";
+        else if (island === "maluku-papua") key = "papua";
+        else if (island && island in stats) key = island as IslandId;
+
+        if (stats[key]) {
+          stats[key].primaryCount += 1;
+          stats[key].secondaryCount += item.participants || 0;
+        }
+      });
+      return stats;
+    }
+
+    if (activeTab === "buss") {
+      bussData.forEach((item) => {
+        const island = getIslandByProvince(item.origin || "");
+        let key: IslandId = "jawa";
+        if (island === "bali-nusa") key = "nusa-tenggara";
+        else if (island === "maluku-papua") key = "papua";
+        else if (island && island in stats) key = island as IslandId;
+
+        if (stats[key]) {
+          stats[key].primaryCount += 1;
+        }
+      });
+      return stats;
+    }
+
+    if (activeTab === "yatim") {
+      yatimData.forEach(() => {
+        stats["jawa"].primaryCount += 1;
+      });
+      return stats;
+    }
+
+    // Default jinan
     const uniquePesantrenPerIsland: Record<string, Set<string>> = {
       sumatra: new Set(),
       jawa: new Set(),
@@ -94,7 +208,6 @@ export default function IndonesiaMap({
     jinanData.forEach((item) => {
       let island = getIslandByProvince(item.pesantren_province || "");
       if (!island) {
-        // Fallback cek string alamat
         const addr = (item.address || "").toLowerCase();
         if (addr.includes("jawa") || addr.includes("cirebon") || addr.includes("bogor") || addr.includes("banten") || addr.includes("jakarta")) {
           island = "jawa";
@@ -103,15 +216,14 @@ export default function IndonesiaMap({
         }
       }
 
-      // Normalisasi island key
       let key: IslandId = "jawa";
       if (island === "bali-nusa") key = "nusa-tenggara";
       else if (island === "maluku-papua") key = "papua";
       else if (island && island in stats) key = island as IslandId;
 
       if (stats[key]) {
-        stats[key].mushafCount += 1; // 1 donasi mewakili nomor urut mushaf jinan
-        stats[key].santriCount += item.santri_count || 0;
+        stats[key].primaryCount += 1;
+        stats[key].secondaryCount += item.santri_count || 0;
         if (item.pesantren_name) {
           uniquePesantrenPerIsland[key].add(item.pesantren_name.toLowerCase().trim());
         }
@@ -119,14 +231,106 @@ export default function IndonesiaMap({
     });
 
     Object.keys(stats).forEach((k) => {
-      stats[k].pesantrenCount = uniquePesantrenPerIsland[k]?.size || 0;
+      stats[k].tertiaryCount = uniquePesantrenPerIsland[k]?.size || 0;
     });
 
     return stats;
-  }, [jinanData]);
+  }, [activeTab, jinanData, bussData, yatimData, geberData]);
 
-  // Bangun pin murni dari record infak jinan aktual
+  // Bangun pin murni dari record aktual sesuai tab aktif
   const activePins: MapPinPoint[] = useMemo(() => {
+    if (activeTab === "geber") {
+      return geberData.map((d, idx) => {
+        let island = getIslandByProvince(d.province || "");
+        if (!island) {
+          const addr = (d.address || d.city || "").toLowerCase();
+          if (addr.includes("jawa") || addr.includes("bekasi") || addr.includes("cikarang") || addr.includes("cirebon") || addr.includes("bogor") || addr.includes("banten") || addr.includes("jakarta")) {
+            island = "jawa";
+          } else if (addr.includes("sumatra") || addr.includes("aceh") || addr.includes("medan")) {
+            island = "sumatra";
+          }
+        }
+        let islandKey: IslandId = "jawa";
+        if (island === "bali-nusa") islandKey = "nusa-tenggara";
+        else if (island === "maluku-papua") islandKey = "papua";
+        else if (island && island in ISLAND_COORDINATES) islandKey = island as IslandId;
+
+        let x = 0;
+        let y = 0;
+        if (d.lng && d.lat && Number(d.lng) && Number(d.lat)) {
+          const proj = projectCoordinates(Number(d.lng), Number(d.lat));
+          x = proj.x;
+          y = proj.y;
+        } else {
+          const baseCoords = ISLAND_COORDINATES[islandKey] || { x: 330, y: 325 };
+          const jitterX = ((idx * 27) % 50) - 25;
+          const jitterY = ((idx * 19) % 30) - 15;
+          x = baseCoords.x + jitterX;
+          y = baseCoords.y + jitterY;
+        }
+
+        return {
+          id: String(d.id),
+          islandId: islandKey,
+          label: d.mosque_name || "Masjid / Musholla",
+          detail: `${d.city || ""}, ${d.province || d.address || ""}`.trim().replace(/^,\s*/, ""),
+          x,
+          y,
+          quantity: `${d.participants || 0} Relawan`,
+          date: formatTanggal(d.activity_date),
+          recipient: d.activity_notes || "Aksi Bersih-Bersih Masjid",
+        };
+      });
+    }
+
+    if (activeTab === "buss") {
+      return bussData.map((d, idx) => {
+        const island = getIslandByProvince(d.origin || "");
+        let islandKey: IslandId = "jawa";
+        if (island === "bali-nusa") islandKey = "nusa-tenggara";
+        else if (island === "maluku-papua") islandKey = "papua";
+        else if (island && island in ISLAND_COORDINATES) islandKey = island as IslandId;
+
+        const baseCoords = ISLAND_COORDINATES[islandKey] || { x: 330, y: 325 };
+        const jitterX = ((idx * 27) % 50) - 25;
+        const jitterY = ((idx * 19) % 30) - 15;
+
+        return {
+          id: String(d.id),
+          islandId: islandKey,
+          label: d.santri_name || "Santri Tahfidz",
+          detail: `${d.pesantren_name} (${d.origin})`,
+          x: baseCoords.x + jitterX,
+          y: baseCoords.y + jitterY,
+          quantity: `${d.current_surah} (Juz ${d.juz})`,
+          date: `Tahun ${d.year}`,
+          recipient: `Donatur: ${d.display_donor_name || "Hamba Allah"}`,
+        };
+      });
+    }
+
+    if (activeTab === "yatim") {
+      return yatimData.map((d, idx) => {
+        const islandKey: IslandId = "jawa";
+        const baseCoords = ISLAND_COORDINATES[islandKey];
+        const jitterX = ((idx * 27) % 50) - 25;
+        const jitterY = ((idx * 19) % 30) - 15;
+
+        return {
+          id: String(d.id),
+          islandId: islandKey,
+          label: d.activity_name || "Kegiatan Yatim",
+          detail: `Penyelenggara: ${d.organizer}`,
+          x: baseCoords.x + jitterX,
+          y: baseCoords.y + jitterY,
+          quantity: `Tahun ${d.year}`,
+          date: formatTanggal(d.activity_date),
+          recipient: d.description,
+        };
+      });
+    }
+
+    // Default jinan
     return jinanData.map((d, idx) => {
       let island = getIslandByProvince(d.pesantren_province || "");
       if (!island) {
@@ -137,9 +341,8 @@ export default function IndonesiaMap({
       let islandKey: IslandId = "jawa";
       if (island === "bali-nusa") islandKey = "nusa-tenggara";
       else if (island === "maluku-papua") islandKey = "papua";
-      else if (island) islandKey = island as IslandId;
+      else if (island && island in ISLAND_COORDINATES) islandKey = island as IslandId;
 
-      // Beri sedikit jitter agar pin di pulau yang sama tidak bertumpuk persis
       const baseCoords = ISLAND_COORDINATES[islandKey] || { x: 330, y: 325 };
       const jitterX = ((idx * 27) % 50) - 25;
       const jitterY = ((idx * 19) % 30) - 15;
@@ -156,7 +359,7 @@ export default function IndonesiaMap({
         recipient: d.display_donor_name,
       };
     });
-  }, [jinanData]);
+  }, [activeTab, jinanData, bussData, yatimData, geberData]);
 
   // Lacak posisi kursor mouse untuk tooltip
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -194,7 +397,7 @@ export default function IndonesiaMap({
       <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3 pb-3 border-b border-[#8ca362]/20">
         <div>
           <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#f7f5ee]">
-            Sebaran Infak Al-Qur&apos;an Jinan
+            {headerMeta.title}
           </h3>
         </div>
 
@@ -205,7 +408,7 @@ export default function IndonesiaMap({
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ffd700] opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[#ffd700]" />
             </span>
-            <span>Titik Penyaluran ({jinanData.length})</span>
+            <span>{headerMeta.legend}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-2 rounded-xs bg-[#145932] border border-[#ffd700]" />
@@ -232,7 +435,7 @@ export default function IndonesiaMap({
           <g className="transition-all duration-300">
             {Object.values(INDONESIA_ISLANDS).map((island) => {
               const isSelected = selectedIsland === island.id;
-              const hasData = (islandStats[island.id]?.mushafCount || 0) > 0;
+              const hasData = (islandStats[island.id]?.primaryCount || 0) > 0;
 
               return (
                 <path
@@ -248,12 +451,21 @@ export default function IndonesiaMap({
                   onClick={() => handleIslandClick(island.id)}
                   onMouseEnter={() => setHoveredIsland(island)}
                   onMouseLeave={() => setHoveredIsland(null)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${island.name}: ${islandStats[island.id]?.primaryCount || 0} ${headerMeta.primaryLabel}`}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleIslandClick(island.id);
+                    }
+                  }}
                 />
               );
             })}
           </g>
 
-          {/* Distribution Pins (Dari database infak jinan) */}
+          {/* Interactive Pins */}
           {activePins.map((pin) => {
             const isSelected = selectedPin?.id === pin.id;
             const isHovered = hoveredPin?.id === pin.id;
@@ -263,10 +475,10 @@ export default function IndonesiaMap({
               <g
                 key={pin.id}
                 className="cursor-pointer"
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setSelectedPin(pin);
-                  setSelectedIsland(pin.islandId);
-                  setHoveredPin(null);
+                  setSelectedIsland(null);
                   setHoveredIsland(null);
                 }}
                 onMouseEnter={() => setHoveredPin(pin)}
@@ -323,7 +535,7 @@ export default function IndonesiaMap({
                 </div>
                 {hoveredPin.quantity && (
                   <div className="text-[10px] font-semibold text-[#8ca362] mt-0.5">
-                    {hoveredPin.quantity} / Donatur: {hoveredPin.recipient}
+                    {hoveredPin.quantity} {hoveredPin.recipient ? `/ ${hoveredPin.recipient}` : ""}
                   </div>
                 )}
               </div>
@@ -333,17 +545,30 @@ export default function IndonesiaMap({
                   <Layers className="w-3.5 h-3.5 text-[#8ca362]" />
                   <span>{hoveredIsland.name}</span>
                 </div>
-                {islandStats[hoveredIsland.id]?.mushafCount > 0 ? (
+                {islandStats[hoveredIsland.id]?.primaryCount > 0 ? (
                   <div className="flex items-center gap-3 mt-1.5 pt-1 border-t border-[#8ca362]/30 text-[10px] text-[#f7f5ee]">
                     <span>
-                      Mushaf: <strong className="text-[#ffd700]">{islandStats[hoveredIsland.id].mushafCount}</strong>
+                      {headerMeta.primaryLabel}:{" "}
+                      <strong className="text-[#ffd700]">
+                        {islandStats[hoveredIsland.id].primaryCount}
+                      </strong>
                     </span>
-                    <span>
-                      Santri: <strong className="text-[#8ca362]">{islandStats[hoveredIsland.id].santriCount}</strong>
-                    </span>
-                    <span>
-                      Pesantren: <strong className="text-[#8ca362]">{islandStats[hoveredIsland.id].pesantrenCount}</strong>
-                    </span>
+                    {headerMeta.secondaryLabel && (
+                      <span>
+                        {headerMeta.secondaryLabel}:{" "}
+                        <strong className="text-[#8ca362]">
+                          {islandStats[hoveredIsland.id].secondaryCount}
+                        </strong>
+                      </span>
+                    )}
+                    {headerMeta.tertiaryLabel && (
+                      <span>
+                        {headerMeta.tertiaryLabel}:{" "}
+                        <strong className="text-[#8ca362]">
+                          {islandStats[hoveredIsland.id].tertiaryCount}
+                        </strong>
+                      </span>
+                    )}
                   </div>
                 ) : (
                   <div className="text-[10px] text-[#8ca362] mt-1 italic">
@@ -363,12 +588,12 @@ export default function IndonesiaMap({
                 {selectedPin ? (
                   <>
                     <MapPin className="w-3.5 h-3.5 text-[#ffd700]" />
-                    Penerima Manfaat
+                    <span>Titik Terpilih</span>
                   </>
                 ) : (
                   <>
                     <Layers className="w-3.5 h-3.5 text-[#ffd700]" />
-                    Wilayah Terpilih
+                    <span>Wilayah Terpilih</span>
                   </>
                 )}
               </div>
@@ -395,11 +620,15 @@ export default function IndonesiaMap({
                 </p>
                 <div className="mt-3 pt-2.5 border-t border-[#8ca362]/20 grid grid-cols-2 gap-2 text-xs text-[#e5ebd9]">
                   <div>
-                    <span className="text-[10px] text-[#8ca362] block">Amanah Mushaf</span>
+                    <span className="text-[10px] text-[#8ca362] block">
+                      {headerMeta.pinPrimaryLabel}
+                    </span>
                     <strong className="text-[#ffd700]">{selectedPin.quantity}</strong>
                   </div>
                   <div>
-                    <span className="text-[10px] text-[#8ca362] block">Penyaluran</span>
+                    <span className="text-[10px] text-[#8ca362] block">
+                      {headerMeta.pinSecondaryLabel}
+                    </span>
                     <span>{selectedPin.date}</span>
                   </div>
                 </div>
@@ -409,30 +638,40 @@ export default function IndonesiaMap({
                 <h4 className="font-serif font-bold text-lg text-[#f7f5ee]">
                   {activeIslandData.name}
                 </h4>
-                {activeIslandStats.mushafCount > 0 ? (
-                  <div className="mt-3 pt-2.5 border-t border-[#8ca362]/20 grid grid-cols-3 gap-2 text-xs">
+                {activeIslandStats.primaryCount > 0 ? (
+                  <div className="mt-3 pt-2.5 border-t border-[#8ca362]/20 grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
                     <div>
-                      <span className="text-[10px] text-[#8ca362] block uppercase tracking-wider">Mushaf</span>
+                      <span className="text-[10px] text-[#8ca362] block uppercase tracking-wider">
+                        {headerMeta.primaryLabel}
+                      </span>
                       <span className="font-bold text-base text-[#ffd700]">
-                        {activeIslandStats.mushafCount}
+                        {activeIslandStats.primaryCount}
                       </span>
                     </div>
-                    <div>
-                      <span className="text-[10px] text-[#8ca362] block uppercase tracking-wider">Santri</span>
-                      <span className="font-bold text-base text-[#8ca362]">
-                        {activeIslandStats.santriCount}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-[#8ca362] block uppercase tracking-wider">Pesantren</span>
-                      <span className="font-bold text-base text-[#8ca362]">
-                        {activeIslandStats.pesantrenCount}
-                      </span>
-                    </div>
+                    {headerMeta.secondaryLabel && (
+                      <div>
+                        <span className="text-[10px] text-[#8ca362] block uppercase tracking-wider">
+                          {headerMeta.secondaryLabel}
+                        </span>
+                        <span className="font-bold text-base text-[#8ca362]">
+                          {activeIslandStats.secondaryCount}
+                        </span>
+                      </div>
+                    )}
+                    {headerMeta.tertiaryLabel && (
+                      <div>
+                        <span className="text-[10px] text-[#8ca362] block uppercase tracking-wider">
+                          {headerMeta.tertiaryLabel}
+                        </span>
+                        <span className="font-bold text-base text-[#8ca362]">
+                          {activeIslandStats.tertiaryCount}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <p className="text-xs text-[#d2dac3] mt-2 italic">
-                    Belum ada penyaluran infak Al-Qur&apos;an Jinan yang berstatus publikasi di wilayah ini.
+                    {headerMeta.emptyMsg}
                   </p>
                 )}
               </div>
@@ -443,32 +682,25 @@ export default function IndonesiaMap({
 
       {/* Screen Reader Table Alternative (Aksesibilitas Akses Tabel Peta) */}
       <div className="sr-only">
-        <h4>Ringkasan Aksesibilitas Sebaran Penyaluran Al-Qur&apos;an per Wilayah Pulau</h4>
-        <table aria-label="Ringkasan sebaran infak Al-Qur'an Jinan per pulau">
+        <h4>Ringkasan Aksesibilitas Sebaran Penyaluran per Wilayah Pulau</h4>
+        <table aria-label="Ringkasan sebaran penyaluran per pulau">
           <thead>
             <tr>
               <th>Wilayah Pulau</th>
-              <th>Mushaf Tersalurkan</th>
-              <th>Santri Penerima</th>
-              <th>Pesantren Binaan</th>
+              <th>{headerMeta.primaryLabel}</th>
+              {headerMeta.secondaryLabel && <th>{headerMeta.secondaryLabel}</th>}
             </tr>
           </thead>
           <tbody>
             {Object.entries(islandStats).map(([islandKey, st]) => (
               <tr key={islandKey}>
                 <td>{INDONESIA_ISLANDS[islandKey as IslandId]?.name || islandKey}</td>
-                <td>{st.mushafCount}</td>
-                <td>{st.santriCount}</td>
-                <td>{st.pesantrenCount}</td>
+                <td>{st.primaryCount}</td>
+                {headerMeta.secondaryLabel && <td>{st.secondaryCount}</td>}
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
-
-      {/* Footer Helper Note */}
-      <div className="mt-2 pt-2 border-t border-[#8ca362]/10 flex flex-col sm:flex-row items-center justify-between text-[11px] text-[#8ca362] gap-1">
-        <span>Klik pulau pada peta untuk menyaring tabel penyaluran di bawah.</span>
       </div>
     </div>
   );

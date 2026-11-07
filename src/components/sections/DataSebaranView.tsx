@@ -162,9 +162,15 @@ export default function DataSebaranView({
       const matchesYear = selectedYear === "all" || item.year.toString() === selectedYear;
       const matchesOrigin = selectedOrigin === "all" || item.origin === selectedOrigin;
 
-      return matchesSearch && matchesYear && matchesOrigin;
+      const itemIsland = getIslandByProvince(item.origin || "");
+      let normIsland: string | null = itemIsland;
+      if (itemIsland === "bali-nusa") normIsland = "nusa-tenggara";
+      else if (itemIsland === "maluku-papua") normIsland = "papua";
+      const matchesIsland = !selectedIslandFilter || normIsland === selectedIslandFilter;
+
+      return matchesSearch && matchesYear && matchesOrigin && matchesIsland;
     });
-  }, [initialBuss, searchQuery, selectedYear, selectedOrigin]);
+  }, [initialBuss, searchQuery, selectedYear, selectedOrigin, selectedIslandFilter]);
 
   // Tab 3: Filtered Yatim
   const filteredYatim = useMemo(() => {
@@ -197,9 +203,23 @@ export default function DataSebaranView({
       const itemYear = item.activity_date ? item.activity_date.substring(0, 4) : "";
       const matchesYear = selectedYear === "all" || itemYear === selectedYear;
 
-      return matchesSearch && matchesYear;
+      let itemIsland = getIslandByProvince(item.province || "");
+      if (!itemIsland) {
+        const addr = (item.address || item.city || "").toLowerCase();
+        if (addr.includes("jawa") || addr.includes("bekasi") || addr.includes("cikarang") || addr.includes("cirebon") || addr.includes("bogor") || addr.includes("banten") || addr.includes("jakarta")) {
+          itemIsland = "jawa";
+        } else if (addr.includes("sumatra") || addr.includes("aceh") || addr.includes("medan")) {
+          itemIsland = "sumatra";
+        }
+      }
+      let normIsland: string | null = itemIsland;
+      if (itemIsland === "bali-nusa") normIsland = "nusa-tenggara";
+      else if (itemIsland === "maluku-papua") normIsland = "papua";
+      const matchesIsland = !selectedIslandFilter || normIsland === selectedIslandFilter;
+
+      return matchesSearch && matchesYear && matchesIsland;
     });
-  }, [initialGeber, searchQuery, selectedYear]);
+  }, [initialGeber, searchQuery, selectedYear, selectedIslandFilter]);
 
   // Pagination calculation
   const currentDataset = useMemo(() => {
@@ -243,10 +263,13 @@ export default function DataSebaranView({
           </span>
         </div>
         <IndonesiaMap
+          activeTab={activeTab}
           jinanData={initialInfakJinan}
+          bussData={initialBuss}
+          yatimData={initialYatim}
+          geberData={initialGeber}
           onSelectIsland={(islandId) => {
             setSelectedIslandFilter(islandId);
-            setActiveTab("jinan");
             setCurrentPage(1);
             const tableElem = document.getElementById("sebaran-table-section");
             if (tableElem) {
