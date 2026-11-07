@@ -89,8 +89,7 @@ test.describe("Verifikasi 5 Item Revisi User", () => {
 
     const main = page.locator("#main-content");
 
-    // Verifikasi rincian profil dalam subtitle
-    await expect(main.getByText("Profil Lembaga & Legalitas Resmi:")).toBeVisible();
+    // Verifikasi rincian profil dalam subtitle menyatu
     await expect(main.getByText("22 Oktober 2026")).toBeVisible();
     await expect(main.getByText("Bogor, Jawa Barat, Indonesia")).toBeVisible();
     await expect(main.getByText("AHU-0022494.AH.01.04. Tahun 2026")).toBeVisible();

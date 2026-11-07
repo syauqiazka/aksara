@@ -4,7 +4,7 @@ import { organizationContent } from "@/content/organization";
 import InteractiveLogoHotspots from "@/components/sections/InteractiveLogoHotspots";
 import Button from "@/components/ui/Button";
 import PageHeader from "@/components/ui/PageHeader";
-import { Quote, HeartHandshake, ShieldCheck } from "lucide-react";
+import { Quote, HeartHandshake } from "lucide-react";
 import IslamicCornerOrnament from "@/components/ui/IslamicCornerOrnament";
 
 export const metadata: Metadata = {
@@ -37,22 +37,7 @@ export default function TentangPage() {
       <PageHeader
         eyebrow="Profil &amp; Rekam Jejak Lembaga"
         title="Berkhidmat Menghidupkan Nur Al-Qur'an di Seluruh Penjuru Semesta"
-        subtitle={
-          <div className="space-y-4">
-            <p>
-              Yayasan Sahabat Aksara (Yayasan Ajirasa Aksara Semesta) mendedikasikan ikhtiar dakwah, pendidikan, sosial, dan teknologi untuk kemandirian umat.
-            </p>
-            <div className="pt-3 border-t border-[var(--gold-500)]/25 text-xs sm:text-sm text-[var(--cream-100)] leading-relaxed space-y-1.5">
-              <div className="text-[var(--gold-300)] font-semibold flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-[var(--gold-400)] flex-shrink-0" />
-                <span>Profil Lembaga &amp; Legalitas Resmi:</span>
-              </div>
-              <p className="text-[var(--cream-200)] text-xs sm:text-[13px] leading-relaxed">
-                Resmi berdiri pada <strong className="text-[var(--cream-50)] font-semibold">{organizationContent.establishedDate}</strong> berkedudukan di <strong className="text-[var(--cream-50)] font-semibold">{organizationContent.address}</strong>. Badan hukum <strong className="text-[var(--cream-50)] font-semibold">{legalName}</strong> disahkan melalui <strong className="text-[var(--cream-50)] font-semibold">{organizationContent.aktaPendirian}</strong>, SK Kemenkumham Nomor <span className="font-mono text-[var(--gold-300)] font-semibold">{skKemenkumham}</span>, NPWP Resmi <span className="font-mono text-[var(--gold-300)] font-semibold">{npwp}</span>, serta email resmi <a href={`mailto:${organizationContent.email}`} className="text-[var(--gold-300)] hover:underline font-mono">{organizationContent.email}</a>.
-              </p>
-            </div>
-          </div>
-        }
+        subtitle={`Yayasan Sahabat Aksara (Yayasan Ajirasa Aksara Semesta) mendedikasikan ikhtiar dakwah, pendidikan, sosial, dan teknologi untuk kemandirian umat. Resmi berdiri pada ${organizationContent.establishedDate} berkedudukan di ${organizationContent.address}, dengan badan hukum ${legalName} yang disahkan melalui ${organizationContent.aktaPendirian}, SK Kemenkumham Nomor ${skKemenkumham}, NPWP Resmi ${npwp}, serta email resmi ${organizationContent.email}.`}
         breadcrumbs={[{ label: "Tentang Kami" }]}
       />
 
