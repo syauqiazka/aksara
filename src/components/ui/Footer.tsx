@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Heart, Mail, MapPin, ExternalLink } from "lucide-react";
+import { Mail, MapPin, ExternalLink } from "lucide-react";
 import { organizationContent } from "@/content/organization";
 import IslamicCornerOrnament from "@/components/ui/IslamicCornerOrnament";
 
@@ -171,8 +171,22 @@ export default function Footer() {
                   href="https://www.instagram.com/sahabat_aksara_semesta?exln=enR1ZnBkZTA1enp6"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-2.5 py-1.5 rounded-lg bg-[var(--green-900)] border border-[var(--gold-500)]/20 hover:border-[var(--gold-400)] text-[var(--cream-100)] flex items-center gap-1 transition-colors"
+                  className="px-2.5 py-1.5 rounded-lg bg-[var(--green-900)] border border-[var(--gold-500)]/20 hover:border-[var(--gold-400)] text-[var(--cream-100)] flex items-center gap-1.5 transition-colors"
                 >
+                  <svg
+                    className="w-3.5 h-3.5 text-[var(--gold-400)] flex-shrink-0"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                  </svg>
                   <span>@sahabat_aksara_semesta</span>
                   <ExternalLink className="w-3 h-3 text-[var(--gold-400)]" />
                 </a>
@@ -187,9 +201,7 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} Yayasan Sahabat Aksara. Seluruh hak cipta dilindungi undang-undang.
           </p>
           <div className="flex items-center gap-1 text-[var(--cream-200)]/80">
-            <span>Berkhidmat dengan</span>
-            <Heart className="w-3.5 h-3.5 text-[var(--terracotta-500)] fill-[var(--terracotta-500)]" />
-            <span>untuk kemaslahatan umat</span>
+            <span>Berkhidmat untuk kemaslahatan umat</span>
           </div>
         </div>
       </div>

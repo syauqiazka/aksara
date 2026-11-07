@@ -102,5 +102,29 @@ test.describe("Verifikasi 5 Item Revisi User", () => {
     const oldGrid = page.locator(".grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-6");
     await expect(oldGrid).toHaveCount(0);
   });
+
+  test("5. Footer: Hapus love di bottom bar dan sertakan icon Instagram pada medsos", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    const skipBtn = page.getByRole("button", { name: /Lewati/i });
+    if (await skipBtn.isVisible({ timeout: 1500 }).catch(() => false)) {
+      await skipBtn.click();
+    }
+
+    const footer = page.locator("footer");
+    await footer.scrollIntoViewIfNeeded();
+    await expect(footer).toBeVisible();
+
+    // Verifikasi teks bottom bar tanpa icon love
+    await expect(footer.getByText("Berkhidmat untuk kemaslahatan umat")).toBeVisible();
+    await expect(footer.getByText("Berkhidmat dengan")).not.toBeVisible();
+
+    // Verifikasi link instagram memiliki icon Instagram SVG
+    const igLink = footer.locator('a[href*="instagram.com"]');
+    await expect(igLink).toBeVisible();
+    await expect(igLink.locator("svg")).toHaveCount(2); // Instagram icon + ExternalLink icon
+  });
 });
 
