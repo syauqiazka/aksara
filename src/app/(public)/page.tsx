@@ -230,9 +230,6 @@ export default async function HomePage() {
                   <span className="text-xs font-bold uppercase tracking-wider text-[var(--gold-700)]">
                     Target 1.000.000 Mushaf
                   </span>
-                  <span className="bg-gold-gradient text-[var(--green-950)] text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-                    Rp 100.000 / Mushaf
-                  </span>
                 </div>
 
                 <h3 className="font-serif text-2xl sm:text-3xl font-bold text-[var(--ink-900)] group-hover:text-[var(--green-800)] transition-colors">
@@ -265,9 +262,6 @@ export default async function HomePage() {
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold uppercase tracking-wider text-[var(--gold-400)]">
                     Beasiswa Uang Saku Santri
-                  </span>
-                  <span className="bg-[var(--green-900)] border border-[var(--gold-500)]/40 text-[var(--gold-300)] text-xs font-bold px-3 py-1 rounded-full">
-                    Mulai Rp 200.000 / Bln
                   </span>
                 </div>
 

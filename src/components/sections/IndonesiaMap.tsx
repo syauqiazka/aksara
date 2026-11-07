@@ -171,6 +171,7 @@ export default function IndonesiaMap({
   const handleIslandClick = (id: IslandId) => {
     const nextIsland = selectedIsland === id ? null : id;
     setSelectedIsland(nextIsland);
+    setHoveredIsland(null);
     if (onSelectIsland) {
       const islandMeta = INDONESIA_ISLANDS[id];
       onSelectIsland(nextIsland, nextIsland ? islandMeta?.name : null);
@@ -265,6 +266,8 @@ export default function IndonesiaMap({
                 onClick={() => {
                   setSelectedPin(pin);
                   setSelectedIsland(pin.islandId);
+                  setHoveredPin(null);
+                  setHoveredIsland(null);
                 }}
                 onMouseEnter={() => setHoveredPin(pin)}
                 onMouseLeave={() => setHoveredPin(null)}
@@ -300,8 +303,8 @@ export default function IndonesiaMap({
           })}
         </svg>
 
-        {/* Hover Floating Tooltip */}
-        {(hoveredPin || hoveredIsland) && (
+        {/* Hover Floating Tooltip - hanya tampil saat tidak ada pulau/pin yang sedang dipilih agar tidak menumpuk */}
+        {!selectedIsland && !selectedPin && (hoveredPin || hoveredIsland) && (
           <div
             className="pointer-events-none absolute z-30 transform -translate-x-1/2 -translate-y-full mb-3 px-3 py-2 rounded-xl bg-[#081e10]/95 border border-[#ffd700]/70 text-[#f7f5ee] shadow-xl backdrop-blur-md transition-transform duration-75 text-left"
             style={{

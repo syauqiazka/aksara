@@ -12,8 +12,9 @@ test.describe("Verifikasi 5 Item Revisi User", () => {
       await skipBtn.click();
     }
 
-    // Badge Mulai Rp 200.000 / Bln
-    await expect(page.getByText("Mulai Rp 200.000 / Bln")).toBeVisible();
+    // Badge Mulai Rp 200.000 / Bln dan Rp 100.000 / Mushaf telah dihapus sesuai permintaan
+    await expect(page.getByText("Mulai Rp 200.000 / Bln")).not.toBeVisible();
+    await expect(page.getByText("Rp 100.000 / Mushaf", { exact: true })).not.toBeVisible();
 
     // 4 Kategori BUSS
     await expect(page.getByText("BUSS Kelas Ekonomis")).toBeVisible();
@@ -125,6 +126,63 @@ test.describe("Verifikasi 5 Item Revisi User", () => {
     const igLink = footer.locator('a[href*="instagram.com"]');
     await expect(igLink).toBeVisible();
     await expect(igLink.locator("svg")).toHaveCount(2); // Instagram icon + ExternalLink icon
+  });
+
+  test("6. Mobile Navbar: Drawer dapat dibuka saat halaman ter-scroll ke bawah tanpa harus scroll ke atas", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto("/donasi");
+
+    const skipBtn = page.getByRole("button", { name: /Lewati/i });
+    if (await skipBtn.isVisible({ timeout: 1500 }).catch(() => false)) {
+      await skipBtn.click();
+    }
+
+    // Scroll ke bawah halaman (misal 1000px)
+    await page.evaluate(() => window.scrollTo(0, 1000));
+    await page.waitForTimeout(300);
+
+    // Pastikan tombol menu hamburger terlihat pada posisi scroll bawah
+    const menuBtn = page.getByRole("button", { name: /Buka Menu/i });
+    await expect(menuBtn).toBeVisible();
+
+    // Klik tombol menu hamburger
+    await menuBtn.click();
+
+    // Drawer mobile harus langsung muncul dan terlihat
+    const mobileDrawer = page.locator("#mobile-nav-drawer");
+    await expect(mobileDrawer).toBeVisible();
+    await expect(mobileDrawer.getByRole("link", { name: "Program" })).toBeVisible();
+    await expect(mobileDrawer.getByRole("link", { name: "Salurkan Donasi" })).toBeVisible();
+  });
+
+  test("7. Peta Home: Klik pulau menampilkan satu kartu wilayah tanpa tooltip bertumpuk", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    const skipBtn = page.getByRole("button", { name: /Lewati/i });
+    if (await skipBtn.isVisible({ timeout: 1500 }).catch(() => false)) {
+      await skipBtn.click();
+    }
+
+    // Scroll ke area peta
+    const mapHeading = page.getByRole("heading", { name: "Sebaran Infak Al-Qur'an Jinan" });
+    await mapHeading.scrollIntoViewIfNeeded();
+
+    // Klik pulau pertama pada peta (Sumatra)
+    const firstIsland = page.locator("path.cursor-pointer").first();
+    await expect(firstIsland).toBeVisible();
+    await firstIsland.click({ force: true });
+
+    // Kartu Wilayah Terpilih harus muncul
+    const selectedBadge = page.getByText("Wilayah Terpilih");
+    await expect(selectedBadge).toBeVisible();
+
+    // Pastikan tooltip hover tidak bertumpuk / tidak muncul bersamaan
+    const hoverTooltip = page.locator(".pointer-events-none.absolute.z-30");
+    await expect(hoverTooltip).toHaveCount(0);
   });
 });
 
