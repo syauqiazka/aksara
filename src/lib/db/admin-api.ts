@@ -1,13 +1,16 @@
 import { localStore } from "./local-store";
+import { isPrismaConfigured, prisma } from "./prisma";
 import { isSupabaseConfigured } from "./client";
 import { adminSupabase } from "./admin-client";
 import { isPostgresConfigured, pgQuery, getErrorMessage } from "./postgres";
+import { Prisma } from "@prisma/client";
 import {
   InfakDistribution,
   InfakJinanRecord,
   HafalanUpdate,
   GeberMasjidDistribution,
   Report,
+  ReportProgram,
   ThemedCampaign,
   GalleryItem,
   BankAccount,
@@ -30,6 +33,47 @@ function throwIfError(error: { message: string } | null, operation: string): voi
 export const db = {
   // Infak Al-Qur'an Jinan (Dua Tingkat)
   async getInfakJinan(onlyPublished = false): Promise<InfakJinanRecord[]> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const data = await prisma.infakJinan.findMany({
+          where: onlyPublished ? { status: "published" } : undefined,
+          orderBy: { mushaf_no: "asc" },
+          include: {
+            photos: { orderBy: { sort: "asc" } },
+            santri_list: {
+              include: { hafalan_updates: { orderBy: { updated_on: "desc" } } },
+              orderBy: { sort: "asc" },
+            },
+          },
+        });
+        return data.map((item) => ({
+          ...item,
+          distributed_at: item.distributed_at.toISOString().split("T")[0],
+          status: item.status as "draft" | "published",
+          created_at: item.created_at.toISOString(),
+          updated_at: item.updated_at.toISOString(),
+          photos: item.photos.map((p) => ({
+            ...p,
+            created_at: p.created_at.toISOString(),
+          })),
+          santri_list: item.santri_list.map((s) => ({
+            ...s,
+            status: s.status as "draft" | "published",
+            created_at: s.created_at.toISOString(),
+            updated_at: s.updated_at.toISOString(),
+            hafalan_updates: s.hafalan_updates.map((h) => ({
+              ...h,
+              updated_on: h.updated_on.toISOString().split("T")[0],
+              created_at: h.created_at.toISOString(),
+            })),
+          })),
+          santri_count: item.santri_list.length,
+        })) as InfakJinanRecord[];
+      } catch (err: unknown) {
+        console.warn("[prisma] getInfakJinan fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(`
@@ -127,6 +171,48 @@ export const db = {
   },
 
   async getInfakJinanById(id: string): Promise<InfakJinanRecord | null> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const item = await prisma.infakJinan.findUnique({
+          where: { id },
+          include: {
+            photos: { orderBy: { sort: "asc" } },
+            santri_list: {
+              include: { hafalan_updates: { orderBy: { updated_on: "desc" } } },
+              orderBy: { sort: "asc" },
+            },
+          },
+        });
+        if (item) {
+          return {
+            ...item,
+            distributed_at: item.distributed_at.toISOString().split("T")[0],
+            status: item.status as "draft" | "published",
+            created_at: item.created_at.toISOString(),
+            updated_at: item.updated_at.toISOString(),
+            photos: item.photos.map((p) => ({
+              ...p,
+              created_at: p.created_at.toISOString(),
+            })),
+            santri_list: item.santri_list.map((s) => ({
+              ...s,
+              status: s.status as "draft" | "published",
+              created_at: s.created_at.toISOString(),
+              updated_at: s.updated_at.toISOString(),
+              hafalan_updates: s.hafalan_updates.map((h) => ({
+                ...h,
+                updated_on: h.updated_on.toISOString().split("T")[0],
+                created_at: h.created_at.toISOString(),
+              })),
+            })),
+            santri_count: item.santri_list.length,
+          } as InfakJinanRecord;
+        }
+      } catch (err: unknown) {
+        console.warn("[prisma] getInfakJinanById fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(`
@@ -229,7 +315,135 @@ export const db = {
     const defaultSantriName = (_sl && _sl.length > 0 && _sl[0]?.name?.trim()) || "Santri Binaan";
     const defaultSantriPhone = (_sl && _sl.length > 0 && _sl[0]?.phone) || null;
 
-    // 1. Primary: PostgreSQL
+    // 1. Primary: Prisma
+    if (isPrismaConfigured && prisma) {
+      try {
+        let savedId = id;
+        if (id) {
+          await prisma.$transaction(async (tx) => {
+            await tx.infakJinan.update({
+              where: { id },
+              data: {
+                mushaf_no: jinanData.mushaf_no,
+                donor_name: jinanData.donor_name,
+                show_donor_name: Boolean(jinanData.show_donor_name),
+                donor_origin: jinanData.donor_origin,
+                donor_phone: jinanData.donor_phone || null,
+                dedication_name: jinanData.dedication_name,
+                pesantren_name: jinanData.pesantren_name,
+                pesantren_province: jinanData.pesantren_province || null,
+                pesantren_city: jinanData.pesantren_city || null,
+                address: jinanData.address,
+                distributed_at: new Date(jinanData.distributed_at),
+                maps_url: jinanData.maps_url || null,
+                santri_name: defaultSantriName,
+                santri_phone: defaultSantriPhone,
+                status: jinanData.status || "published",
+              },
+            });
+
+            await tx.infakJinanPhoto.deleteMany({ where: { infak_id: id } });
+            if (_ph && _ph.length > 0) {
+              await tx.infakJinanPhoto.createMany({
+                data: _ph.map((p) => ({
+                  infak_id: id,
+                  url: p.url,
+                  caption: p.caption || null,
+                  sort: p.sort || 1,
+                })),
+              });
+            }
+
+            await tx.infakJinanSantri.deleteMany({ where: { infak_id: id } });
+            if (_sl && _sl.length > 0) {
+              for (const s of _sl) {
+                const createdSantri = await tx.infakJinanSantri.create({
+                  data: {
+                    infak_id: id,
+                    name: s.name?.trim() || "Santri Binaan",
+                    phone: s.phone || null,
+                    sort: s.sort || 1,
+                    status: s.status || "published",
+                  },
+                });
+                if (s.hafalan_updates && s.hafalan_updates.length > 0) {
+                  await tx.santriHafalanUpdate.createMany({
+                    data: s.hafalan_updates.map((h) => ({
+                      santri_id: createdSantri.id,
+                      updated_on: new Date(h.updated_on || new Date()),
+                      surah_no: Number(h.surah_no) || 1,
+                      surah_name: String(h.surah_name || "Al-Fatihah"),
+                      ayat: Number(h.ayat) || 1,
+                      juz: Number(h.juz) || 1,
+                      notes: h.notes || null,
+                    })),
+                  });
+                }
+              }
+            }
+          });
+        } else {
+          const created = await prisma.infakJinan.create({
+            data: {
+              mushaf_no: jinanData.mushaf_no,
+              donor_name: jinanData.donor_name,
+              show_donor_name: Boolean(jinanData.show_donor_name),
+              donor_origin: jinanData.donor_origin,
+              donor_phone: jinanData.donor_phone || null,
+              dedication_name: jinanData.dedication_name,
+              pesantren_name: jinanData.pesantren_name,
+              pesantren_province: jinanData.pesantren_province || null,
+              pesantren_city: jinanData.pesantren_city || null,
+              address: jinanData.address,
+              distributed_at: new Date(jinanData.distributed_at),
+              maps_url: jinanData.maps_url || null,
+              santri_name: defaultSantriName,
+              santri_phone: defaultSantriPhone,
+              status: jinanData.status || "published",
+              photos: _ph && _ph.length > 0 ? {
+                create: _ph.map((p) => ({
+                  url: p.url,
+                  caption: p.caption || null,
+                  sort: p.sort || 1,
+                })),
+              } : undefined,
+              santri_list: _sl && _sl.length > 0 ? {
+                create: _sl.map((s) => ({
+                  name: s.name?.trim() || "Santri Binaan",
+                  phone: s.phone || null,
+                  sort: s.sort || 1,
+                  status: s.status || "published",
+                  hafalan_updates: s.hafalan_updates && s.hafalan_updates.length > 0 ? {
+                    create: s.hafalan_updates.map((h) => ({
+                      updated_on: new Date(h.updated_on || new Date()),
+                      surah_no: Number(h.surah_no) || 1,
+                      surah_name: String(h.surah_name || "Al-Fatihah"),
+                      ayat: Number(h.ayat) || 1,
+                      juz: Number(h.juz) || 1,
+                      notes: h.notes || null,
+                    })),
+                  } : undefined,
+                })),
+              } : undefined,
+            },
+          });
+          savedId = created.id;
+        }
+
+        const mirror = { ...item, id: savedId, santri_count: _sl?.length || 0 } as InfakJinanRecord;
+        if (id) {
+          const ex = localStore.getInfakJinanById(id);
+          if (ex) Object.assign(ex, mirror);
+        } else {
+          localStore.addInfakJinan(item);
+        }
+        return mirror;
+      } catch (err: unknown) {
+        console.warn("[prisma] saveInfakJinan fallback to Postgres/Supabase:", getErrorMessage(err));
+      }
+    }
+
+    // 2. Direct PostgreSQL Fallback
     if (isPostgresConfigured) {
       try {
         let savedId = id;
@@ -266,7 +480,6 @@ export const db = {
           savedId = ins.rows[0].id;
         }
 
-        // Simpan santri binaan
         if (savedId) {
           if (id) {
             await pgQuery(`delete from infak_jinan_santri where infak_id = $1`, [savedId]);
@@ -295,7 +508,6 @@ export const db = {
             }
           }
 
-          // Simpan foto
           if (id) {
             await pgQuery(`delete from infak_jinan_photos where infak_id = $1`, [savedId]);
           }
@@ -309,7 +521,6 @@ export const db = {
           }
         }
 
-        // Update localStore as in-memory mirror
         if (savedId) {
           const mirror = { ...item, id: savedId, santri_count: _sl?.length || 0 } as InfakJinanRecord;
           if (id) {
@@ -325,7 +536,7 @@ export const db = {
       }
     }
 
-    // 2. Fallback: Supabase
+    // 3. Fallback: Supabase
     if (isSupabaseConfigured && adminSupabase) {
       try {
         const client = getClient();
@@ -386,7 +597,7 @@ export const db = {
       }
     }
 
-    // 3. Fallback: localStore
+    // 4. Fallback: localStore
     if (id) {
       const existing = localStore.getInfakJinanById(id);
       if (existing) {
@@ -399,6 +610,15 @@ export const db = {
 
   async deleteInfakJinan(id: string): Promise<boolean> {
     localStore.deleteInfakJinan(id);
+
+    if (isPrismaConfigured && prisma) {
+      try {
+        await prisma.infakJinan.delete({ where: { id } });
+        return true;
+      } catch (err: unknown) {
+        console.warn("[prisma] deleteInfakJinan fallback:", getErrorMessage(err));
+      }
+    }
 
     if (isPostgresConfigured) {
       try {
@@ -421,6 +641,34 @@ export const db = {
   },
 
   async addSantriHafalanUpdate(santriId: string, update: Omit<HafalanUpdate, "id">): Promise<HafalanUpdate | null> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const h = await prisma.santriHafalanUpdate.create({
+          data: {
+            santri_id: santriId,
+            updated_on: new Date(update.updated_on || new Date()),
+            surah_no: Number(update.surah_no) || 1,
+            surah_name: String(update.surah_name || "Al-Fatihah"),
+            ayat: Number(update.ayat) || 1,
+            juz: Number(update.juz) || 1,
+            notes: update.notes || null,
+          },
+        });
+        return {
+          id: h.id,
+          santri_id: h.santri_id,
+          updated_on: h.updated_on.toISOString().split("T")[0],
+          surah_no: h.surah_no,
+          surah_name: h.surah_name,
+          ayat: h.ayat,
+          juz: h.juz,
+          notes: h.notes || undefined,
+        };
+      } catch (err: unknown) {
+        console.warn("[prisma] addSantriHafalanUpdate fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(
@@ -443,6 +691,27 @@ export const db = {
 
   // Infak Distributions (Single-Tier / Bulk Import Support)
   async getInfakDistributions(onlyPublished = true): Promise<InfakDistribution[]> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const data = await prisma.infakDistribution.findMany({
+          where: onlyPublished ? { status: "published" } : undefined,
+          orderBy: { mushaf_no: "asc" },
+        });
+        return data.map((d) => ({
+          ...d,
+          lat: d.lat ? Number(d.lat) : null,
+          lng: d.lng ? Number(d.lng) : null,
+          distributed_at: d.distributed_at.toISOString().split("T")[0],
+          recipient_type: d.recipient_type as "pesantren" | "masjid" | "madrasah" | "lainnya",
+          status: d.status as "draft" | "published",
+          created_at: d.created_at.toISOString(),
+          updated_at: d.updated_at.toISOString(),
+        }));
+      } catch (err: unknown) {
+        console.warn("[prisma] getInfakDistributions fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery<InfakDistribution>(
@@ -473,6 +742,26 @@ export const db = {
   },
 
   async getInfakById(id: string): Promise<InfakDistribution | null> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const d = await prisma.infakDistribution.findUnique({ where: { id } });
+        if (d) {
+          return {
+            ...d,
+            lat: d.lat ? Number(d.lat) : null,
+            lng: d.lng ? Number(d.lng) : null,
+            distributed_at: d.distributed_at.toISOString().split("T")[0],
+            recipient_type: d.recipient_type as "pesantren" | "masjid" | "madrasah" | "lainnya",
+            status: d.status as "draft" | "published",
+            created_at: d.created_at.toISOString(),
+            updated_at: d.updated_at.toISOString(),
+          };
+        }
+      } catch (err: unknown) {
+        console.warn("[prisma] getInfakById fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery<InfakDistribution>(
@@ -499,6 +788,61 @@ export const db = {
   },
 
   async saveInfak(item: Omit<InfakDistribution, "id" | "created_at" | "updated_at">, id?: string): Promise<InfakDistribution> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        if (id) {
+          const updated = await prisma.infakDistribution.update({
+            where: { id },
+            data: {
+              mushaf_no: item.mushaf_no,
+              donor_name: item.donor_name,
+              show_donor_name: Boolean(item.show_donor_name),
+              recipient_name: item.recipient_name,
+              recipient_type: item.recipient_type,
+              province: item.province,
+              city: item.city,
+              district: item.district,
+              lat: item.lat ? new Prisma.Decimal(item.lat) : null,
+              lng: item.lng ? new Prisma.Decimal(item.lng) : null,
+              distributed_at: new Date(item.distributed_at),
+              quantity: item.quantity || 1,
+              photo_url: item.photo_url || null,
+              notes: item.notes || null,
+              status: item.status || "published",
+            },
+          });
+          const mirror = { ...item, id: updated.id } as InfakDistribution;
+          localStore.updateInfak(id, item);
+          return mirror;
+        } else {
+          const created = await prisma.infakDistribution.create({
+            data: {
+              mushaf_no: item.mushaf_no,
+              donor_name: item.donor_name,
+              show_donor_name: Boolean(item.show_donor_name),
+              recipient_name: item.recipient_name,
+              recipient_type: item.recipient_type,
+              province: item.province,
+              city: item.city,
+              district: item.district,
+              lat: item.lat ? new Prisma.Decimal(item.lat) : null,
+              lng: item.lng ? new Prisma.Decimal(item.lng) : null,
+              distributed_at: new Date(item.distributed_at),
+              quantity: item.quantity || 1,
+              photo_url: item.photo_url || null,
+              notes: item.notes || null,
+              status: item.status || "published",
+            },
+          });
+          const res = { ...item, id: created.id } as InfakDistribution;
+          localStore.addInfak(item);
+          return res;
+        }
+      } catch (err: unknown) {
+        console.warn("[prisma] saveInfak fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         if (id) {
@@ -562,6 +906,15 @@ export const db = {
   async deleteInfak(id: string): Promise<boolean> {
     localStore.deleteInfak(id);
 
+    if (isPrismaConfigured && prisma) {
+      try {
+        await prisma.infakDistribution.delete({ where: { id } });
+        return true;
+      } catch (err: unknown) {
+        console.warn("[prisma] deleteInfak fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         await pgQuery(`delete from infak_distributions where id = $1`, [id]);
@@ -584,6 +937,26 @@ export const db = {
 
   // Geber Masjid
   async getGeberDistributions(onlyPublished = true): Promise<GeberMasjidDistribution[]> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const data = await prisma.geberMasjidDistribution.findMany({
+          where: onlyPublished ? { status: "published" } : undefined,
+          orderBy: { activity_date: "desc" },
+        });
+        return data.map((g) => ({
+          ...g,
+          lat: g.lat ? Number(g.lat) : null,
+          lng: g.lng ? Number(g.lng) : null,
+          activity_date: g.activity_date.toISOString().split("T")[0],
+          status: g.status as "draft" | "published",
+          created_at: g.created_at.toISOString(),
+          updated_at: g.updated_at.toISOString(),
+        }));
+      } catch (err: unknown) {
+        console.warn("[prisma] getGeberDistributions fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(
@@ -615,6 +988,25 @@ export const db = {
   },
 
   async getGeberById(id: string): Promise<GeberMasjidDistribution | null> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const g = await prisma.geberMasjidDistribution.findUnique({ where: { id } });
+        if (g) {
+          return {
+            ...g,
+            lat: g.lat ? Number(g.lat) : null,
+            lng: g.lng ? Number(g.lng) : null,
+            activity_date: g.activity_date.toISOString().split("T")[0],
+            status: g.status as "draft" | "published",
+            created_at: g.created_at.toISOString(),
+            updated_at: g.updated_at.toISOString(),
+          };
+        }
+      } catch (err: unknown) {
+        console.warn("[prisma] getGeberById fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(
@@ -642,6 +1034,67 @@ export const db = {
   },
 
   async saveGeber(item: Omit<GeberMasjidDistribution, "id" | "created_at" | "updated_at">, id?: string): Promise<GeberMasjidDistribution> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        if (id) {
+          const updated = await prisma.geberMasjidDistribution.update({
+            where: { id },
+            data: {
+              mosque_name: item.mosque_name,
+              province: item.province,
+              city: item.city,
+              district: item.district,
+              address: item.address,
+              lat: item.lat ? new Prisma.Decimal(item.lat) : null,
+              lng: item.lng ? new Prisma.Decimal(item.lng) : null,
+              activity_date: new Date(item.activity_date),
+              participants: item.participants || 0,
+              activity_notes: item.activity_notes || null,
+              photo_urls: item.photo_urls || [],
+              status: item.status || "published",
+            },
+          });
+          const mirror = {
+            ...item,
+            id: updated.id,
+            lat: updated.lat ? Number(updated.lat) : null,
+            lng: updated.lng ? Number(updated.lng) : null,
+            activity_date: updated.activity_date.toISOString().split("T")[0],
+          } as GeberMasjidDistribution;
+          localStore.updateGeber(id, item);
+          return mirror;
+        } else {
+          const created = await prisma.geberMasjidDistribution.create({
+            data: {
+              mosque_name: item.mosque_name,
+              province: item.province,
+              city: item.city,
+              district: item.district,
+              address: item.address,
+              lat: item.lat ? new Prisma.Decimal(item.lat) : null,
+              lng: item.lng ? new Prisma.Decimal(item.lng) : null,
+              activity_date: new Date(item.activity_date),
+              participants: item.participants || 0,
+              activity_notes: item.activity_notes || null,
+              photo_urls: item.photo_urls || [],
+              status: item.status || "published",
+            },
+          });
+          const res = {
+            ...item,
+            id: created.id,
+            lat: created.lat ? Number(created.lat) : null,
+            lng: created.lng ? Number(created.lng) : null,
+            activity_date: created.activity_date.toISOString().split("T")[0],
+          } as GeberMasjidDistribution;
+          localStore.addGeber(item);
+          return res;
+        }
+      } catch (err: unknown) {
+        console.warn("[prisma] saveGeber fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         if (id) {
@@ -705,6 +1158,15 @@ export const db = {
   async deleteGeber(id: string): Promise<boolean> {
     localStore.deleteGeber(id);
 
+    if (isPrismaConfigured && prisma) {
+      try {
+        await prisma.geberMasjidDistribution.delete({ where: { id } });
+        return true;
+      } catch (err: unknown) {
+        console.warn("[prisma] deleteGeber fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         await pgQuery(`delete from geber_masjid_distributions where id = $1`, [id]);
@@ -727,6 +1189,27 @@ export const db = {
 
   // Reports
   async getReports(onlyPublished = true): Promise<Report[]> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const data = await prisma.report.findMany({
+          where: onlyPublished ? { status: "published" } : undefined,
+          orderBy: { period_start: "desc" },
+        });
+        return data.map((r) => ({
+          ...r,
+          program: r.program as ReportProgram,
+          amount_idr: r.amount_idr ? Number(r.amount_idr) : null,
+          period_start: r.period_start.toISOString().split("T")[0],
+          period_end: r.period_end.toISOString().split("T")[0],
+          status: r.status as "draft" | "published",
+          created_at: r.created_at.toISOString(),
+          updated_at: r.updated_at.toISOString(),
+        }));
+      } catch (err: unknown) {
+        console.warn("[prisma] getReports fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(
@@ -760,6 +1243,26 @@ export const db = {
   },
 
   async getReportBySlug(slug: string): Promise<Report | null> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const r = await prisma.report.findUnique({ where: { slug } });
+        if (r) {
+          return {
+            ...r,
+            program: r.program as ReportProgram,
+            amount_idr: r.amount_idr ? Number(r.amount_idr) : null,
+            period_start: r.period_start.toISOString().split("T")[0],
+            period_end: r.period_end.toISOString().split("T")[0],
+            status: r.status as "draft" | "published",
+            created_at: r.created_at.toISOString(),
+            updated_at: r.updated_at.toISOString(),
+          };
+        }
+      } catch (err: unknown) {
+        console.warn("[prisma] getReportBySlug fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(
@@ -789,6 +1292,26 @@ export const db = {
   },
 
   async getReportById(id: string): Promise<Report | null> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const r = await prisma.report.findUnique({ where: { id } });
+        if (r) {
+          return {
+            ...r,
+            program: r.program as ReportProgram,
+            amount_idr: r.amount_idr ? Number(r.amount_idr) : null,
+            period_start: r.period_start.toISOString().split("T")[0],
+            period_end: r.period_end.toISOString().split("T")[0],
+            status: r.status as "draft" | "published",
+            created_at: r.created_at.toISOString(),
+            updated_at: r.updated_at.toISOString(),
+          };
+        }
+      } catch (err: unknown) {
+        console.warn("[prisma] getReportById fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(
@@ -818,6 +1341,69 @@ export const db = {
   },
 
   async saveReport(item: Omit<Report, "id" | "created_at" | "updated_at">, id?: string): Promise<Report> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        if (id) {
+          const updated = await prisma.report.update({
+            where: { id },
+            data: {
+              slug: item.slug,
+              title: item.title,
+              program: item.program,
+              period_start: new Date(item.period_start),
+              period_end: new Date(item.period_end),
+              summary: item.summary,
+              body: item.body,
+              beneficiaries: item.beneficiaries || 0,
+              amount_idr: item.amount_idr ? BigInt(item.amount_idr) : null,
+              cover_url: item.cover_url || null,
+              gallery_urls: item.gallery_urls || [],
+              pdf_url: item.pdf_url || null,
+              status: item.status || "published",
+            },
+          });
+          const mirror = {
+            ...item,
+            id: updated.id,
+            amount_idr: updated.amount_idr ? Number(updated.amount_idr) : null,
+            period_start: updated.period_start.toISOString().split("T")[0],
+            period_end: updated.period_end.toISOString().split("T")[0],
+          } as Report;
+          localStore.updateReport(id, item);
+          return mirror;
+        } else {
+          const created = await prisma.report.create({
+            data: {
+              slug: item.slug,
+              title: item.title,
+              program: item.program,
+              period_start: new Date(item.period_start),
+              period_end: new Date(item.period_end),
+              summary: item.summary,
+              body: item.body,
+              beneficiaries: item.beneficiaries || 0,
+              amount_idr: item.amount_idr ? BigInt(item.amount_idr) : null,
+              cover_url: item.cover_url || null,
+              gallery_urls: item.gallery_urls || [],
+              pdf_url: item.pdf_url || null,
+              status: item.status || "published",
+            },
+          });
+          const res = {
+            ...item,
+            id: created.id,
+            amount_idr: created.amount_idr ? Number(created.amount_idr) : null,
+            period_start: created.period_start.toISOString().split("T")[0],
+            period_end: created.period_end.toISOString().split("T")[0],
+          } as Report;
+          localStore.addReport(item);
+          return res;
+        }
+      } catch (err: unknown) {
+        console.warn("[prisma] saveReport fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         if (id) {
@@ -883,6 +1469,15 @@ export const db = {
   async deleteReport(id: string): Promise<boolean> {
     localStore.deleteReport(id);
 
+    if (isPrismaConfigured && prisma) {
+      try {
+        await prisma.report.delete({ where: { id } });
+        return true;
+      } catch (err: unknown) {
+        console.warn("[prisma] deleteReport fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         await pgQuery(`delete from reports where id = $1`, [id]);
@@ -905,6 +1500,21 @@ export const db = {
 
   // Themed Campaigns
   async getThemedCampaigns(): Promise<ThemedCampaign[]> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const data = await prisma.themedCampaign.findMany({ orderBy: { created_at: "desc" } });
+        return data.map((c) => ({
+          ...c,
+          target_idr: Number(c.target_idr),
+          collected_idr: Number(c.collected_idr),
+          status: c.status as "aktif" | "selesai",
+          created_at: c.created_at.toISOString(),
+        }));
+      } catch (err: unknown) {
+        console.warn("[prisma] getThemedCampaigns fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(`select * from themed_campaigns order by created_at desc`);
@@ -928,6 +1538,23 @@ export const db = {
   },
 
   async getThemedCampaignById(id: string): Promise<ThemedCampaign | null> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const c = await prisma.themedCampaign.findUnique({ where: { id } });
+        if (c) {
+          return {
+            ...c,
+            target_idr: Number(c.target_idr),
+            collected_idr: Number(c.collected_idr),
+            status: c.status as "aktif" | "selesai",
+            created_at: c.created_at.toISOString(),
+          };
+        }
+      } catch (err: unknown) {
+        console.warn("[prisma] getThemedCampaignById fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(`select * from themed_campaigns where id = $1 limit 1`, [id]);
@@ -954,6 +1581,55 @@ export const db = {
     item: Omit<ThemedCampaign, "id" | "created_at">,
     id?: string
   ): Promise<ThemedCampaign> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        if (id) {
+          const res = await prisma.themedCampaign.update({
+            where: { id },
+            data: {
+              title: item.title,
+              disaster_type: item.disaster_type,
+              location: item.location,
+              status: item.status || "aktif",
+              description: item.description,
+              cover_url: item.cover_url || null,
+              target_idr: BigInt(item.target_idr || 0),
+              collected_idr: BigInt(item.collected_idr || 0),
+            },
+          });
+          return {
+            ...item,
+            id: res.id,
+            target_idr: Number(res.target_idr),
+            collected_idr: Number(res.collected_idr),
+            created_at: res.created_at.toISOString(),
+          } as ThemedCampaign;
+        } else {
+          const res = await prisma.themedCampaign.create({
+            data: {
+              title: item.title,
+              disaster_type: item.disaster_type,
+              location: item.location,
+              status: item.status || "aktif",
+              description: item.description,
+              cover_url: item.cover_url || null,
+              target_idr: BigInt(item.target_idr || 0),
+              collected_idr: BigInt(item.collected_idr || 0),
+            },
+          });
+          return {
+            ...item,
+            id: res.id,
+            target_idr: Number(res.target_idr),
+            collected_idr: Number(res.collected_idr),
+            created_at: res.created_at.toISOString(),
+          } as ThemedCampaign;
+        }
+      } catch (err: unknown) {
+        console.warn("[prisma] saveThemedCampaign fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         if (id) {
@@ -1006,6 +1682,15 @@ export const db = {
   },
 
   async deleteThemedCampaign(id: string): Promise<boolean> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        await prisma.themedCampaign.delete({ where: { id } });
+        return true;
+      } catch (err: unknown) {
+        console.warn("[prisma] deleteThemedCampaign fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         await pgQuery(`delete from themed_campaigns where id = $1`, [id]);
@@ -1028,6 +1713,23 @@ export const db = {
 
   // Gallery
   async getGalleryItems(onlyPublished = false): Promise<GalleryItem[]> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const data = await prisma.galleryItem.findMany({
+          where: onlyPublished ? { status: "published" } : undefined,
+          orderBy: { date: "desc" },
+        });
+        return data.map((g) => ({
+          ...g,
+          date: g.date.toISOString().split("T")[0],
+          status: g.status as "draft" | "published",
+          created_at: g.created_at.toISOString(),
+        }));
+      } catch (err: unknown) {
+        console.warn("[prisma] getGalleryItems fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(
@@ -1059,6 +1761,22 @@ export const db = {
   },
 
   async getGalleryItemById(id: string): Promise<GalleryItem | null> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const g = await prisma.galleryItem.findUnique({ where: { id } });
+        if (g) {
+          return {
+            ...g,
+            date: g.date.toISOString().split("T")[0],
+            status: g.status as "draft" | "published",
+            created_at: g.created_at.toISOString(),
+          };
+        }
+      } catch (err: unknown) {
+        console.warn("[prisma] getGalleryItemById fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(
@@ -1089,6 +1807,49 @@ export const db = {
     item: Omit<GalleryItem, "id" | "created_at">,
     id?: string
   ): Promise<GalleryItem> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        if (id) {
+          const res = await prisma.galleryItem.update({
+            where: { id },
+            data: {
+              title: item.title,
+              program: item.program,
+              date: new Date(item.date),
+              image_url: item.image_url,
+              caption: item.caption || null,
+              status: item.status || "published",
+            },
+          });
+          return {
+            ...item,
+            id: res.id,
+            date: res.date.toISOString().split("T")[0],
+            created_at: res.created_at.toISOString(),
+          } as GalleryItem;
+        } else {
+          const res = await prisma.galleryItem.create({
+            data: {
+              title: item.title,
+              program: item.program,
+              date: new Date(item.date),
+              image_url: item.image_url,
+              caption: item.caption || null,
+              status: item.status || "published",
+            },
+          });
+          return {
+            ...item,
+            id: res.id,
+            date: res.date.toISOString().split("T")[0],
+            created_at: res.created_at.toISOString(),
+          } as GalleryItem;
+        }
+      } catch (err: unknown) {
+        console.warn("[prisma] saveGalleryItem fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         if (id) {
@@ -1131,6 +1892,15 @@ export const db = {
   },
 
   async deleteGalleryItem(id: string): Promise<boolean> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        await prisma.galleryItem.delete({ where: { id } });
+        return true;
+      } catch (err: unknown) {
+        console.warn("[prisma] deleteGalleryItem fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         await pgQuery(`delete from gallery_items where id = $1`, [id]);
@@ -1153,6 +1923,15 @@ export const db = {
 
   // Settings: Bank, Contact, Social
   async getBankAccounts(): Promise<BankAccount[]> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const row = await prisma.siteSetting.findUnique({ where: { key: "bank_accounts" } });
+        if (row?.value) return row.value as unknown as BankAccount[];
+      } catch (err: unknown) {
+        console.warn("[prisma] getBankAccounts fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(`select value from site_settings where key = 'bank_accounts' limit 1`);
@@ -1177,6 +1956,19 @@ export const db = {
 
   async updateBankAccounts(accounts: BankAccount[]): Promise<void> {
     localStore.updateBankAccounts(accounts);
+
+    if (isPrismaConfigured && prisma) {
+      try {
+        await prisma.siteSetting.upsert({
+          where: { key: "bank_accounts" },
+          create: { key: "bank_accounts", value: accounts as unknown as Prisma.InputJsonValue },
+          update: { value: accounts as unknown as Prisma.InputJsonValue },
+        });
+        return;
+      } catch (err: unknown) {
+        console.warn("[prisma] updateBankAccounts fallback:", getErrorMessage(err));
+      }
+    }
 
     if (isPostgresConfigured) {
       try {
@@ -1207,6 +1999,15 @@ export const db = {
   },
 
   async getContactInfo(): Promise<ContactInfo> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const row = await prisma.siteSetting.findUnique({ where: { key: "contact_info" } });
+        if (row?.value) return row.value as unknown as ContactInfo;
+      } catch (err: unknown) {
+        console.warn("[prisma] getContactInfo fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(`select value from site_settings where key = 'contact_info' limit 1`);
@@ -1231,6 +2032,19 @@ export const db = {
 
   async updateContactInfo(info: ContactInfo): Promise<void> {
     localStore.updateContactInfo(info);
+
+    if (isPrismaConfigured && prisma) {
+      try {
+        await prisma.siteSetting.upsert({
+          where: { key: "contact_info" },
+          create: { key: "contact_info", value: info as unknown as Prisma.InputJsonValue },
+          update: { value: info as unknown as Prisma.InputJsonValue },
+        });
+        return;
+      } catch (err: unknown) {
+        console.warn("[prisma] updateContactInfo fallback:", getErrorMessage(err));
+      }
+    }
 
     if (isPostgresConfigured) {
       try {
@@ -1261,6 +2075,15 @@ export const db = {
   },
 
   async getSocialLinks(): Promise<SocialLinks> {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const row = await prisma.siteSetting.findUnique({ where: { key: "social_links" } });
+        if (row?.value) return row.value as unknown as SocialLinks;
+      } catch (err: unknown) {
+        console.warn("[prisma] getSocialLinks fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(`select value from site_settings where key = 'social_links' limit 1`);
@@ -1285,6 +2108,19 @@ export const db = {
 
   async updateSocialLinks(links: SocialLinks): Promise<void> {
     localStore.updateSocialLinks(links);
+
+    if (isPrismaConfigured && prisma) {
+      try {
+        await prisma.siteSetting.upsert({
+          where: { key: "social_links" },
+          create: { key: "social_links", value: links as unknown as Prisma.InputJsonValue },
+          update: { value: links as unknown as Prisma.InputJsonValue },
+        });
+        return;
+      } catch (err: unknown) {
+        console.warn("[prisma] updateSocialLinks fallback:", getErrorMessage(err));
+      }
+    }
 
     if (isPostgresConfigured) {
       try {

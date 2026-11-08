@@ -5,7 +5,8 @@ import crypto from "node:crypto";
 import { put, del, list } from "@vercel/blob";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { isPostgresConfigured, pgQuery } from "./db/postgres";
+import { isPrismaConfigured, prisma } from "./db/prisma";
+import { isPostgresConfigured, pgQuery, getErrorMessage } from "./db/postgres";
 import { isSupabaseConfigured, supabase } from "./db/client";
 import { localStore } from "./db/local-store";
 import { UploadLedgerEntry } from "./db/types";
@@ -165,6 +166,18 @@ export async function uploadToStorage(
 export async function commitUpload(url: string): Promise<void> {
   localStore.commitUploadLedger(url);
 
+  if (isPrismaConfigured && prisma) {
+    try {
+      await prisma.uploadLedger.update({
+        where: { url },
+        data: { status: "committed", committed_at: new Date() },
+      });
+      return;
+    } catch (err: unknown) {
+      console.warn("[prisma] commitUpload fallback:", getErrorMessage(err));
+    }
+  }
+
   if (isPostgresConfigured) {
     try {
       await pgQuery(
@@ -173,8 +186,7 @@ export async function commitUpload(url: string): Promise<void> {
       );
       return;
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.warn("[postgres] commitUpload fallback:", msg);
+      console.warn("[postgres] commitUpload fallback:", getErrorMessage(err));
     }
   }
 
@@ -207,13 +219,23 @@ export async function deleteBlobFromStorage(url: string): Promise<boolean> {
 
     localStore.deleteUploadLedger(url);
 
-    // Update ledger in PostgreSQL / Supabase
+    // Update ledger in Prisma / PostgreSQL / Supabase
+    if (isPrismaConfigured && prisma) {
+      try {
+        await prisma.uploadLedger.update({
+          where: { url },
+          data: { status: "deleted" },
+        });
+      } catch (err: unknown) {
+        console.warn("[prisma] deleteBlobFromStorage ledger fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         await pgQuery(`update upload_ledger set status = 'deleted' where url = $1`, [url]);
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : String(err);
-        console.warn("[postgres] deleteBlobFromStorage ledger fallback:", msg);
+        console.warn("[postgres] deleteBlobFromStorage ledger fallback:", getErrorMessage(err));
       }
     }
 
@@ -283,6 +305,31 @@ export async function listAllStorageBlobs(): Promise<StorageBlobItem[]> {
  */
 export async function getAllReferencedPhotoUrls(): Promise<Set<string>> {
   const referenced = new Set<string>();
+
+  if (isPrismaConfigured && prisma) {
+    try {
+      const [jinanPhotos, geber, reports, gallery, campaigns] = await Promise.all([
+        prisma.infakJinanPhoto.findMany({ select: { url: true } }),
+        prisma.geberMasjidDistribution.findMany({ select: { photo_urls: true } }),
+        prisma.report.findMany({ select: { cover_url: true, gallery_urls: true } }),
+        prisma.galleryItem.findMany({ select: { image_url: true } }),
+        prisma.themedCampaign.findMany({ select: { cover_url: true } }),
+      ]);
+
+      jinanPhotos.forEach((r) => r.url && referenced.add(r.url));
+      geber.forEach((r) => r.photo_urls.forEach((u) => u && referenced.add(u)));
+      reports.forEach((r) => {
+        if (r.cover_url) referenced.add(r.cover_url);
+        r.gallery_urls.forEach((u) => u && referenced.add(u));
+      });
+      gallery.forEach((r) => r.image_url && referenced.add(r.image_url));
+      campaigns.forEach((r) => r.cover_url && referenced.add(r.cover_url));
+
+      return referenced;
+    } catch (err: unknown) {
+      console.warn("[prisma] getAllReferencedPhotoUrls fallback:", getErrorMessage(err));
+    }
+  }
 
   if (isPostgresConfigured) {
     try {
@@ -381,6 +428,28 @@ export async function getOrphanBlobs(minAgeHours = 0): Promise<OrphanBlobItem[]>
 
 // Helper: Query ledger by hash
 async function getLedgerByHash(hash: string): Promise<UploadLedgerEntry | null> {
+  if (isPrismaConfigured && prisma) {
+    try {
+      const row = await prisma.uploadLedger.findFirst({
+        where: { content_hash: hash, status: "committed" },
+      });
+      if (row) {
+        return {
+          id: row.id,
+          url: row.url,
+          content_hash: row.content_hash,
+          size_bytes: row.size_bytes,
+          mime_type: row.mime_type,
+          status: row.status as "pending" | "committed" | "deleted",
+          created_at: row.created_at.toISOString(),
+          committed_at: row.committed_at?.toISOString() || null,
+        };
+      }
+    } catch (err: unknown) {
+      console.warn("[prisma] getLedgerByHash fallback:", getErrorMessage(err));
+    }
+  }
+
   if (isPostgresConfigured) {
     try {
       const res = await pgQuery(
@@ -413,6 +482,30 @@ async function getLedgerByHash(hash: string): Promise<UploadLedgerEntry | null> 
 // Helper: Insert record into ledger
 async function recordUploadLedger(entry: Omit<UploadLedgerEntry, "id" | "created_at" | "committed_at">): Promise<void> {
   localStore.addUploadLedger(entry);
+
+  if (isPrismaConfigured && prisma) {
+    try {
+      await prisma.uploadLedger.upsert({
+        where: { url: entry.url },
+        create: {
+          url: entry.url,
+          content_hash: entry.content_hash,
+          size_bytes: entry.size_bytes,
+          mime_type: entry.mime_type,
+          status: entry.status,
+        },
+        update: {
+          content_hash: entry.content_hash,
+          size_bytes: entry.size_bytes,
+          mime_type: entry.mime_type,
+          status: entry.status,
+        },
+      });
+      return;
+    } catch (err: unknown) {
+      console.warn("[prisma] recordUploadLedger fallback:", getErrorMessage(err));
+    }
+  }
 
   if (isPostgresConfigured) {
     try {

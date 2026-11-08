@@ -10,11 +10,15 @@
     "lint:bullets": "node scripts/lint-bullets.mjs",
     "check:contrast": "node scripts/check-token-contrast.mjs",
     "db:init": "node scripts/init-local-db.mjs",
+    "db:push": "prisma db push",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio",
     "storage:orphans": "node scripts/storage-orphans.mjs",
     "e2e": "playwright test"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
+    "@prisma/client": "^6.4.1",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.118.0",
     "@tanstack/react-table": "^9.3.1",
@@ -41,6 +45,7 @@
     "@types/react-dom": "^19",
     "eslint": "^10.14.0",
     "eslint-config-next": "^16.4.4",
+    "prisma": "^6.4.1",
     "puppeteer-core": "^25.16.0",
     "tailwindcss": "^4",
     "typescript": "^5"

@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { isPrismaConfigured, prisma } from "./prisma";
 import { isPostgresConfigured, pgQuery, getErrorMessage } from "./postgres";
 import { isSupabaseConfigured, supabase } from "./client";
 import { localStore } from "./local-store";
@@ -6,6 +7,7 @@ import {
   InfakDistribution,
   GeberMasjidDistribution,
   Report,
+  ReportProgram,
   ThemedCampaign,
   GalleryItem,
   BankAccount,
@@ -31,6 +33,29 @@ function getSupabaseClient() {
 export const db = {
   // 1. Infak Distributions
   getInfakDistributions: cache(async (onlyPublished = true): Promise<InfakDistribution[]> => {
+    // A. Prisma (Primary)
+    if (isPrismaConfigured && prisma) {
+      try {
+        const data = await prisma.infakDistribution.findMany({
+          where: onlyPublished ? { status: "published" } : undefined,
+          orderBy: { mushaf_no: "asc" },
+        });
+        return data.map((d) => ({
+          ...d,
+          lat: d.lat ? Number(d.lat) : null,
+          lng: d.lng ? Number(d.lng) : null,
+          distributed_at: d.distributed_at.toISOString().split("T")[0],
+          recipient_type: d.recipient_type as "pesantren" | "masjid" | "madrasah" | "lainnya",
+          status: d.status as "draft" | "published",
+          created_at: d.created_at.toISOString(),
+          updated_at: d.updated_at.toISOString(),
+        }));
+      } catch (err: unknown) {
+        console.warn("[prisma] getInfakDistributions fallback:", getErrorMessage(err));
+      }
+    }
+
+    // B. Direct Postgres Fallback
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery<InfakDistribution>(
@@ -45,6 +70,7 @@ export const db = {
       }
     }
 
+    // C. Supabase Fallback
     if (isSupabaseConfigured && supabase) {
       try {
         const client = getSupabaseClient();
@@ -57,10 +83,31 @@ export const db = {
       }
     }
 
+    // D. Local Store Fallback
     return localStore.getInfak(onlyPublished);
   }),
 
   getInfakById: cache(async (id: string): Promise<InfakDistribution | null> => {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const d = await prisma.infakDistribution.findUnique({ where: { id } });
+        if (d) {
+          return {
+            ...d,
+            lat: d.lat ? Number(d.lat) : null,
+            lng: d.lng ? Number(d.lng) : null,
+            distributed_at: d.distributed_at.toISOString().split("T")[0],
+            recipient_type: d.recipient_type as "pesantren" | "masjid" | "madrasah" | "lainnya",
+            status: d.status as "draft" | "published",
+            created_at: d.created_at.toISOString(),
+            updated_at: d.updated_at.toISOString(),
+          };
+        }
+      } catch (err: unknown) {
+        console.warn("[prisma] getInfakById fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery<InfakDistribution>(
@@ -88,6 +135,26 @@ export const db = {
 
   // 2. Geber Masjid
   getGeberDistributions: cache(async (onlyPublished = true): Promise<GeberMasjidDistribution[]> => {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const data = await prisma.geberMasjidDistribution.findMany({
+          where: onlyPublished ? { status: "published" } : undefined,
+          orderBy: { activity_date: "desc" },
+        });
+        return data.map((g) => ({
+          ...g,
+          lat: g.lat ? Number(g.lat) : null,
+          lng: g.lng ? Number(g.lng) : null,
+          activity_date: g.activity_date.toISOString().split("T")[0],
+          status: g.status as "draft" | "published",
+          created_at: g.created_at.toISOString(),
+          updated_at: g.updated_at.toISOString(),
+        }));
+      } catch (err: unknown) {
+        console.warn("[prisma] getGeberDistributions fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(
@@ -119,6 +186,25 @@ export const db = {
   }),
 
   getGeberById: cache(async (id: string): Promise<GeberMasjidDistribution | null> => {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const g = await prisma.geberMasjidDistribution.findUnique({ where: { id } });
+        if (g) {
+          return {
+            ...g,
+            lat: g.lat ? Number(g.lat) : null,
+            lng: g.lng ? Number(g.lng) : null,
+            activity_date: g.activity_date.toISOString().split("T")[0],
+            status: g.status as "draft" | "published",
+            created_at: g.created_at.toISOString(),
+            updated_at: g.updated_at.toISOString(),
+          };
+        }
+      } catch (err: unknown) {
+        console.warn("[prisma] getGeberById fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(
@@ -147,6 +233,27 @@ export const db = {
 
   // 3. Reports
   getReports: cache(async (onlyPublished = true): Promise<Report[]> => {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const data = await prisma.report.findMany({
+          where: onlyPublished ? { status: "published" } : undefined,
+          orderBy: { period_start: "desc" },
+        });
+        return data.map((r) => ({
+          ...r,
+          program: r.program as ReportProgram,
+          amount_idr: r.amount_idr ? Number(r.amount_idr) : null,
+          period_start: r.period_start.toISOString().split("T")[0],
+          period_end: r.period_end.toISOString().split("T")[0],
+          status: r.status as "draft" | "published",
+          created_at: r.created_at.toISOString(),
+          updated_at: r.updated_at.toISOString(),
+        }));
+      } catch (err: unknown) {
+        console.warn("[prisma] getReports fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(
@@ -180,6 +287,26 @@ export const db = {
   }),
 
   getReportBySlug: cache(async (slug: string): Promise<Report | null> => {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const r = await prisma.report.findUnique({ where: { slug } });
+        if (r) {
+          return {
+            ...r,
+            program: r.program as ReportProgram,
+            amount_idr: r.amount_idr ? Number(r.amount_idr) : null,
+            period_start: r.period_start.toISOString().split("T")[0],
+            period_end: r.period_end.toISOString().split("T")[0],
+            status: r.status as "draft" | "published",
+            created_at: r.created_at.toISOString(),
+            updated_at: r.updated_at.toISOString(),
+          };
+        }
+      } catch (err: unknown) {
+        console.warn("[prisma] getReportBySlug fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(
@@ -209,6 +336,26 @@ export const db = {
   }),
 
   getReportById: cache(async (id: string): Promise<Report | null> => {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const r = await prisma.report.findUnique({ where: { id } });
+        if (r) {
+          return {
+            ...r,
+            program: r.program as ReportProgram,
+            amount_idr: r.amount_idr ? Number(r.amount_idr) : null,
+            period_start: r.period_start.toISOString().split("T")[0],
+            period_end: r.period_end.toISOString().split("T")[0],
+            status: r.status as "draft" | "published",
+            created_at: r.created_at.toISOString(),
+            updated_at: r.updated_at.toISOString(),
+          };
+        }
+      } catch (err: unknown) {
+        console.warn("[prisma] getReportById fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(
@@ -239,6 +386,21 @@ export const db = {
 
   // 4. Themed Campaigns
   getThemedCampaigns: cache(async (): Promise<ThemedCampaign[]> => {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const data = await prisma.themedCampaign.findMany({ orderBy: { created_at: "desc" } });
+        return data.map((c) => ({
+          ...c,
+          target_idr: Number(c.target_idr),
+          collected_idr: Number(c.collected_idr),
+          status: c.status as "aktif" | "selesai",
+          created_at: c.created_at.toISOString(),
+        }));
+      } catch (err: unknown) {
+        console.warn("[prisma] getThemedCampaigns fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(`select * from themed_campaigns order by created_at desc`);
@@ -263,6 +425,23 @@ export const db = {
 
   // 5. Gallery Items
   getGalleryItems: cache(async (): Promise<GalleryItem[]> => {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const data = await prisma.galleryItem.findMany({
+          where: { status: "published" },
+          orderBy: { date: "desc" },
+        });
+        return data.map((g) => ({
+          ...g,
+          date: g.date.toISOString().split("T")[0],
+          status: g.status as "draft" | "published",
+          created_at: g.created_at.toISOString(),
+        }));
+      } catch (err: unknown) {
+        console.warn("[prisma] getGalleryItems fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(
@@ -292,6 +471,15 @@ export const db = {
 
   // 6. Settings (Bank, Contact, Social)
   getBankAccounts: cache(async (): Promise<BankAccount[]> => {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const row = await prisma.siteSetting.findUnique({ where: { key: "bank_accounts" } });
+        if (row?.value) return row.value as unknown as BankAccount[];
+      } catch (err: unknown) {
+        console.warn("[prisma] getBankAccounts fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(`select value from site_settings where key = 'bank_accounts' limit 1`);
@@ -315,6 +503,15 @@ export const db = {
   }),
 
   getContactInfo: cache(async (): Promise<ContactInfo> => {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const row = await prisma.siteSetting.findUnique({ where: { key: "contact_info" } });
+        if (row?.value) return row.value as unknown as ContactInfo;
+      } catch (err: unknown) {
+        console.warn("[prisma] getContactInfo fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(`select value from site_settings where key = 'contact_info' limit 1`);
@@ -338,6 +535,15 @@ export const db = {
   }),
 
   getSocialLinks: cache(async (): Promise<SocialLinks> => {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const row = await prisma.siteSetting.findUnique({ where: { key: "social_links" } });
+        if (row?.value) return row.value as unknown as SocialLinks;
+      } catch (err: unknown) {
+        console.warn("[prisma] getSocialLinks fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(`select value from site_settings where key = 'social_links' limit 1`);
@@ -362,6 +568,47 @@ export const db = {
 
   // 7. Infak Al-Qur'an Jinan (Dua Tingkat)
   getInfakJinan: cache(async (onlyPublished = true): Promise<InfakJinanRecord[]> => {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const data = await prisma.infakJinan.findMany({
+          where: onlyPublished ? { status: "published" } : undefined,
+          orderBy: { mushaf_no: "asc" },
+          include: {
+            photos: { orderBy: { sort: "asc" } },
+            santri_list: {
+              include: { hafalan_updates: { orderBy: { updated_on: "desc" } } },
+              orderBy: { sort: "asc" },
+            },
+          },
+        });
+        return data.map((item) => ({
+          ...item,
+          distributed_at: item.distributed_at.toISOString().split("T")[0],
+          status: item.status as "draft" | "published",
+          created_at: item.created_at.toISOString(),
+          updated_at: item.updated_at.toISOString(),
+          photos: item.photos.map((p) => ({
+            ...p,
+            created_at: p.created_at.toISOString(),
+          })),
+          santri_list: item.santri_list.map((s) => ({
+            ...s,
+            status: s.status as "draft" | "published",
+            created_at: s.created_at.toISOString(),
+            updated_at: s.updated_at.toISOString(),
+            hafalan_updates: s.hafalan_updates.map((h) => ({
+              ...h,
+              updated_on: h.updated_on.toISOString().split("T")[0],
+              created_at: h.created_at.toISOString(),
+            })),
+          })),
+          santri_count: item.santri_list.length,
+        })) as InfakJinanRecord[];
+      } catch (err: unknown) {
+        console.warn("[prisma] getInfakJinan fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(`
@@ -408,7 +655,46 @@ export const db = {
   }),
 
   getPublicInfakJinan: cache(async (): Promise<PublicInfakJinanRecord[]> => {
-    // 1. Primary: Local PostgreSQL
+    // 1. Primary: Prisma
+    if (isPrismaConfigured && prisma) {
+      try {
+        const data = await prisma.infakJinan.findMany({
+          where: { status: "published" },
+          orderBy: { mushaf_no: "asc" },
+          include: {
+            photos: { orderBy: { sort: "asc" } },
+            santri_list: { where: { status: "published" } },
+          },
+        });
+        return data.map((item) => ({
+          id: item.id,
+          mushaf_no: item.mushaf_no,
+          display_donor_name: item.show_donor_name ? item.donor_name : "Hamba Allah",
+          donor_origin: item.donor_origin,
+          dedication_name: item.dedication_name,
+          pesantren_name: item.pesantren_name,
+          pesantren_province: item.pesantren_province,
+          pesantren_city: item.pesantren_city,
+          address: item.address,
+          distributed_at: item.distributed_at.toISOString().split("T")[0],
+          maps_url: item.maps_url,
+          status: item.status as "draft" | "published",
+          photos: item.photos.map((p) => ({
+            id: p.id,
+            infak_id: p.infak_id,
+            url: p.url,
+            caption: p.caption,
+            sort: p.sort,
+            created_at: p.created_at.toISOString(),
+          })),
+          santri_count: item.santri_list.length,
+        }));
+      } catch (err: unknown) {
+        console.warn("[prisma] getPublicInfakJinan fallback:", getErrorMessage(err));
+      }
+    }
+
+    // 2. Direct PostgreSQL
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(`
@@ -448,7 +734,7 @@ export const db = {
       }
     }
 
-    // 2. Fallback: Supabase
+    // 3. Fallback: Supabase
     if (isSupabaseConfigured && supabase) {
       try {
         const client = getSupabaseClient();
@@ -464,12 +750,86 @@ export const db = {
       }
     }
 
-    // 3. Fallback: localStore (already sorted by mushaf_no)
+    // 4. Fallback: localStore (already sorted by mushaf_no)
     return localStore.getPublicInfakJinan();
   }),
 
   getPublicInfakJinanDetail: cache(async (id: string): Promise<{ donation: PublicInfakJinanRecord; santri: PublicInfakJinanSantri[] } | null> => {
-    // 1. Primary: Local PostgreSQL
+    // 1. Primary: Prisma
+    if (isPrismaConfigured && prisma) {
+      try {
+        const item = await prisma.infakJinan.findUnique({
+          where: { id },
+          include: {
+            photos: { orderBy: { sort: "asc" } },
+            santri_list: {
+              where: { status: "published" },
+              orderBy: { sort: "asc" },
+              include: {
+                hafalan_updates: { orderBy: { updated_on: "desc" } },
+              },
+            },
+          },
+        });
+
+        if (item && item.status === "published") {
+          const donation: PublicInfakJinanRecord = {
+            id: item.id,
+            mushaf_no: item.mushaf_no,
+            display_donor_name: item.show_donor_name ? item.donor_name : "Hamba Allah",
+            donor_origin: item.donor_origin,
+            dedication_name: item.dedication_name,
+            pesantren_name: item.pesantren_name,
+            pesantren_province: item.pesantren_province,
+            pesantren_city: item.pesantren_city,
+            address: item.address,
+            distributed_at: item.distributed_at.toISOString().split("T")[0],
+            maps_url: item.maps_url,
+            status: item.status as "draft" | "published",
+            photos: item.photos.map((p) => ({
+              id: p.id,
+              infak_id: p.infak_id,
+              url: p.url,
+              caption: p.caption,
+              sort: p.sort,
+              created_at: p.created_at.toISOString(),
+            })),
+            santri_count: item.santri_list.length,
+          };
+
+          const santri: PublicInfakJinanSantri[] = item.santri_list.map((s) => {
+            const updates: HafalanUpdate[] = s.hafalan_updates.map((h) => ({
+              id: h.id,
+              santri_id: h.santri_id,
+              updated_on: h.updated_on.toISOString().split("T")[0],
+              surah_no: h.surah_no,
+              surah_name: h.surah_name,
+              ayat: h.ayat,
+              juz: h.juz,
+              notes: h.notes || undefined,
+            }));
+            const latest = updates[0];
+            return {
+              id: s.id,
+              infak_id: s.infak_id,
+              santri_name: s.name,
+              sort: s.sort,
+              status: s.status as "draft" | "published",
+              latest_surah: latest ? latest.surah_name : "-",
+              latest_ayat: latest ? latest.ayat : undefined,
+              latest_juz: latest ? latest.juz : undefined,
+              hafalan_updates: updates,
+            };
+          });
+
+          return { donation, santri };
+        }
+      } catch (err: unknown) {
+        console.warn("[prisma] getPublicInfakJinanDetail fallback:", getErrorMessage(err));
+      }
+    }
+
+    // 2. Direct PostgreSQL
     if (isPostgresConfigured) {
       try {
         const donRes = await pgQuery(`
@@ -555,7 +915,7 @@ export const db = {
       }
     }
 
-    // 2. Fallback: Supabase
+    // 3. Fallback: Supabase
     if (isSupabaseConfigured && supabase) {
       try {
         const client = getSupabaseClient();
@@ -612,7 +972,7 @@ export const db = {
       }
     }
 
-    // 3. Fallback: localStore
+    // 4. Fallback: localStore
     return localStore.getPublicInfakJinanDetail(id);
   }),
 
@@ -622,6 +982,22 @@ export const db = {
 
   // 8. BUSS Al-Qur'an
   getBussDistributions: cache(async (onlyPublished = true): Promise<BussDistribution[]> => {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const data = await prisma.bussDistribution.findMany({
+          where: onlyPublished ? { status: "published" } : undefined,
+          orderBy: [{ year: "desc" }, { created_at: "desc" }],
+        });
+        return data.map((b) => ({
+          ...b,
+          status: b.status as "draft" | "published",
+          created_at: b.created_at.toISOString(),
+        }));
+      } catch (err: unknown) {
+        console.warn("[prisma] getBussDistributions fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(
@@ -670,6 +1046,24 @@ export const db = {
 
   // 9. Yatim Berdikari
   getYatimActivities: cache(async (onlyPublished = true): Promise<YatimActivity[]> => {
+    if (isPrismaConfigured && prisma) {
+      try {
+        const data = await prisma.yatimDistribution.findMany({
+          where: onlyPublished ? { status: "published" } : undefined,
+          orderBy: { created_at: "desc" },
+        });
+        return data.map((y) => ({
+          ...y,
+          documentation_urls: y.documentation_urls?.length ? y.documentation_urls : y.photo_urls,
+          activity_date: y.activity_date ? y.activity_date.toISOString().split("T")[0] : y.created_at.toISOString().split("T")[0],
+          status: y.status as "draft" | "published",
+          created_at: y.created_at.toISOString(),
+        }));
+      } catch (err: unknown) {
+        console.warn("[prisma] getYatimActivities fallback:", getErrorMessage(err));
+      }
+    }
+
     if (isPostgresConfigured) {
       try {
         const res = await pgQuery(

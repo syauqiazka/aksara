@@ -1,0 +1,234 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 1. Site Settings
+model SiteSetting {
+  key        String   @id
+  value      Json
+  updated_at DateTime @default(now()) @updatedAt
+
+  @@map("site_settings")
+}
+
+// 2. Upload Ledger
+model UploadLedger {
+  id           String    @id @default(uuid()) @db.Uuid
+  url          String    @unique
+  content_hash String
+  size_bytes   Int
+  mime_type    String
+  status       String
+  created_at   DateTime  @default(now())
+  committed_at DateTime?
+
+  @@map("upload_ledger")
+}
+
+// 3. Infak Al-Qur'an Jinan (Tingkat 1)
+model InfakJinan {
+  id                 String               @id @default(uuid()) @db.Uuid
+  mushaf_no          Int                  @unique
+  donor_name         String
+  show_donor_name    Boolean              @default(false)
+  donor_origin       String
+  donor_phone        String?
+  dedication_name    String
+  pesantren_name     String
+  pesantren_province String?
+  pesantren_city     String?
+  address            String
+  distributed_at     DateTime             @db.Date
+  maps_url           String?
+  santri_name        String?
+  santri_phone       String?
+  status             String               @default("published")
+  created_at         DateTime             @default(now())
+  updated_at         DateTime             @default(now()) @updatedAt
+  photos             InfakJinanPhoto[]
+  santri_list        InfakJinanSantri[]
+
+  @@map("infak_jinan")
+}
+
+// 4. Foto Serah Terima Infak Jinan
+model InfakJinanPhoto {
+  id         String     @id @default(uuid()) @db.Uuid
+  infak_id   String     @db.Uuid
+  url        String
+  caption    String?
+  sort       Int        @default(0)
+  created_at DateTime   @default(now())
+  infak      InfakJinan @relation(fields: [infak_id], references: [id], onDelete: Cascade)
+
+  @@map("infak_jinan_photos")
+}
+
+// 5. Santri Binaan Infak Jinan (Tingkat 2)
+model InfakJinanSantri {
+  id              String                 @id @default(uuid()) @db.Uuid
+  infak_id        String                 @db.Uuid
+  name            String
+  phone           String?
+  sort            Int                    @default(0)
+  status          String                 @default("published")
+  created_at      DateTime               @default(now())
+  updated_at      DateTime               @default(now()) @updatedAt
+  infak           InfakJinan             @relation(fields: [infak_id], references: [id], onDelete: Cascade)
+  hafalan_updates SantriHafalanUpdate[]
+
+  @@map("infak_jinan_santri")
+}
+
+// 6. Progres Hafalan Santri
+model SantriHafalanUpdate {
+  id         String           @id @default(uuid()) @db.Uuid
+  santri_id  String           @db.Uuid
+  updated_on DateTime         @db.Date
+  surah_no   Int
+  surah_name String
+  ayat       Int
+  juz        Int
+  notes      String?
+  created_at DateTime         @default(now())
+  santri     InfakJinanSantri @relation(fields: [santri_id], references: [id], onDelete: Cascade)
+
+  @@map("santri_hafalan_updates")
+}
+
+// 7. Geber Bersih Masjid
+model GeberMasjidDistribution {
+  id             String    @id @default(uuid()) @db.Uuid
+  mosque_name    String
+  province       String
+  city           String
+  district       String
+  address        String
+  lat            Decimal?  @db.Decimal
+  lng            Decimal?  @db.Decimal
+  activity_date  DateTime  @db.Date
+  participants   Int       @default(0)
+  activity_notes String?
+  photo_urls     String[]  @default([])
+  status         String    @default("published")
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @default(now()) @updatedAt
+
+  @@map("geber_masjid_distributions")
+}
+
+// 8. BUSS Al-Qur'an
+model BussDistribution {
+  id              String   @id @default(uuid()) @db.Uuid
+  year            Int
+  santri_name     String
+  origin          String
+  pesantren_name  String
+  current_surah   String
+  current_ayat    Int
+  juz             Int
+  donor_name      String
+  show_donor_name Boolean  @default(false)
+  photo_urls      String[] @default([])
+  status          String   @default("published")
+  created_at      DateTime @default(now())
+
+  @@map("buss_distributions")
+}
+
+// 9. Yatim Berdikari
+model YatimDistribution {
+  id                 String    @id @default(uuid()) @db.Uuid
+  year               Int
+  activity_name      String
+  organizer          String
+  description        String
+  photo_urls         String[]  @default([])
+  documentation_urls String[]  @default([])
+  activity_date      DateTime? @db.Date
+  status             String    @default("published")
+  created_at         DateTime  @default(now())
+
+  @@map("yatim_distributions")
+}
+
+// 10. Laporan Penyaluran
+model Report {
+  id            String   @id @default(uuid()) @db.Uuid
+  slug          String   @unique
+  title         String
+  program       String
+  period_start  DateTime @db.Date
+  period_end    DateTime @db.Date
+  summary       String
+  body          String
+  beneficiaries Int      @default(0)
+  amount_idr    BigInt?
+  cover_url     String?
+  gallery_urls  String[] @default([])
+  pdf_url       String?
+  status        String   @default("published")
+  created_at    DateTime @default(now())
+  updated_at    DateTime @default(now()) @updatedAt
+
+  @@map("reports")
+}
+
+// 11. Galeri Kegiatan
+model GalleryItem {
+  id         String   @id @default(uuid()) @db.Uuid
+  title      String
+  program    String
+  date       DateTime @db.Date
+  image_url  String
+  caption    String?
+  status     String   @default("published")
+  created_at DateTime @default(now())
+
+  @@map("gallery_items")
+}
+
+// 12. Donasi Tematik
+model ThemedCampaign {
+  id            String   @id @default(uuid()) @db.Uuid
+  title         String
+  disaster_type String
+  location      String
+  status        String   @default("aktif")
+  description   String
+  cover_url     String?
+  target_idr    BigInt   @default(0)
+  collected_idr BigInt   @default(0)
+  created_at    DateTime @default(now())
+
+  @@map("themed_campaigns")
+}
+
+// 13. Infak Single-Tier (Data Legacy & Impor CSV)
+model InfakDistribution {
+  id              String   @id @default(uuid()) @db.Uuid
+  mushaf_no       Int      @unique
+  donor_name      String
+  show_donor_name Boolean  @default(false)
+  recipient_name  String
+  recipient_type  String
+  province        String
+  city            String
+  district        String
+  lat             Decimal? @db.Decimal
+  lng             Decimal? @db.Decimal
+  distributed_at  DateTime @db.Date
+  quantity        Int      @default(1)
+  photo_url       String?
+  notes           String?
+  status          String   @default("published")
+  created_at      DateTime @default(now())
+  updated_at      DateTime @default(now()) @updatedAt
+
+  @@map("infak_distributions")
+}
