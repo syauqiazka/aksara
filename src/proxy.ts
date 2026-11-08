@@ -3,6 +3,16 @@ import type { NextRequest } from "next/server";
 
 const SESSION_COOKIE_NAME = "sahabat_aksara_admin_session";
 
+function getAllowedOrigins(): string[] {
+  const envOrigins = process.env.ALLOWED_ORIGINS;
+  if (!envOrigins) return ["localhost:3000", "127.0.0.1:3000"];
+
+  return envOrigins
+    .split(",")
+    .map((o) => o.trim().replace(/^https?:\/\//, ""))
+    .filter(Boolean);
+}
+
 async function hasValidAdminSession(token?: string): Promise<boolean> {
   const secret = process.env.ADMIN_SESSION_SECRET;
   if (!token || !secret || secret.length < 32) return false;
@@ -44,11 +54,44 @@ async function hasValidAdminSession(token?: string): Promise<boolean> {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const origin = request.headers.get("origin") || "";
   const isAdminPage = pathname.startsWith("/admin");
   const isAdminApi = pathname.startsWith("/api/admin/");
-  if (!isAdminPage && !isAdminApi) return NextResponse.next();
+
+  // 1. CORS Preflight & Headers
+  const allowedOrigins = getAllowedOrigins();
+  const normalizedOriginHost = origin.replace(/^https?:\/\//, "").replace(/\/$/, "");
+  const isOriginAllowed =
+    !origin ||
+    allowedOrigins.some((allowed) => normalizedOriginHost === allowed || normalizedOriginHost.endsWith(`.${allowed}`));
+
+  if (request.method === "OPTIONS" && pathname.startsWith("/api/")) {
+    const preflightHeaders = new Headers();
+    if (isOriginAllowed && origin) {
+      preflightHeaders.set("Access-Control-Allow-Origin", origin);
+      preflightHeaders.set("Access-Control-Allow-Credentials", "true");
+    }
+    preflightHeaders.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    preflightHeaders.set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+    preflightHeaders.set("Access-Control-Max-Age", "86400");
+    return new NextResponse(null, { status: 204, headers: preflightHeaders });
+  }
+
+  if (!isAdminPage && !isAdminApi) {
+    const response = NextResponse.next();
+    if (pathname.startsWith("/api/") && isOriginAllowed && origin) {
+      response.headers.set("Access-Control-Allow-Origin", origin);
+      response.headers.set("Access-Control-Allow-Credentials", "true");
+    }
+    return response;
+  }
 
   const response = NextResponse.next();
+  if (isOriginAllowed && origin) {
+    response.headers.set("Access-Control-Allow-Origin", origin);
+    response.headers.set("Access-Control-Allow-Credentials", "true");
+  }
+
   if (isAdminPage) response.headers.set("X-Robots-Tag", "noindex, nofollow");
 
   const validSession = await hasValidAdminSession(
@@ -79,5 +122,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/admin/:path*"],
+  matcher: ["/admin/:path*", "/api/:path*"],
 };

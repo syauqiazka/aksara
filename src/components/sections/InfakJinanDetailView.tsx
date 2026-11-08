@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { formatTanggal } from "@/lib/format-date";
 import Image from "next/image";
@@ -27,6 +28,11 @@ interface Props {
 export default function InfakJinanDetailView({ donation, santri }: Props) {
   const [activeSantriTimeline, setActiveSantriTimeline] = useState<PublicInfakJinanSantri | null>(null);
   const [showPhotoGallery, setShowPhotoGallery] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Kunci scroll halaman saat popup aktif agar fokus pada modal
   useEffect(() => {
@@ -42,16 +48,10 @@ export default function InfakJinanDetailView({ donation, santri }: Props) {
 
   const handleOpenTimeline = (s: PublicInfakJinanSantri) => {
     setActiveSantriTimeline(s);
-    if (typeof window !== "undefined") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
   };
 
   const handleOpenPhotoGallery = () => {
     setShowPhotoGallery(true);
-    if (typeof window !== "undefined") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
   };
 
   return (
@@ -279,132 +279,146 @@ export default function InfakJinanDetailView({ donation, santri }: Props) {
       </div>
 
       {/* 4. Modal Timeline Riwayat Bulanan Santri */}
-      {activeSantriTimeline && (
+      {mounted && activeSantriTimeline && createPortal(
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-xs p-3 sm:p-6 animate-fade-in flex items-start sm:items-center justify-center"
-          onClick={() => setActiveSantriTimeline(null)}
+          className="fixed inset-0 z-[9999] overflow-y-auto"
         >
           <div
-            className="relative bg-[var(--cream-50)] rounded-3xl max-w-xl w-full my-auto max-h-[90vh] overflow-y-auto border border-[var(--gold-500)]/40 shadow-2xl p-5 sm:p-8 space-y-5"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between pb-3 border-b border-[var(--cream-200)]">
-              <div>
-                <span className="text-[10px] uppercase font-bold text-[var(--gold-700)] tracking-wider">
-                  Riwayat Progres Hafalan Bulanan
-                </span>
-                <h3 className="font-serif text-xl font-bold text-[var(--green-950)] mt-0.5">
-                  {activeSantriTimeline.santri_name}
-                </h3>
-                <p className="text-xs text-[var(--ink-600)]">
-                  Mushaf ke-{donation.mushaf_no} / {donation.pesantren_name}
-                </p>
-              </div>
-              <button
-                onClick={() => setActiveSantriTimeline(null)}
-                className="p-2 rounded-full hover:bg-[var(--cream-200)] text-[var(--ink-600)] transition-colors"
-                aria-label="Tutup riwayat hafalan"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Timeline updates */}
-            <div className="space-y-4 pt-2">
-              {activeSantriTimeline.hafalan_updates.length === 0 ? (
-                <p className="text-xs text-[var(--ink-600)] italic text-center py-4">
-                  Belum ada catatan progres bulanan yang diunggah.
-                </p>
-              ) : (
-                <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-[var(--gold-500)]/40">
-                  {activeSantriTimeline.hafalan_updates.map((u: HafalanUpdate, idx: number) => (
-                    <div key={u.id || idx} className="relative group text-xs">
-                      <div className="absolute -left-[19px] top-1.5 w-2.5 h-2.5 rounded-full bg-[var(--gold-500)] border-2 border-[var(--cream-50)]" />
-                      <div className="p-4 rounded-2xl bg-[var(--cream-100)] border border-[var(--cream-200)] space-y-1.5">
-                        <div className="flex items-center justify-between font-semibold">
-                          <span className="text-[var(--green-950)] font-serif text-sm">
-                            Surah {u.surah_name} (Ayat {u.ayat})
-                          </span>
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--green-800)] text-[var(--cream-50)] font-bold">
-                            Juz {u.juz}
-                          </span>
-                        </div>
-                        <div className="text-[10px] text-[var(--ink-600)] flex items-center gap-1">
-                          <Calendar className="w-3 h-3 text-[var(--green-700)]" />
-                          <span>Pembaruan: {formatTanggal(u.updated_on)}</span>
-                        </div>
-                        {u.notes && (
-                          <p className="text-[11px] text-[var(--ink-700)] italic pt-1 border-t border-[var(--cream-200)]/60">
-                            &ldquo;{u.notes}&rdquo;
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+            className="fixed inset-0 bg-black/75 backdrop-blur-xs transition-opacity"
+            onClick={() => setActiveSantriTimeline(null)}
+          />
+          <div className="flex min-h-full items-center justify-center p-3 sm:p-6 text-center">
+            <div
+              className="relative w-full max-w-xl transform rounded-3xl bg-[var(--cream-50)] text-left shadow-2xl transition-all border border-[var(--gold-500)]/40 p-5 sm:p-8 space-y-5 my-auto max-h-[85vh] flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start justify-between pb-3 border-b border-[var(--cream-200)] flex-shrink-0">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-[var(--gold-700)] tracking-wider">
+                    Riwayat Progres Hafalan Bulanan
+                  </span>
+                  <h3 className="font-serif text-xl font-bold text-[var(--green-950)] mt-0.5">
+                    {activeSantriTimeline.santri_name}
+                  </h3>
+                  <p className="text-xs text-[var(--ink-600)]">
+                    Mushaf ke-{donation.mushaf_no} / {donation.pesantren_name}
+                  </p>
                 </div>
-              )}
+                <button
+                  onClick={() => setActiveSantriTimeline(null)}
+                  className="p-2 rounded-full hover:bg-[var(--cream-200)] text-[var(--ink-600)] transition-colors cursor-pointer"
+                  aria-label="Tutup riwayat hafalan"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Timeline updates */}
+              <div className="overflow-y-auto pr-1 flex-1">
+                {activeSantriTimeline.hafalan_updates.length === 0 ? (
+                  <p className="text-xs text-[var(--ink-600)] italic text-center py-4">
+                    Belum ada catatan progres bulanan yang diunggah.
+                  </p>
+                ) : (
+                  <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-[var(--gold-500)]/40">
+                    {activeSantriTimeline.hafalan_updates.map((u: HafalanUpdate, idx: number) => (
+                      <div key={u.id || idx} className="relative group text-xs">
+                        <div className="absolute -left-[19px] top-1.5 w-2.5 h-2.5 rounded-full bg-[var(--gold-500)] border-2 border-[var(--cream-50)]" />
+                        <div className="p-4 rounded-2xl bg-[var(--cream-100)] border border-[var(--cream-200)] space-y-1.5">
+                          <div className="flex items-center justify-between font-semibold">
+                            <span className="text-[var(--green-950)] font-serif text-sm">
+                              Surah {u.surah_name} (Ayat {u.ayat})
+                            </span>
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--green-800)] text-[var(--cream-50)] font-bold">
+                              Juz {u.juz}
+                            </span>
+                          </div>
+                          <div className="text-[10px] text-[var(--ink-600)] flex items-center gap-1">
+                            <Calendar className="w-3 h-3 text-[var(--green-700)]" />
+                            <span>Pembaruan: {formatTanggal(u.updated_on)}</span>
+                          </div>
+                          {u.notes && (
+                            <p className="text-[11px] text-[var(--ink-700)] italic pt-1 border-t border-[var(--cream-200)]/60">
+                              &ldquo;{u.notes}&rdquo;
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* 5. Modal Galeri Foto Donasi */}
-      {showPhotoGallery && donation.photos && (
+      {mounted && showPhotoGallery && donation.photos && createPortal(
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-xs p-3 sm:p-6 animate-fade-in flex items-start sm:items-center justify-center"
-          onClick={() => setShowPhotoGallery(false)}
+          className="fixed inset-0 z-[9999] overflow-y-auto"
         >
           <div
-            className="relative bg-[var(--cream-50)] rounded-3xl max-w-2xl w-full my-auto max-h-[90vh] overflow-y-auto border border-[var(--gold-500)]/40 shadow-2xl p-5 sm:p-8 space-y-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between pb-3 border-b border-[var(--cream-200)]">
-              <div>
-                <h3 className="font-serif text-lg font-bold text-[var(--green-950)]">
-                  Dokumentasi Serah Terima Mushaf #{donation.mushaf_no}
-                </h3>
-                <p className="text-xs text-[var(--ink-600)]">
-                  {donation.pesantren_name} / {formatTanggal(donation.distributed_at)}
-                </p>
-              </div>
-              <button
-                onClick={() => setShowPhotoGallery(false)}
-                className="p-2 rounded-full hover:bg-[var(--cream-200)] text-[var(--ink-600)] transition-colors"
-                aria-label="Tutup galeri foto"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-              {donation.photos.map((p) => (
-                <div
-                  key={p.id}
-                  className="rounded-2xl overflow-hidden border border-[var(--cream-200)] bg-[var(--green-950)] space-y-2 p-2"
-                >
-                  <div className="relative aspect-4/3 rounded-xl overflow-hidden">
-                    <Image
-                      src={p.url}
-                      alt={p.caption || `Mushaf #${donation.mushaf_no}`}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 300px"
-                    />
-                  </div>
-                  {p.caption && (
-                    <p className="text-[11px] text-[var(--cream-100)] italic px-1">
-                      {p.caption}
-                    </p>
-                  )}
+            className="fixed inset-0 bg-black/75 backdrop-blur-xs transition-opacity"
+            onClick={() => setShowPhotoGallery(false)}
+          />
+          <div className="flex min-h-full items-center justify-center p-3 sm:p-6 text-center">
+            <div
+              className="relative w-full max-w-2xl transform rounded-3xl bg-[var(--cream-50)] text-left shadow-2xl transition-all border border-[var(--gold-500)]/40 p-5 sm:p-8 space-y-4 my-auto max-h-[85vh] flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-[var(--cream-200)] flex-shrink-0">
+                <div>
+                  <h3 className="font-serif text-lg font-bold text-[var(--green-950)]">
+                    Dokumentasi Serah Terima Mushaf #{donation.mushaf_no}
+                  </h3>
+                  <p className="text-xs text-[var(--ink-600)]">
+                    {donation.pesantren_name} / {formatTanggal(donation.distributed_at)}
+                  </p>
                 </div>
-              ))}
+                <button
+                  onClick={() => setShowPhotoGallery(false)}
+                  className="p-2 rounded-full hover:bg-[var(--cream-200)] text-[var(--ink-600)] transition-colors cursor-pointer"
+                  aria-label="Tutup galeri foto"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="overflow-y-auto pr-1 flex-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  {donation.photos.map((p) => (
+                    <div
+                      key={p.id}
+                      className="rounded-2xl overflow-hidden border border-[var(--cream-200)] bg-[var(--green-950)] space-y-2 p-2"
+                    >
+                      <div className="relative aspect-4/3 rounded-xl overflow-hidden">
+                        <Image
+                          src={p.url}
+                          alt={p.caption || `Mushaf #${donation.mushaf_no}`}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 300px"
+                        />
+                      </div>
+                      {p.caption && (
+                        <p className="text-[11px] text-[var(--cream-100)] italic px-1">
+                          {p.caption}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

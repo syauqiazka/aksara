@@ -144,7 +144,7 @@ export default function DataSebaranView({
       }
 
       return matchesSearch && matchesOrigin && matchesIsland;
-    });
+    }).sort((a, b) => a.mushaf_no - b.mushaf_no);
   }, [initialInfakJinan, searchQuery, selectedOrigin, selectedIslandFilter]);
 
   // Tab 2: Filtered BUSS
@@ -1134,69 +1134,76 @@ export default function DataSebaranView({
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 bg-black/75 backdrop-blur-sm animate-fade-in"
-          onClick={() => setActiveGalleryModal(null)}
+          className="fixed inset-0 z-[99999] overflow-y-auto"
         >
           <div
-            className="relative bg-[var(--cream-50)] rounded-3xl max-w-lg w-full max-h-[85vh] overflow-y-auto border border-[var(--gold-500)]/40 shadow-2xl p-6 sm:p-8 space-y-5 my-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between pb-3 border-b border-[var(--cream-200)]">
-              <div>
-                <h3 className="font-serif text-xl font-bold text-[var(--green-950)]">
-                  {activeGalleryModal.title}
-                </h3>
-                {activeGalleryModal.subtitle && (
-                  <p className="text-xs text-[var(--ink-600)] mt-0.5">
-                    {activeGalleryModal.subtitle}
+            className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity"
+            onClick={() => setActiveGalleryModal(null)}
+          />
+          <div className="flex min-h-full items-center justify-center p-3 sm:p-6 text-center">
+            <div
+              className="relative w-full max-w-lg transform rounded-3xl bg-[var(--cream-50)] text-left shadow-2xl transition-all border border-[var(--gold-500)]/40 p-5 sm:p-8 space-y-5 my-auto max-h-[85vh] flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start justify-between pb-3 border-b border-[var(--cream-200)] flex-shrink-0">
+                <div>
+                  <h3 className="font-serif text-xl font-bold text-[var(--green-950)]">
+                    {activeGalleryModal.title}
+                  </h3>
+                  {activeGalleryModal.subtitle && (
+                    <p className="text-xs text-[var(--ink-600)] mt-0.5">
+                      {activeGalleryModal.subtitle}
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={() => setActiveGalleryModal(null)}
+                  className="p-2 rounded-full hover:bg-[var(--cream-200)] text-[var(--ink-600)] transition-colors cursor-pointer"
+                  aria-label="Tutup modal galeri"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="overflow-y-auto pr-1 flex-1 space-y-4">
+                {activeGalleryModal.description && (
+                  <p className="text-xs text-[var(--ink-700)] leading-relaxed">
+                    {activeGalleryModal.description}
                   </p>
                 )}
-              </div>
-              <button
-                onClick={() => setActiveGalleryModal(null)}
-                className="p-2 rounded-full hover:bg-[var(--cream-200)] text-[var(--ink-600)] transition-colors cursor-pointer"
-                aria-label="Tutup modal galeri"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
 
-            {activeGalleryModal.description && (
-              <p className="text-xs text-[var(--ink-700)] leading-relaxed">
-                {activeGalleryModal.description}
-              </p>
-            )}
-
-            <div className="grid grid-cols-1 gap-3">
-              {activeGalleryModal.photos.length > 0 ? (
-                activeGalleryModal.photos.map((url, pIdx) => (
-                  <div
-                    key={pIdx}
-                    className="relative aspect-16/10 rounded-2xl overflow-hidden border border-[var(--cream-200)] bg-[var(--green-950)] shadow-sm"
-                  >
-                    <Image
-                      src={url}
-                      alt={activeGalleryModal.title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 550px"
-                    />
-                  </div>
-                ))
-              ) : (
-                <div className="p-8 text-center text-xs text-[var(--ink-500)] rounded-2xl bg-[var(--cream-100)] border border-dashed border-[var(--cream-200)]">
-                  Foto dokumentasi sedang diproses oleh tim media.
+                <div className="grid grid-cols-1 gap-3">
+                  {activeGalleryModal.photos.length > 0 ? (
+                    activeGalleryModal.photos.map((url, pIdx) => (
+                      <div
+                        key={pIdx}
+                        className="relative aspect-16/10 rounded-2xl overflow-hidden border border-[var(--cream-200)] bg-[var(--green-950)] shadow-sm"
+                      >
+                        <Image
+                          src={url}
+                          alt={activeGalleryModal.title}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 550px"
+                        />
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-8 text-center text-xs text-[var(--ink-500)] rounded-2xl bg-[var(--cream-100)] border border-dashed border-[var(--cream-200)]">
+                      Foto dokumentasi sedang diproses oleh tim media.
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </div>
 
-            <div className="pt-2 text-right">
-              <button
-                onClick={() => setActiveGalleryModal(null)}
-                className="px-6 py-2 rounded-full bg-[var(--green-800)] text-[var(--cream-50)] text-xs font-semibold hover:bg-[var(--green-700)] transition-colors cursor-pointer"
-              >
-                Tutup
-              </button>
+              <div className="pt-2 text-right border-t border-[var(--cream-200)] flex-shrink-0">
+                <button
+                  onClick={() => setActiveGalleryModal(null)}
+                  className="px-6 py-2 rounded-full bg-[var(--green-800)] text-[var(--cream-50)] text-xs font-semibold hover:bg-[var(--green-700)] transition-colors cursor-pointer"
+                >
+                  Tutup
+                </button>
+              </div>
             </div>
           </div>
         </div>,

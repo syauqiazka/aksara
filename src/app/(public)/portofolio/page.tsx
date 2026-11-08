@@ -60,7 +60,7 @@ export default function PortofolioPage() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs">
           <div className="flex items-center gap-2 text-[var(--gold-400)] font-semibold">
             <span>Karakter Produk Teknologi:</span>
-            <span className="text-[var(--cream-50)]">Bebas Iklan dan Terbuka untuk Kemaslahatan Ummat</span>
+            <span className="text-[var(--cream-50)]">Terbuka untuk Kemaslahatan Ummat</span>
           </div>
           <div className="flex flex-wrap items-center gap-4 text-[var(--cream-200)]/80">
             <span>6 Modul Terintegrasi</span>

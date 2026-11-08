@@ -76,7 +76,7 @@ export default function AdminInfakListPage() {
       item.donor_origin.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = filterStatus === "all" || item.status === filterStatus;
     return matchesSearch && matchesStatus;
-  });
+  }).sort((a, b) => a.mushaf_no - b.mushaf_no);
 
   return (
     <div className="space-y-6">

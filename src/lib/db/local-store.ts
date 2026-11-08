@@ -309,11 +309,13 @@ export const localStore = {
 
   // Infak Al-Qur'an Jinan (Dua Tingkat: Donasi -> Santri)
   getInfakJinan: (onlyPublished = true): InfakJinanRecord[] => {
-    return onlyPublished ? infakJinanList.filter(i => i.status === 'published') : [...infakJinanList];
+    const list = onlyPublished ? infakJinanList.filter(i => i.status === 'published') : [...infakJinanList];
+    return list.sort((a, b) => a.mushaf_no - b.mushaf_no);
   },
   getPublicInfakJinan: (): PublicInfakJinanRecord[] => {
     return infakJinanList
       .filter(i => i.status === 'published')
+      .sort((a, b) => a.mushaf_no - b.mushaf_no)
       .map(item => {
         const publishedSantri = (item.santri_list || []).filter(s => s.status === 'published');
         return {

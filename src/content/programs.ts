@@ -61,10 +61,10 @@ export const programsContent: ProgramDetail[] = [
       "Mari menjadi bagian bersejarah para penghafal Al-Qur'an dengan mensupport mereka hingga mencapai tujuan akhir (Gerbang Khatam 30 Juz) dengan update progres hafalan yang dapat dipantau secara berkala.",
     ],
     impactPoints: [
-      "BUSS Kelas Ekonomis: Bantuan Uang Saku Santri Rp 200.000,- / Bulan / Santri.",
-      "BUSS Kelas Bisnis: Bantuan Uang Saku Santri Rp 400.000,- / Bulan / Santri.",
-      "BUSS Kelas Eksekutif: Bantuan Uang Saku Santri Rp 600.000,- / Bulan / Santri.",
-      "BUSS Kelas Luxury: Bantuan Uang Saku Santri Rp 1.000.000,- / Bulan / Santri.",
+      "BUSS Kelas Ekonomis: Bantuan Uang Saku Rp 200.000,- / Bulan.",
+      "BUSS Kelas Bisnis: Bantuan Uang Saku Rp 400.000,- / Bulan.",
+      "BUSS Kelas Eksekutif: Bantuan Uang Saku Rp 600.000,- / Bulan.",
+      "BUSS Kelas Luxury: Bantuan Uang Saku Rp 1.000.000,- / Bulan.",
       "Monitoring berkala capaian juz dan ayat hafalan santri menuju Gerbang Khatam.",
     ],
     howToJoin: [

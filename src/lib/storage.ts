@@ -5,6 +5,7 @@ import crypto from "node:crypto";
 import { put, del, list } from "@vercel/blob";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { isPostgresConfigured, pgQuery } from "./db/postgres";
 import { isSupabaseConfigured, supabase } from "./db/client";
 import { localStore } from "./db/local-store";
 import { UploadLedgerEntry } from "./db/types";
@@ -162,18 +163,30 @@ export async function uploadToStorage(
  * Commits an upload in the ledger when the database record is saved successfully.
  */
 export async function commitUpload(url: string): Promise<void> {
+  localStore.commitUploadLedger(url);
+
+  if (isPostgresConfigured) {
+    try {
+      await pgQuery(
+        `update upload_ledger set status = 'committed', committed_at = now() where url = $1`,
+        [url]
+      );
+      return;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn("[postgres] commitUpload fallback:", msg);
+    }
+  }
+
   if (isSupabaseConfigured && supabase) {
     try {
-      const { error } = await supabase
+      await supabase
         .from("upload_ledger")
         .update({ status: "committed", committed_at: new Date().toISOString() })
         .eq("url", url);
-      if (error) localStore.commitUploadLedger(url);
     } catch {
-      localStore.commitUploadLedger(url);
+      // already committed in localStore
     }
-  } else {
-    localStore.commitUploadLedger(url);
   }
 }
 
@@ -192,19 +205,27 @@ export async function deleteBlobFromStorage(url: string): Promise<boolean> {
       await fs.unlink(filePath).catch(() => {});
     }
 
-    // Update ledger
+    localStore.deleteUploadLedger(url);
+
+    // Update ledger in PostgreSQL / Supabase
+    if (isPostgresConfigured) {
+      try {
+        await pgQuery(`update upload_ledger set status = 'deleted' where url = $1`, [url]);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.warn("[postgres] deleteBlobFromStorage ledger fallback:", msg);
+      }
+    }
+
     if (isSupabaseConfigured && supabase) {
       try {
-        const { error } = await supabase
+        await supabase
           .from("upload_ledger")
           .update({ status: "deleted" })
           .eq("url", url);
-        if (error) localStore.deleteUploadLedger(url);
       } catch {
-        localStore.deleteUploadLedger(url);
+        // already updated in localStore
       }
-    } else {
-      localStore.deleteUploadLedger(url);
     }
 
     return true;
@@ -262,6 +283,32 @@ export async function listAllStorageBlobs(): Promise<StorageBlobItem[]> {
  */
 export async function getAllReferencedPhotoUrls(): Promise<Set<string>> {
   const referenced = new Set<string>();
+
+  if (isPostgresConfigured) {
+    try {
+      const [jinanPhotos, geber, reports, gallery, campaigns] = await Promise.all([
+        pgQuery(`select url from infak_jinan_photos where url is not null`),
+        pgQuery(`select photo_urls from geber_masjid_distributions where photo_urls is not null`),
+        pgQuery(`select cover_url, gallery_urls from reports`),
+        pgQuery(`select image_url from gallery_items where image_url is not null`),
+        pgQuery(`select cover_url from themed_campaigns where cover_url is not null`),
+      ]);
+
+      jinanPhotos.rows.forEach((r) => r.url && referenced.add(r.url));
+      geber.rows.forEach((r) => Array.isArray(r.photo_urls) && r.photo_urls.forEach((u: string) => u && referenced.add(u)));
+      reports.rows.forEach((r) => {
+        if (r.cover_url) referenced.add(r.cover_url);
+        if (Array.isArray(r.gallery_urls)) r.gallery_urls.forEach((u: string) => u && referenced.add(u));
+      });
+      gallery.rows.forEach((r) => r.image_url && referenced.add(r.image_url));
+      campaigns.rows.forEach((r) => r.cover_url && referenced.add(r.cover_url));
+
+      return referenced;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn("[postgres] getAllReferencedPhotoUrls fallback:", msg);
+    }
+  }
 
   if (isSupabaseConfigured && supabase) {
     const [infak, geber, reports, gallery, campaigns] = await Promise.all([
@@ -334,6 +381,19 @@ export async function getOrphanBlobs(minAgeHours = 0): Promise<OrphanBlobItem[]>
 
 // Helper: Query ledger by hash
 async function getLedgerByHash(hash: string): Promise<UploadLedgerEntry | null> {
+  if (isPostgresConfigured) {
+    try {
+      const res = await pgQuery(
+        `select * from upload_ledger where content_hash = $1 and status = 'committed' limit 1`,
+        [hash]
+      );
+      if (res.rows.length) return res.rows[0] as UploadLedgerEntry;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn("[postgres] getLedgerByHash fallback:", msg);
+    }
+  }
+
   if (isSupabaseConfigured && supabase) {
     try {
       const { data, error } = await supabase
@@ -342,10 +402,9 @@ async function getLedgerByHash(hash: string): Promise<UploadLedgerEntry | null> 
         .eq("content_hash", hash)
         .eq("status", "committed")
         .maybeSingle();
-      if (error) return localStore.getUploadLedgerByHash(hash);
-      return (data as UploadLedgerEntry | null) ?? null;
+      if (!error && data) return data as UploadLedgerEntry;
     } catch {
-      return localStore.getUploadLedgerByHash(hash);
+      // fallback to localStore
     }
   }
   return localStore.getUploadLedgerByHash(hash);
@@ -353,17 +412,31 @@ async function getLedgerByHash(hash: string): Promise<UploadLedgerEntry | null> 
 
 // Helper: Insert record into ledger
 async function recordUploadLedger(entry: Omit<UploadLedgerEntry, "id" | "created_at" | "committed_at">): Promise<void> {
+  localStore.addUploadLedger(entry);
+
+  if (isPostgresConfigured) {
+    try {
+      await pgQuery(
+        `insert into upload_ledger (url, content_hash, size_bytes, mime_type, status, created_at)
+         values ($1, $2, $3, $4, $5, now())
+         on conflict (url) do nothing`,
+        [entry.url, entry.content_hash, entry.size_bytes, entry.mime_type, entry.status]
+      );
+      return;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn("[postgres] recordUploadLedger fallback:", msg);
+    }
+  }
+
   if (isSupabaseConfigured && supabase) {
     try {
-      const { error } = await supabase.from("upload_ledger").insert({
+      await supabase.from("upload_ledger").insert({
         ...entry,
         created_at: new Date().toISOString(),
       });
-      if (error) localStore.addUploadLedger(entry);
     } catch {
-      localStore.addUploadLedger(entry);
+      // already added to localStore
     }
-  } else {
-    localStore.addUploadLedger(entry);
   }
 }

@@ -200,7 +200,7 @@ test.describe("Verifikasi 5 Item Revisi User", () => {
     await expect(header.getByText("Akta Pendirian Nomor 195")).not.toBeVisible();
   });
 
-  test("9. Program BUSS Al-Qur'an: Seluruh 4 kategori disamakan redaksinya menggunakan 'Bantuan Uang Saku Santri'", async ({
+  test("9. Program BUSS Al-Qur'an: Seluruh 4 kategori disamakan redaksinya menggunakan 'Bantuan Uang Saku'", async ({
     page,
   }) => {
     await page.goto("/program/buss-quran");
@@ -211,16 +211,16 @@ test.describe("Verifikasi 5 Item Revisi User", () => {
     }
 
     await expect(
-      page.getByText("BUSS Kelas Ekonomis: Bantuan Uang Saku Santri Rp 200.000,- / Bulan / Santri.")
+      page.getByText("BUSS Kelas Ekonomis: Bantuan Uang Saku Rp 200.000,- / Bulan.")
     ).toBeVisible();
     await expect(
-      page.getByText("BUSS Kelas Bisnis: Bantuan Uang Saku Santri Rp 400.000,- / Bulan / Santri.")
+      page.getByText("BUSS Kelas Bisnis: Bantuan Uang Saku Rp 400.000,- / Bulan.")
     ).toBeVisible();
     await expect(
-      page.getByText("BUSS Kelas Eksekutif: Bantuan Uang Saku Santri Rp 600.000,- / Bulan / Santri.")
+      page.getByText("BUSS Kelas Eksekutif: Bantuan Uang Saku Rp 600.000,- / Bulan.")
     ).toBeVisible();
     await expect(
-      page.getByText("BUSS Kelas Luxury: Bantuan Uang Saku Santri Rp 1.000.000,- / Bulan / Santri.")
+      page.getByText("BUSS Kelas Luxury: Bantuan Uang Saku Rp 1.000.000,- / Bulan.")
     ).toBeVisible();
 
     // Pastikan redaksi lama tidak ada
