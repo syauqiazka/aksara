@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Fraunces, Plus_Jakarta_Sans, Amiri } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/ui/Navbar";
-import Footer from "@/components/ui/Footer";
+import FooterWrapper from "@/components/ui/FooterWrapper";
 import SmoothScroll from "@/components/motion/SmoothScroll";
 import CustomCursor from "@/components/motion/CustomCursor";
 import PageTransition from "@/components/motion/PageTransition";
@@ -201,7 +201,7 @@ export default function RootLayout({
           <main id="main-content" className="flex-grow flex flex-col w-full relative">
             <PageTransition>{children}</PageTransition>
           </main>
-          <Footer />
+          <FooterWrapper />
         </SmoothScroll>
       </body>
     </html>

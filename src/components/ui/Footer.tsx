@@ -6,8 +6,13 @@ import { usePathname } from "next/navigation";
 import { Mail, MapPin, ExternalLink } from "lucide-react";
 import { organizationContent } from "@/content/organization";
 import IslamicCornerOrnament from "@/components/ui/IslamicCornerOrnament";
+import type { BankAccount } from "@/lib/db/types";
 
-export default function Footer() {
+interface FooterProps {
+  bankAccounts?: BankAccount[];
+}
+
+export default function Footer({ bankAccounts }: FooterProps) {
   const pathname = usePathname();
 
   // If on admin route, don't show public footer
@@ -137,10 +142,21 @@ export default function Footer() {
             <h4 className="text-sm font-semibold uppercase tracking-widest text-[var(--gold-400)] mb-4 font-sans">
               Rekening Resmi Infak
             </h4>
-            <div className="p-4 rounded-xl bg-[var(--green-900)]/60 border border-[var(--gold-500)]/30 text-xs text-[var(--cream-200)]/90 leading-relaxed">
-              <p className="font-semibold text-[var(--gold-300)] mb-1">Informasi rekening segera diumumkan</p>
-              <p>Transfer donasi saat ini dapat dikonfirmasikan langsung melalui email pengurus yayasan.</p>
-            </div>
+            {bankAccounts && bankAccounts.length > 0 && bankAccounts[0].number ? (
+              <div className="p-4 rounded-xl bg-[var(--green-900)]/60 border border-[var(--gold-500)]/30 text-xs space-y-0.5">
+                <p className="font-semibold text-[var(--gold-300)] mb-1">{bankAccounts[0].bank}</p>
+                <p className="font-mono text-lg font-bold text-[var(--cream-50)] tracking-wider">{bankAccounts[0].number}</p>
+                <p className="text-[var(--cream-200)]/80">a.n. {bankAccounts[0].holder}</p>
+                {bankAccounts[0].branch && (
+                  <p className="text-[var(--sage-300)]">Cabang: {bankAccounts[0].branch}</p>
+                )}
+              </div>
+            ) : (
+              <div className="p-4 rounded-xl bg-[var(--green-900)]/60 border border-[var(--gold-500)]/30 text-xs text-[var(--cream-200)]/90 leading-relaxed">
+                <p className="font-semibold text-[var(--gold-300)] mb-1">Informasi rekening segera diumumkan</p>
+                <p>Transfer donasi saat ini dapat dikonfirmasikan langsung melalui email pengurus yayasan.</p>
+              </div>
+            )}
           </div>
 
           {/* Col 4: Contact & Channels */}

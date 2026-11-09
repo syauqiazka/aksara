@@ -19,45 +19,7 @@ import {
   HafalanUpdate,
 } from './types';
 
-// Store in-memory bersih tanpa data dummy/simulasi
-const infakList: InfakDistribution[] = [];
-const geberList: GeberMasjidDistribution[] = [];
-const reportList: Report[] = [];
-const themedCampaignsList: ThemedCampaign[] = [];
-const galleryList: GalleryItem[] = [];
-
-let bankAccounts: BankAccount[] = [
-  {
-    bank: "Bank BCA",
-    number: "",
-    holder: "Yayasan Ajirasa Aksara Semesta",
-    branch: "Kantor Cabang",
-  },
-];
-
-let contactInfo: ContactInfo = {
-  whatsapp: "0822-6217-0018",
-  phone: "0822-6217-0018",
-  email: "ajirasaaksarasemesta@gmail.com",
-  address: "Bogor, Jawa Barat, Indonesia"
-};
-
-let socialLinks: SocialLinks = {
-  instagram: "https://www.instagram.com/sahabat_aksara_semesta?exln=enR1ZnBkZTA1enp6",
-  youtube: "https://youtube.com/@sahabataksara",
-  tiktok: "https://tiktok.com/@sahabataksara"
-};
-
-const uploadLedger: UploadLedgerEntry[] = [];
-
-const globalForStore = globalThis as unknown as {
-  __infakJinanList?: InfakJinanRecord[];
-  __bussList?: BussDistribution[];
-  __yatimList?: YatimActivity[];
-  __bankAccounts?: BankAccount[];
-  __contactInfo?: ContactInfo;
-  __socialLinks?: SocialLinks;
-};
+// --- Helpers untuk persistensi ke file JSON lokal (server-only) ---
 
 function loadPersistedSettings(): {
   bankAccounts?: BankAccount[];
@@ -100,6 +62,81 @@ function savePersistedSettings(settings: {
     // ignore
   }
 }
+
+function loadJsonFile<T>(filename: string): T[] {
+  if (typeof window !== "undefined") return [];
+  try {
+    const fs = eval("require")("fs");
+    const path = eval("require")("path");
+    const filePath = path.join(process.cwd(), "data", filename);
+    if (fs.existsSync(filePath)) {
+      const raw = fs.readFileSync(filePath, "utf8");
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed as T[];
+    }
+  } catch {
+    // ignore
+  }
+  return [];
+}
+
+function saveJsonFile<T>(filename: string, data: T[]): void {
+  if (typeof window !== "undefined") return;
+  try {
+    const fs = eval("require")("fs");
+    const path = eval("require")("path");
+    const dirPath = path.join(process.cwd(), "data");
+    const filePath = path.join(dirPath, filename);
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+    }
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+  } catch {
+    // ignore
+  }
+}
+
+// --- Store in-memory (reportList & galleryList di-seed dari file JSON lokal) ---
+
+const infakList: InfakDistribution[] = [];
+const geberList: GeberMasjidDistribution[] = [];
+// reportList dan galleryList di-seed dari file JSON lokal agar persisten across restarts
+const reportList: Report[] = loadJsonFile<Report>("reports.json");
+const themedCampaignsList: ThemedCampaign[] = [];
+const galleryList: GalleryItem[] = loadJsonFile<GalleryItem>("gallery-items.json");
+
+let bankAccounts: BankAccount[] = [
+  {
+    bank: "Bank BCA",
+    number: "",
+    holder: "Yayasan Ajirasa Aksara Semesta",
+    branch: "Kantor Cabang",
+  },
+];
+
+let contactInfo: ContactInfo = {
+  whatsapp: "0822-6217-0018",
+  phone: "0822-6217-0018",
+  email: "ajirasaaksarasemesta@gmail.com",
+  address: "Bogor, Jawa Barat, Indonesia"
+};
+
+let socialLinks: SocialLinks = {
+  instagram: "https://www.instagram.com/sahabat_aksara_semesta?exln=enR1ZnBkZTA1enp6",
+  youtube: "https://youtube.com/@sahabataksara",
+  tiktok: "https://tiktok.com/@sahabataksara"
+};
+
+const uploadLedger: UploadLedgerEntry[] = [];
+
+const globalForStore = globalThis as unknown as {
+  __infakJinanList?: InfakJinanRecord[];
+  __bussList?: BussDistribution[];
+  __yatimList?: YatimActivity[];
+  __bankAccounts?: BankAccount[];
+  __contactInfo?: ContactInfo;
+  __socialLinks?: SocialLinks;
+};
 
 const infakJinanList: InfakJinanRecord[] =
   globalForStore.__infakJinanList || (globalForStore.__infakJinanList = []);
@@ -176,18 +213,21 @@ export const localStore = {
       updated_at: new Date().toISOString()
     };
     reportList.unshift(newItem);
+    saveJsonFile("reports.json", reportList);
     return newItem;
   },
   updateReport: (id: string, updates: Partial<Report>) => {
     const idx = reportList.findIndex(r => r.id === id);
     if (idx === -1) return null;
     reportList[idx] = { ...reportList[idx], ...updates, updated_at: new Date().toISOString() };
+    saveJsonFile("reports.json", reportList);
     return reportList[idx];
   },
   deleteReport: (id: string) => {
     const idx = reportList.findIndex(r => r.id === id);
     if (idx === -1) return false;
     reportList.splice(idx, 1);
+    saveJsonFile("reports.json", reportList);
     return true;
   },
 
@@ -212,7 +252,22 @@ export const localStore = {
       created_at: new Date().toISOString()
     };
     galleryList.unshift(newItem);
+    saveJsonFile("gallery-items.json", galleryList);
     return newItem;
+  },
+  updateGalleryItem: (id: string, updates: Partial<GalleryItem>) => {
+    const idx = galleryList.findIndex(g => g.id === id);
+    if (idx === -1) return null;
+    galleryList[idx] = { ...galleryList[idx], ...updates };
+    saveJsonFile("gallery-items.json", galleryList);
+    return galleryList[idx];
+  },
+  deleteGalleryItem: (id: string) => {
+    const idx = galleryList.findIndex(g => g.id === id);
+    if (idx === -1) return false;
+    galleryList.splice(idx, 1);
+    saveJsonFile("gallery-items.json", galleryList);
+    return true;
   },
 
   getBankAccounts: () => {
