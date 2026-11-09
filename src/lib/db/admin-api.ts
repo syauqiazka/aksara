@@ -448,7 +448,7 @@ export const db = {
       try {
         let savedId = id;
         if (id) {
-          await pgQuery(
+          const upd = await pgQuery(
             `update infak_jinan set 
                mushaf_no = $1, donor_name = $2, show_donor_name = $3, donor_origin = $4, donor_phone = $5,
                dedication_name = $6, pesantren_name = $7, pesantren_province = $8, pesantren_city = $9,
@@ -462,6 +462,9 @@ export const db = {
               jinanData.status || "published", id
             ]
           );
+          if (upd.rowCount === 0) {
+            throw new Error(`Record with id ${id} not found in postgres`);
+          }
         } else {
           const ins = await pgQuery(
             `insert into infak_jinan (
@@ -524,10 +527,9 @@ export const db = {
         if (savedId) {
           const mirror = { ...item, id: savedId, santri_count: _sl?.length || 0 } as InfakJinanRecord;
           if (id) {
-            const ex = localStore.getInfakJinanById(id);
-            if (ex) Object.assign(ex, mirror);
+            localStore.updateInfakJinan(id, mirror);
           } else {
-            localStore.addInfakJinan(item);
+            localStore.addInfakJinan(item, savedId);
           }
           return mirror;
         }
@@ -546,52 +548,90 @@ export const db = {
           santri_phone: (item as unknown as { santri_phone?: string }).santri_phone || defaultSantriPhone,
         };
 
-        const query = id
-          ? client.from("infak_jinan").update({ ...payload, updated_at: new Date().toISOString() }).eq("id", id)
-          : client.from("infak_jinan").insert(payload);
-        const { data, error } = await query.select().single();
-        throwIfError(error, id ? "memperbarui data infak jinan" : "menambahkan data infak jinan");
+        let savedData: Record<string, unknown> | null = null;
 
-        if (_sl && _sl.length > 0 && data?.id) {
-          if (id) await client.from("infak_jinan_santri").delete().eq("infak_id", id);
-          for (const s of _sl) {
-            const { data: insS } = await client.from("infak_jinan_santri").insert({
-              infak_id: data.id,
-              name: s.name?.trim() || "Santri Binaan",
-              phone: s.phone || null,
-              sort: s.sort || 1,
-              status: s.status || "published",
-            }).select().single();
+        if (id) {
+          const { data: updData, error: updErr } = await client
+            .from("infak_jinan")
+            .update({ ...payload, updated_at: new Date().toISOString() })
+            .eq("id", id)
+            .select();
 
-            if (insS && s.hafalan_updates && s.hafalan_updates.length > 0) {
-              for (const h of s.hafalan_updates) {
-                await client.from("santri_hafalan_updates").insert({
-                  santri_id: insS.id,
-                  updated_on: h.updated_on || new Date().toISOString().split("T")[0],
-                  surah_no: Number(h.surah_no) || 1,
-                  surah_name: String(h.surah_name || "Al-Fatihah"),
-                  ayat: Number(h.ayat) || 1,
-                  juz: Number(h.juz) || 1,
-                  notes: h.notes || null,
-                });
+          if (!updErr && updData && updData.length > 0) {
+            savedData = updData[0] as Record<string, unknown>;
+          } else {
+            console.warn("[supabase] infak_jinan update affected 0 rows or error:", updErr?.message || "0 rows (RLS check needed)");
+          }
+        } else {
+          const { data: insData, error: insErr } = await client
+            .from("infak_jinan")
+            .insert(payload)
+            .select()
+            .single();
+          throwIfError(insErr, "menambahkan data infak jinan");
+          savedData = insData as Record<string, unknown>;
+        }
+
+        if (savedData?.id) {
+          const targetId = String(savedData.id);
+          if (id) {
+            try { await client.from("infak_jinan_santri").delete().eq("infak_id", targetId); } catch {}
+          }
+          if (_sl && _sl.length > 0) {
+            for (const s of _sl) {
+              const { data: insS } = await client.from("infak_jinan_santri").insert({
+                infak_id: targetId,
+                name: s.name?.trim() || "Santri Binaan",
+                phone: s.phone || null,
+                sort: s.sort || 1,
+                status: s.status || "published",
+              }).select().single();
+
+              if (insS && s.hafalan_updates && s.hafalan_updates.length > 0) {
+                for (const h of s.hafalan_updates) {
+                  await client.from("santri_hafalan_updates").insert({
+                    santri_id: insS.id,
+                    updated_on: h.updated_on || new Date().toISOString().split("T")[0],
+                    surah_no: Number(h.surah_no) || 1,
+                    surah_name: String(h.surah_name || "Al-Fatihah"),
+                    ayat: Number(h.ayat) || 1,
+                    juz: Number(h.juz) || 1,
+                    notes: h.notes || null,
+                  });
+                }
               }
             }
           }
-        }
 
-        if (_ph && _ph.length > 0 && data?.id) {
-          if (id) await client.from("infak_jinan_photos").delete().eq("infak_id", id);
-          for (const p of _ph) {
-            await client.from("infak_jinan_photos").insert({
-              infak_id: data.id,
-              url: p.url,
-              caption: p.caption || null,
-              sort: p.sort || 1,
-            });
+          if (id) {
+            try { await client.from("infak_jinan_photos").delete().eq("infak_id", targetId); } catch {}
           }
+          if (_ph && _ph.length > 0) {
+            for (const p of _ph) {
+              await client.from("infak_jinan_photos").insert({
+                infak_id: targetId,
+                url: p.url,
+                caption: p.caption || null,
+                sort: p.sort || 1,
+              });
+            }
+          }
+
+          const mirror = {
+            ...item,
+            id: targetId,
+            santri_count: _sl?.length || 0,
+          } as InfakJinanRecord;
+          localStore.updateInfakJinan(targetId, mirror);
+          return mirror;
         }
 
-        return data as InfakJinanRecord;
+        // If Supabase update affected 0 rows due to RLS, still update localStore mirror safely
+        if (id) {
+          const mirror = { ...item, id, santri_count: _sl?.length || 0 } as InfakJinanRecord;
+          localStore.updateInfakJinan(id, mirror);
+          return mirror;
+        }
       } catch (err) {
         console.warn("[supabase] saveInfakJinan fallback to localStore:", err);
       }
@@ -599,11 +639,7 @@ export const db = {
 
     // 4. Fallback: localStore
     if (id) {
-      const existing = localStore.getInfakJinanById(id);
-      if (existing) {
-        Object.assign(existing, item, { updated_at: new Date().toISOString() });
-        return existing;
-      }
+      return localStore.updateInfakJinan(id, { ...item, id } as InfakJinanRecord);
     }
     return localStore.addInfakJinan(item);
   },
@@ -1098,7 +1134,7 @@ export const db = {
     if (isPostgresConfigured) {
       try {
         if (id) {
-          await pgQuery(
+          const upd = await pgQuery(
             `update geber_masjid_distributions set 
                mosque_name = $1, province = $2, city = $3, district = $4, address = $5,
                lat = $6, lng = $7, activity_date = $8, participants = $9, activity_notes = $10,
@@ -1110,6 +1146,9 @@ export const db = {
               item.activity_notes || null, item.photo_urls || [], item.status || "published", id
             ]
           );
+          if (upd.rowCount === 0) {
+            throw new Error(`Geber with id ${id} not found in postgres`);
+          }
           const mirror = { ...item, id } as GeberMasjidDistribution;
           localStore.updateGeber(id, item);
           return mirror;
@@ -1142,7 +1181,11 @@ export const db = {
           ? client.from("geber_masjid_distributions").update({ ...item, updated_at: new Date().toISOString() }).eq("id", id)
           : client.from("geber_masjid_distributions").insert(item);
         const { data, error } = await query.select().single();
-        if (!error && data) return data as GeberMasjidDistribution;
+        if (!error && data) {
+          const saved = data as GeberMasjidDistribution;
+          localStore.updateGeber(saved.id, saved);
+          return saved;
+        }
       } catch (err: unknown) {
         console.warn("[supabase] saveGeber fallback:", getErrorMessage(err));
       }
@@ -1407,7 +1450,7 @@ export const db = {
     if (isPostgresConfigured) {
       try {
         if (id) {
-          await pgQuery(
+          const upd = await pgQuery(
             `update reports set 
                slug = $1, title = $2, program = $3, period_start = $4, period_end = $5,
                summary = $6, body = $7, beneficiaries = $8, amount_idr = $9,
@@ -1420,6 +1463,9 @@ export const db = {
               item.status || "published", id
             ]
           );
+          if (upd.rowCount === 0) {
+            throw new Error(`Report with id ${id} not found in postgres`);
+          }
           const mirror = { ...item, id } as Report;
           localStore.updateReport(id, item);
           return mirror;
@@ -1452,8 +1498,35 @@ export const db = {
         const query = id
           ? client.from("reports").update({ ...item, updated_at: new Date().toISOString() }).eq("id", id)
           : client.from("reports").insert(item);
-        const { data, error } = await query.select().single();
-        if (!error && data) return data as Report;
+        let { data, error } = await query.select().single();
+
+        // Handle check constraint 23514 on reports.program
+        if (error && (error.code === "23514" || error.message?.includes("reports_program_check"))) {
+          const legacyProgramMap: Record<string, string> = {
+            infak_jinan: "infak_alquran",
+            buss_quran: "infak_alquran",
+            yatim_berdikari: "pena_yatim",
+            pelatihan_it: "bela_berdikari",
+          };
+          const fallbackProgram = legacyProgramMap[item.program];
+          if (fallbackProgram) {
+            console.warn(`[supabase] Mapping program '${item.program}' to '${fallbackProgram}' due to database check constraint.`);
+            const retryQuery = id
+              ? client.from("reports").update({ ...item, program: fallbackProgram, updated_at: new Date().toISOString() }).eq("id", id)
+              : client.from("reports").insert({ ...item, program: fallbackProgram });
+            const retryRes = await retryQuery.select().single();
+            if (!retryRes.error && retryRes.data) {
+              data = { ...retryRes.data, program: item.program };
+              error = null;
+            }
+          }
+        }
+
+        if (!error && data) {
+          const savedReport = data as Report;
+          localStore.updateReport(savedReport.id, savedReport);
+          return savedReport;
+        }
       } catch (err: unknown) {
         console.warn("[supabase] saveReport fallback:", getErrorMessage(err));
       }
@@ -1633,7 +1706,7 @@ export const db = {
     if (isPostgresConfigured) {
       try {
         if (id) {
-          await pgQuery(
+          const upd = await pgQuery(
             `update themed_campaigns set 
                title = $1, disaster_type = $2, location = $3, status = $4,
                description = $5, cover_url = $6, target_idr = $7, collected_idr = $8
@@ -1644,7 +1717,12 @@ export const db = {
               item.collected_idr || 0, id
             ]
           );
-          return { ...item, id } as ThemedCampaign;
+          if (upd.rowCount === 0) {
+            throw new Error(`Themed campaign with id ${id} not found in postgres`);
+          }
+          const mirror = { ...item, id } as ThemedCampaign;
+          localStore.updateCampaign(id, mirror);
+          return mirror;
         } else {
           const res = await pgQuery(
             `insert into themed_campaigns (
@@ -1658,7 +1736,9 @@ export const db = {
               item.collected_idr || 0
             ]
           );
-          return { ...item, id: res.rows[0].id } as ThemedCampaign;
+          const created = { ...item, id: res.rows[0].id } as ThemedCampaign;
+          localStore.addCampaign(item, created.id);
+          return created;
         }
       } catch (err: unknown) {
         console.warn("[postgres] saveThemedCampaign fallback:", getErrorMessage(err));
@@ -1672,12 +1752,20 @@ export const db = {
           ? client.from("themed_campaigns").update(item).eq("id", id)
           : client.from("themed_campaigns").insert(item);
         const { data, error } = await query.select().single();
-        if (!error && data) return data as ThemedCampaign;
+        if (!error && data) {
+          const saved = data as ThemedCampaign;
+          localStore.updateCampaign(saved.id, saved);
+          return saved;
+        }
       } catch (err: unknown) {
         console.warn("[supabase] saveThemedCampaign fallback:", getErrorMessage(err));
       }
     }
 
+    if (id) {
+      const updated = localStore.updateCampaign(id, item);
+      if (updated) return updated;
+    }
     return localStore.addCampaign(item);
   },
 
@@ -1853,14 +1941,19 @@ export const db = {
     if (isPostgresConfigured) {
       try {
         if (id) {
-          await pgQuery(
+          const upd = await pgQuery(
             `update gallery_items set 
                title = $1, program = $2, date = $3, image_url = $4,
                caption = $5, status = $6
              where id = $7`,
             [item.title, item.program, item.date, item.image_url, item.caption || null, item.status || "published", id]
           );
-          return { ...item, id } as GalleryItem;
+          if (upd.rowCount === 0) {
+            throw new Error(`Gallery item with id ${id} not found in postgres`);
+          }
+          const mirror = { ...item, id } as GalleryItem;
+          localStore.updateGalleryItem(id, mirror);
+          return mirror;
         } else {
           const res = await pgQuery(
             `insert into gallery_items (title, program, date, image_url, caption, status)
@@ -1868,7 +1961,9 @@ export const db = {
              returning id`,
             [item.title, item.program, item.date, item.image_url, item.caption || null, item.status || "published"]
           );
-          return { ...item, id: res.rows[0].id } as GalleryItem;
+          const created = { ...item, id: res.rows[0].id } as GalleryItem;
+          localStore.addGalleryItem(item);
+          return created;
         }
       } catch (err: unknown) {
         console.warn("[postgres] saveGalleryItem fallback:", getErrorMessage(err));
@@ -1882,7 +1977,11 @@ export const db = {
           ? client.from("gallery_items").update(item).eq("id", id)
           : client.from("gallery_items").insert(item);
         const { data, error } = await query.select().single();
-        if (!error && data) return data as GalleryItem;
+        if (!error && data) {
+          const saved = data as GalleryItem;
+          localStore.updateGalleryItem(saved.id, saved);
+          return saved;
+        }
       } catch (err: unknown) {
         console.warn("[supabase] saveGalleryItem fallback:", getErrorMessage(err));
       }

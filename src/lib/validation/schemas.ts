@@ -91,14 +91,18 @@ export const campaignSchema = z.object({
 export type CampaignInput = z.infer<typeof campaignSchema>;
 
 export const hafalanUpdateSchema = z.object({
+  id: z.string().optional(),
+  santri_id: z.string().optional(),
   updated_on: z.string().min(8, "Tanggal update harus valid"),
   surah_no: z.coerce.number().min(1).max(114, "Nomor surah antara 1 s/d 114"),
+  surah_name: z.string().default("Al-Fatihah"),
   ayat: z.coerce.number().min(1, "Ayat minimal 1"),
   juz: z.coerce.number().min(1).max(30, "Juz antara 1 s/d 30"),
   notes: z.string().nullable().optional(),
 });
 
 export const infakJinanPhotoSchema = z.object({
+  id: z.string().optional(),
   url: z.string().min(1, "URL foto harus diisi"),
   caption: z.string().nullable().optional(),
   sort: z.coerce.number().default(0),
@@ -127,9 +131,11 @@ export const infakJinanSchema = z.object({
   donor_phone: z.string().nullable().optional(),
   dedication_name: z.string().min(2, "Dedikasi atas nama harus diisi"),
   pesantren_name: z.string().min(2, "Nama pesantren tujuan harus diisi"),
+  pesantren_province: z.string().nullable().optional(),
+  pesantren_city: z.string().nullable().optional(),
   address: z.string().min(5, "Alamat lengkap minimal 5 karakter"),
   distributed_at: z.string().min(8, "Tanggal penyaluran harus valid"),
-  maps_url: z.string().url("URL Google Maps harus valid").nullable().optional().or(z.literal("")),
+  maps_url: z.string().nullable().optional().or(z.literal("")),
   status: z.enum(["draft", "published"]).default("published"),
   photos: z.array(infakJinanPhotoSchema).default([]),
   santri_list: z.array(santriSchema).default([]),

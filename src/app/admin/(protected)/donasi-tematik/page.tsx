@@ -109,7 +109,7 @@ export default function AdminThemedCampaignsPage() {
       const parsedPayload = {
         ...formData,
         cover_url: finalCover || null,
-        target_idr: parseInt(formData.target_idr, 10) || 0,
+        target_idr: Math.max(100000, parseInt(formData.target_idr || "100000", 10)),
         collected_idr: parseInt(formData.collected_idr, 10) || 0,
       };
       const body = editingCampaign ? { id: editingCampaign.id, ...parsedPayload } : parsedPayload;

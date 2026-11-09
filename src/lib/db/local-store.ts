@@ -267,14 +267,35 @@ export const localStore = {
   },
 
   getCampaigns: () => [...themedCampaignsList],
-  addCampaign: (item: Omit<ThemedCampaign, 'id' | 'created_at'>) => {
+  addCampaign: (item: Omit<ThemedCampaign, 'id' | 'created_at'>, id?: string) => {
     const newItem: ThemedCampaign = {
       ...item,
-      id: `camp-${Date.now()}`,
+      id: id || `camp-${Date.now()}`,
       created_at: new Date().toISOString()
     };
     themedCampaignsList.unshift(newItem);
     return newItem;
+  },
+  updateCampaign: (id: string, updates: Partial<ThemedCampaign>) => {
+    const idx = themedCampaignsList.findIndex(c => c.id === id);
+    if (idx === -1) {
+      const newItem: ThemedCampaign = {
+        id,
+        title: updates.title || "",
+        disaster_type: updates.disaster_type || "Bencana Alam",
+        location: updates.location || "",
+        status: updates.status || "aktif",
+        description: updates.description || "",
+        cover_url: updates.cover_url || null,
+        target_idr: updates.target_idr || 0,
+        collected_idr: updates.collected_idr || 0,
+        created_at: updates.created_at || new Date().toISOString(),
+      };
+      themedCampaignsList.unshift(newItem);
+      return newItem;
+    }
+    themedCampaignsList[idx] = { ...themedCampaignsList[idx], ...updates };
+    return themedCampaignsList[idx];
   },
 
   getGallery: (onlyPublished = true) => {
@@ -478,11 +499,11 @@ export const localStore = {
       santri: publishedSantri,
     };
   },
-  addInfakJinan: (item: Omit<InfakJinanRecord, 'id' | 'created_at' | 'updated_at'>) => {
+  addInfakJinan: (item: Omit<InfakJinanRecord, 'id' | 'created_at' | 'updated_at'>, id?: string) => {
     const santriList = item.santri_list || [];
     const newItem: InfakJinanRecord = {
       ...item,
-      id: `jinan-${Date.now()}`,
+      id: id || `jinan-${Date.now()}`,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       santri_list: santriList,
@@ -490,6 +511,42 @@ export const localStore = {
     };
     infakJinanList.unshift(newItem);
     return newItem;
+  },
+  updateInfakJinan: (id: string, updates: Partial<InfakJinanRecord>) => {
+    const idx = infakJinanList.findIndex(i => i.id === id);
+    const santriList = updates.santri_list || [];
+    if (idx === -1) {
+      const newItem: InfakJinanRecord = {
+        id,
+        mushaf_no: updates.mushaf_no || 0,
+        donor_name: updates.donor_name || "",
+        show_donor_name: Boolean(updates.show_donor_name),
+        donor_origin: updates.donor_origin || "",
+        donor_phone: updates.donor_phone || null,
+        dedication_name: updates.dedication_name || "",
+        pesantren_name: updates.pesantren_name || "",
+        pesantren_province: updates.pesantren_province || null,
+        pesantren_city: updates.pesantren_city || null,
+        address: updates.address || "",
+        distributed_at: updates.distributed_at || new Date().toISOString().split("T")[0],
+        maps_url: updates.maps_url || null,
+        status: updates.status || "published",
+        photos: updates.photos || [],
+        santri_list: santriList,
+        santri_count: santriList.length,
+        created_at: updates.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      infakJinanList.unshift(newItem);
+      return newItem;
+    }
+    infakJinanList[idx] = {
+      ...infakJinanList[idx],
+      ...updates,
+      updated_at: new Date().toISOString(),
+      santri_count: (updates.santri_list || infakJinanList[idx].santri_list || []).length,
+    };
+    return infakJinanList[idx];
   },
   deleteInfakJinan: (id: string) => {
     const idx = infakJinanList.findIndex(i => i.id === id);

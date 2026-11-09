@@ -49,6 +49,7 @@ export default function AdminGalleryPage() {
 
   const openCreateModal = () => {
     setEditingItem(null);
+    setSelectedFile(null);
     setFormData({
       title: "",
       program: "Infak Al-Qur'an",
@@ -62,10 +63,11 @@ export default function AdminGalleryPage() {
 
   const openEditModal = (item: GalleryItem) => {
     setEditingItem(item);
+    setSelectedFile(null);
     setFormData({
       title: item.title,
       program: item.program,
-      date: item.date,
+      date: item.date ? String(item.date).split("T")[0] : "",
       image_url: item.image_url,
       caption: item.caption || "",
       status: item.status,
@@ -76,6 +78,7 @@ export default function AdminGalleryPage() {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingItem(null);
+    setSelectedFile(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

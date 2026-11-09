@@ -54,8 +54,8 @@ export default function AdminEditGeberPage() {
         address: item.address || "",
         lat: item.lat !== null && item.lat !== undefined ? String(item.lat) : "",
         lng: item.lng !== null && item.lng !== undefined ? String(item.lng) : "",
-        activity_date: item.activity_date || "",
-        participants: item.participants !== null && item.participants !== undefined ? String(item.participants) : "",
+        activity_date: item.activity_date ? String(item.activity_date).split("T")[0] : "",
+        participants: item.participants !== null && item.participants !== undefined ? String(item.participants) : "1",
         activity_notes: item.activity_notes || "",
         photo_url: existingPhoto,
         status: item.status,
@@ -92,7 +92,7 @@ export default function AdminEditGeberPage() {
           body: JSON.stringify({
             id,
             ...formData,
-            participants: parseInt(formData.participants || "0", 10),
+            participants: Math.max(1, parseInt(formData.participants || "1", 10)),
             lat: formData.lat ? parseFloat(formData.lat) : null,
             lng: formData.lng ? parseFloat(formData.lng) : null,
             activity_notes: formData.activity_notes || null,
@@ -108,7 +108,7 @@ export default function AdminEditGeberPage() {
         await commit();
 
         if (originalPhotoUrl && originalPhotoUrl !== finalPhotoUrl) {
-          await deleteOldBlobAfterUpdate(originalPhotoUrl);
+          await deleteOldBlobAfterUpdate(originalPhotoUrl, finalPhotoUrl);
         }
       } else {
         const res = await fetch("/api/admin/geber", {
@@ -117,7 +117,7 @@ export default function AdminEditGeberPage() {
           body: JSON.stringify({
             id,
             ...formData,
-            participants: parseInt(formData.participants || "0", 10),
+            participants: Math.max(1, parseInt(formData.participants || "1", 10)),
             lat: formData.lat ? parseFloat(formData.lat) : null,
             lng: formData.lng ? parseFloat(formData.lng) : null,
             activity_notes: formData.activity_notes || null,

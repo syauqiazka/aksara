@@ -31,28 +31,42 @@ export async function POST(request: Request) {
         caption: p.caption,
         sort: p.sort ?? (idx + 1),
       })),
-      santri_list: (validated.santri_list || []).map((s, idx) => ({
-        ...s,
-        id: s.id || `santri-${Date.now()}-${idx}`,
-        infak_id: "",
-        sort: s.sort ?? idx + 1,
-        status: s.status ?? "published",
-        latest_surah: s.initial_surah_name || "Al-Fatihah",
-        latest_ayat: s.initial_ayat || 7,
-        latest_juz: s.initial_juz || 1,
-        hafalan_updates: s.initial_surah_no ? [
-          {
-            id: `hafalan-${Date.now()}-${idx}`,
-            santri_id: s.id,
-            updated_on: validated.distributed_at,
-            surah_no: s.initial_surah_no,
-            surah_name: s.initial_surah_name || "Al-Fatihah",
-            ayat: s.initial_ayat || 7,
-            juz: s.initial_juz || 1,
-            notes: "Capaian awal saat serah terima mushaf",
-          }
-        ] : [],
-      })),
+      santri_list: (validated.santri_list || []).map((s, idx) => {
+        const santriId = s.id || `santri-${Date.now()}-${idx}`;
+        return {
+          ...s,
+          id: santriId,
+          infak_id: "",
+          sort: s.sort ?? idx + 1,
+          status: s.status ?? "published",
+          latest_surah: s.initial_surah_name || "Al-Fatihah",
+          latest_ayat: s.initial_ayat || 7,
+          latest_juz: s.initial_juz || 1,
+          hafalan_updates: (s.hafalan_updates && s.hafalan_updates.length > 0)
+            ? s.hafalan_updates.map((h, hIdx) => ({
+                id: h.id || `hafalan-${Date.now()}-${hIdx}`,
+                santri_id: h.santri_id || santriId,
+                updated_on: h.updated_on,
+                surah_no: h.surah_no,
+                surah_name: h.surah_name || "Al-Fatihah",
+                ayat: h.ayat,
+                juz: h.juz,
+                notes: h.notes || undefined,
+              }))
+            : (s.initial_surah_no ? [
+                {
+                  id: `hafalan-${Date.now()}-${idx}`,
+                  santri_id: santriId,
+                  updated_on: validated.distributed_at,
+                  surah_no: s.initial_surah_no,
+                  surah_name: s.initial_surah_name || "Al-Fatihah",
+                  ayat: s.initial_ayat || 7,
+                  juz: s.initial_juz || 1,
+                  notes: "Capaian awal saat serah terima mushaf",
+                }
+              ] : []),
+        };
+      }),
     });
 
     // Commit photos if any
@@ -85,28 +99,42 @@ export async function PUT(request: Request) {
     const previousRecord = rawPrevious ? JSON.parse(JSON.stringify(rawPrevious)) : null;
 
     const santriList = validated.santri_list && validated.santri_list.length > 0
-      ? validated.santri_list.map((s, idx) => ({
-          ...s,
-          id: s.id || `santri-${Date.now()}-${idx}`,
-          infak_id: id,
-          sort: s.sort ?? (idx + 1),
-          status: s.status ?? ("published" as const),
-          latest_surah: s.initial_surah_name || "Al-Fatihah",
-          latest_ayat: s.initial_ayat || 7,
-          latest_juz: s.initial_juz || 1,
-          hafalan_updates: s.initial_surah_no ? [
-            {
-              id: `hafalan-${Date.now()}-${idx}`,
-              santri_id: s.id,
-              updated_on: validated.distributed_at,
-              surah_no: s.initial_surah_no,
-              surah_name: s.initial_surah_name || "Al-Fatihah",
-              ayat: s.initial_ayat || 7,
-              juz: s.initial_juz || 1,
-              notes: "Capaian awal saat serah terima mushaf",
-            }
-          ] : [],
-        }))
+      ? validated.santri_list.map((s, idx) => {
+          const santriId = s.id || `santri-${Date.now()}-${idx}`;
+          return {
+            ...s,
+            id: santriId,
+            infak_id: id,
+            sort: s.sort ?? (idx + 1),
+            status: s.status ?? ("published" as const),
+            latest_surah: s.initial_surah_name || "Al-Fatihah",
+            latest_ayat: s.initial_ayat || 7,
+            latest_juz: s.initial_juz || 1,
+            hafalan_updates: (s.hafalan_updates && s.hafalan_updates.length > 0)
+              ? s.hafalan_updates.map((h, hIdx) => ({
+                  id: h.id || `hafalan-${Date.now()}-${hIdx}`,
+                  santri_id: h.santri_id || santriId,
+                  updated_on: h.updated_on,
+                  surah_no: h.surah_no,
+                  surah_name: h.surah_name || "Al-Fatihah",
+                  ayat: h.ayat,
+                  juz: h.juz,
+                  notes: h.notes || undefined,
+                }))
+              : (s.initial_surah_no ? [
+                  {
+                    id: `hafalan-${Date.now()}-${idx}`,
+                    santri_id: santriId,
+                    updated_on: validated.distributed_at,
+                    surah_no: s.initial_surah_no,
+                    surah_name: s.initial_surah_name || "Al-Fatihah",
+                    ayat: s.initial_ayat || 7,
+                    juz: s.initial_juz || 1,
+                    notes: "Capaian awal saat serah terima mushaf",
+                  }
+                ] : []),
+          };
+        })
       : (previousRecord?.santri_list || []);
 
     const result = await db.saveInfakJinan(

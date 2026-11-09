@@ -83,7 +83,7 @@ export default function AdminEditInfakPage() {
           pesantren_province: found.pesantren_province || "",
           pesantren_city: found.pesantren_city || "",
           address: found.address,
-          distributed_at: found.distributed_at,
+          distributed_at: found.distributed_at ? String(found.distributed_at).split("T")[0] : "",
           maps_url: found.maps_url || "",
           status: found.status,
         });
@@ -216,6 +216,12 @@ export default function AdminEditInfakPage() {
         await uploadCommit();
       }
 
+      if (data && data.id) {
+        setRecord(data);
+        if (data.photos && data.photos.length > 0) {
+          setPhotoUrl(data.photos[0].url);
+        }
+      }
       setSelectedFile(null);
       setSuccess("Data donasi & foto serah terima berhasil diperbarui.");
       router.refresh();
