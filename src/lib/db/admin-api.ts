@@ -1574,7 +1574,7 @@ export const db = {
       }
     }
 
-    return null;
+    return localStore.getCampaigns().find((c) => c.id === id) || null;
   },
 
   async saveThemedCampaign(
@@ -1800,7 +1800,7 @@ export const db = {
       }
     }
 
-    return null;
+    return localStore.getGalleryById(id) || null;
   },
 
   async saveGalleryItem(
@@ -1888,6 +1888,10 @@ export const db = {
       }
     }
 
+    if (id) {
+      const updated = localStore.updateGalleryItem(id, { ...item });
+      if (updated) return updated;
+    }
     return localStore.addGalleryItem(item);
   },
 
@@ -1918,6 +1922,7 @@ export const db = {
         // fallback
       }
     }
+    localStore.deleteGalleryItem(id);
     return true;
   },
 

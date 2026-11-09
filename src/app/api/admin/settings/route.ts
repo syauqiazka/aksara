@@ -57,6 +57,7 @@ export async function POST(request: Request) {
 
     revalidatePath("/donasi");
     revalidatePath("/");
+    revalidatePath("/", "layout");
 
     return NextResponse.json({
       success: true,

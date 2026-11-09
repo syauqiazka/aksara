@@ -19,45 +19,7 @@ import {
   HafalanUpdate,
 } from './types';
 
-// Store in-memory bersih tanpa data dummy/simulasi
-const infakList: InfakDistribution[] = [];
-const geberList: GeberMasjidDistribution[] = [];
-const reportList: Report[] = [];
-const themedCampaignsList: ThemedCampaign[] = [];
-const galleryList: GalleryItem[] = [];
-
-let bankAccounts: BankAccount[] = [
-  {
-    bank: "Bank BCA",
-    number: "",
-    holder: "Yayasan Ajirasa Aksara Semesta",
-    branch: "Kantor Cabang",
-  },
-];
-
-let contactInfo: ContactInfo = {
-  whatsapp: "0822-6217-0018",
-  phone: "0822-6217-0018",
-  email: "ajirasaaksarasemesta@gmail.com",
-  address: "Bogor, Jawa Barat, Indonesia"
-};
-
-let socialLinks: SocialLinks = {
-  instagram: "https://www.instagram.com/sahabat_aksara_semesta?exln=enR1ZnBkZTA1enp6",
-  youtube: "https://youtube.com/@sahabataksara",
-  tiktok: "https://tiktok.com/@sahabataksara"
-};
-
-const uploadLedger: UploadLedgerEntry[] = [];
-
-const globalForStore = globalThis as unknown as {
-  __infakJinanList?: InfakJinanRecord[];
-  __bussList?: BussDistribution[];
-  __yatimList?: YatimActivity[];
-  __bankAccounts?: BankAccount[];
-  __contactInfo?: ContactInfo;
-  __socialLinks?: SocialLinks;
-};
+// --- Helpers untuk persistensi ke file JSON lokal (server-only) ---
 
 function loadPersistedSettings(): {
   bankAccounts?: BankAccount[];
@@ -100,6 +62,106 @@ function savePersistedSettings(settings: {
     // ignore
   }
 }
+
+function loadJsonFile<T>(filename: string): T[] {
+  if (typeof window !== "undefined") return [];
+  try {
+    const fs = eval("require")("fs");
+    const path = eval("require")("path");
+    const filePath = path.join(process.cwd(), "data", filename);
+    if (fs.existsSync(filePath)) {
+      const raw = fs.readFileSync(filePath, "utf8");
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed as T[];
+    }
+  } catch {
+    // ignore
+  }
+  return [];
+}
+
+function saveJsonFile<T>(filename: string, data: T[]): void {
+  if (typeof window !== "undefined") return;
+  try {
+    const fs = eval("require")("fs");
+    const path = eval("require")("path");
+    const dirPath = path.join(process.cwd(), "data");
+    const filePath = path.join(dirPath, filename);
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+    }
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+  } catch {
+    // ignore
+  }
+}
+
+function hasJsonFile(filename: string): boolean {
+  if (typeof window !== "undefined") return false;
+  try {
+    const fs = eval("require")("fs");
+    const path = eval("require")("path");
+    return fs.existsSync(path.join(process.cwd(), "data", filename));
+  } catch {
+    return false;
+  }
+}
+
+function getReportsData(): Report[] {
+  if (hasJsonFile("reports.json")) {
+    return loadJsonFile<Report>("reports.json");
+  }
+  return reportList;
+}
+
+function getGalleryData(): GalleryItem[] {
+  if (hasJsonFile("gallery-items.json")) {
+    return loadJsonFile<GalleryItem>("gallery-items.json");
+  }
+  return galleryList;
+}
+
+// --- Store in-memory (reportList & galleryList di-seed dari file JSON lokal) ---
+
+const infakList: InfakDistribution[] = [];
+const geberList: GeberMasjidDistribution[] = [];
+// reportList dan galleryList di-seed dari file JSON lokal agar persisten across restarts
+const reportList: Report[] = loadJsonFile<Report>("reports.json");
+const themedCampaignsList: ThemedCampaign[] = [];
+const galleryList: GalleryItem[] = loadJsonFile<GalleryItem>("gallery-items.json");
+
+let bankAccounts: BankAccount[] = [
+  {
+    bank: "Bank BCA",
+    number: "",
+    holder: "Yayasan Ajirasa Aksara Semesta",
+    branch: "Kantor Cabang",
+  },
+];
+
+let contactInfo: ContactInfo = {
+  whatsapp: "0822-6217-0018",
+  phone: "0822-6217-0018",
+  email: "ajirasaaksarasemesta@gmail.com",
+  address: "Bogor, Jawa Barat, Indonesia"
+};
+
+let socialLinks: SocialLinks = {
+  instagram: "https://www.instagram.com/sahabat_aksara_semesta?exln=enR1ZnBkZTA1enp6",
+  youtube: "https://youtube.com/@sahabataksara",
+  tiktok: "https://tiktok.com/@sahabataksara"
+};
+
+const uploadLedger: UploadLedgerEntry[] = [];
+
+const globalForStore = globalThis as unknown as {
+  __infakJinanList?: InfakJinanRecord[];
+  __bussList?: BussDistribution[];
+  __yatimList?: YatimActivity[];
+  __bankAccounts?: BankAccount[];
+  __contactInfo?: ContactInfo;
+  __socialLinks?: SocialLinks;
+};
 
 const infakJinanList: InfakJinanRecord[] =
   globalForStore.__infakJinanList || (globalForStore.__infakJinanList = []);
@@ -164,30 +226,43 @@ export const localStore = {
   },
 
   getReports: (onlyPublished = true) => {
-    return onlyPublished ? reportList.filter(r => r.status === 'published') : [...reportList];
+    const list = getReportsData();
+    return onlyPublished ? list.filter(r => r.status === 'published') : [...list];
   },
-  getReportBySlug: (slug: string) => reportList.find(r => r.slug === slug),
-  getReportById: (id: string) => reportList.find(r => r.id === id),
+  getReportBySlug: (slug: string) => {
+    const list = getReportsData();
+    return list.find(r => r.slug === slug) || null;
+  },
+  getReportById: (id: string) => {
+    const list = getReportsData();
+    return list.find(r => r.id === id) || null;
+  },
   addReport: (item: Omit<Report, 'id' | 'created_at' | 'updated_at'>) => {
+    const list = getReportsData();
     const newItem: Report = {
       ...item,
       id: `rep-${Date.now()}`,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
-    reportList.unshift(newItem);
+    list.unshift(newItem);
+    saveJsonFile("reports.json", list);
     return newItem;
   },
   updateReport: (id: string, updates: Partial<Report>) => {
-    const idx = reportList.findIndex(r => r.id === id);
+    const list = getReportsData();
+    const idx = list.findIndex(r => r.id === id);
     if (idx === -1) return null;
-    reportList[idx] = { ...reportList[idx], ...updates, updated_at: new Date().toISOString() };
-    return reportList[idx];
+    list[idx] = { ...list[idx], ...updates, updated_at: new Date().toISOString() };
+    saveJsonFile("reports.json", list);
+    return list[idx];
   },
   deleteReport: (id: string) => {
-    const idx = reportList.findIndex(r => r.id === id);
+    const list = getReportsData();
+    const idx = list.findIndex(r => r.id === id);
     if (idx === -1) return false;
-    reportList.splice(idx, 1);
+    list.splice(idx, 1);
+    saveJsonFile("reports.json", list);
     return true;
   },
 
@@ -203,16 +278,39 @@ export const localStore = {
   },
 
   getGallery: (onlyPublished = true) => {
-    return onlyPublished ? galleryList.filter(g => g.status === 'published') : [...galleryList];
+    const list = getGalleryData();
+    return onlyPublished ? list.filter(g => g.status === 'published') : [...list];
+  },
+  getGalleryById: (id: string) => {
+    const list = getGalleryData();
+    return list.find(g => g.id === id) || null;
   },
   addGalleryItem: (item: Omit<GalleryItem, 'id' | 'created_at'>) => {
+    const list = getGalleryData();
     const newItem: GalleryItem = {
       ...item,
       id: `gal-${Date.now()}`,
       created_at: new Date().toISOString()
     };
-    galleryList.unshift(newItem);
+    list.unshift(newItem);
+    saveJsonFile("gallery-items.json", list);
     return newItem;
+  },
+  updateGalleryItem: (id: string, updates: Partial<GalleryItem>) => {
+    const list = getGalleryData();
+    const idx = list.findIndex(g => g.id === id);
+    if (idx === -1) return null;
+    list[idx] = { ...list[idx], ...updates };
+    saveJsonFile("gallery-items.json", list);
+    return list[idx];
+  },
+  deleteGalleryItem: (id: string) => {
+    const list = getGalleryData();
+    const idx = list.findIndex(g => g.id === id);
+    if (idx === -1) return false;
+    list.splice(idx, 1);
+    saveJsonFile("gallery-items.json", list);
+    return true;
   },
 
   getBankAccounts: () => {
