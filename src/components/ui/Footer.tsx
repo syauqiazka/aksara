@@ -1,9 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Mail, MapPin, ExternalLink } from "lucide-react";
+import { Mail, MapPin, ExternalLink, Copy, Check } from "lucide-react";
 import { organizationContent } from "@/content/organization";
 import IslamicCornerOrnament from "@/components/ui/IslamicCornerOrnament";
 import type { BankAccount } from "@/lib/db/types";
@@ -12,8 +13,16 @@ interface FooterProps {
   bankAccounts?: BankAccount[];
 }
 
-export default function Footer({ bankAccounts }: FooterProps) {
+export default function Footer({ bankAccounts = [] }: FooterProps) {
   const pathname = usePathname();
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
+
+  const handleCopy = (num: string, idx: number) => {
+    if (!num) return;
+    navigator.clipboard.writeText(num);
+    setCopiedIdx(idx);
+    setTimeout(() => setCopiedIdx(null), 2500);
+  };
 
   // If on admin route, don't show public footer
   if (pathname.startsWith("/admin")) return null;
@@ -142,21 +151,57 @@ export default function Footer({ bankAccounts }: FooterProps) {
             <h4 className="text-sm font-semibold uppercase tracking-widest text-[var(--gold-400)] mb-4 font-sans">
               Rekening Resmi Infak
             </h4>
-            {bankAccounts && bankAccounts.length > 0 && bankAccounts[0].number ? (
-              <div className="p-4 rounded-xl bg-[var(--green-900)]/60 border border-[var(--gold-500)]/30 text-xs space-y-0.5">
-                <p className="font-semibold text-[var(--gold-300)] mb-1">{bankAccounts[0].bank}</p>
-                <p className="font-mono text-lg font-bold text-[var(--cream-50)] tracking-wider">{bankAccounts[0].number}</p>
-                <p className="text-[var(--cream-200)]/80">a.n. {bankAccounts[0].holder}</p>
-                {bankAccounts[0].branch && (
-                  <p className="text-[var(--sage-300)]">Cabang: {bankAccounts[0].branch}</p>
-                )}
-              </div>
-            ) : (
-              <div className="p-4 rounded-xl bg-[var(--green-900)]/60 border border-[var(--gold-500)]/30 text-xs text-[var(--cream-200)]/90 leading-relaxed">
-                <p className="font-semibold text-[var(--gold-300)] mb-1">Informasi rekening segera diumumkan</p>
-                <p>Transfer donasi saat ini dapat dikonfirmasikan langsung melalui email pengurus yayasan.</p>
-              </div>
-            )}
+            {(() => {
+              const validAccounts = (bankAccounts || []).filter((acc) => acc && acc.number);
+              if (validAccounts.length === 0) {
+                return (
+                  <div className="p-4 rounded-xl bg-[var(--green-900)]/60 border border-[var(--gold-500)]/30 text-xs text-[var(--cream-200)]/90 leading-relaxed">
+                    <p className="font-semibold text-[var(--gold-300)] mb-1">Informasi rekening segera diumumkan</p>
+                    <p>Transfer donasi saat ini dapat dikonfirmasikan langsung melalui email pengurus yayasan.</p>
+                  </div>
+                );
+              }
+              return (
+                <div className="space-y-3">
+                  {validAccounts.map((acc, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => handleCopy(acc.number, idx)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => e.key === "Enter" && handleCopy(acc.number, idx)}
+                      className="group relative p-3.5 rounded-xl bg-[var(--green-900)]/60 border border-[var(--gold-500)]/30 hover:border-[var(--gold-400)] transition-all cursor-pointer text-xs select-none"
+                    >
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <span className="font-semibold text-[var(--gold-300)]">{acc.bank}</span>
+                        {copiedIdx === idx ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--gold-400)] bg-[var(--green-950)] px-2 py-0.5 rounded-full border border-[var(--gold-500)]/40">
+                            <Check className="w-3 h-3" />
+                            Tersalin!
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[10px] text-[var(--sage-300)] group-hover:text-[var(--gold-300)] transition-colors">
+                            <Copy className="w-3 h-3" />
+                            Salin
+                          </span>
+                        )}
+                      </div>
+                      <div className="font-mono text-base font-bold text-[var(--cream-50)] tracking-wider">
+                        {acc.number}
+                      </div>
+                      <div className="text-[11px] text-[var(--cream-200)]/80 mt-1">
+                        a.n. {acc.holder}
+                      </div>
+                      {acc.branch && (
+                        <div className="text-[10px] text-[var(--sage-300)]">
+                          Cabang: {acc.branch}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Col 4: Contact & Channels */}

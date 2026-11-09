@@ -1,10 +1,10 @@
 {
   "bankAccounts": [
     {
-      "bank": "Bank Syariah Indonesia (BSI)",
-      "number": "7722334455",
-      "holder": "Yayasan Ajirasa Aksara Semesta",
-      "branch": "KC Bogor Pajajaran"
+      "bank": "Bank BCA",
+      "number": "3040586643",
+      "holder": "Ahmad Dahlan",
+      "branch": "Cirebon"
     }
   ],
   "contactInfo": {
