@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import Link from "next/link";
 import { db } from "@/lib/db/api";
 import { Phone, Mail, ShieldCheck, ImageIcon, Calendar, ArrowRight, HeartHandshake } from "lucide-react";
@@ -143,7 +143,7 @@ export default async function DonasiPage() {
                     <div className="space-y-4">
                       {camp.cover_url && (
                         <div className="relative aspect-16/9 rounded-2xl overflow-hidden border border-[var(--cream-200)] shadow-xs">
-                          <Image
+                          <SafeImage
                             src={camp.cover_url}
                             alt={camp.title}
                             fill
@@ -256,7 +256,7 @@ export default async function DonasiPage() {
                 key={item.id}
                 className="group relative rounded-3xl overflow-hidden border border-[var(--cream-200)] bg-[var(--green-950)] aspect-[4/3] shadow-md hover:shadow-2xl transition-all duration-300"
               >
-                <Image
+                <SafeImage
                   src={item.image_url}
                   alt={item.title}
                   fill

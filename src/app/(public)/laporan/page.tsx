@@ -1,11 +1,11 @@
 import { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { formatTanggal } from "@/lib/format-date";
 import { db } from "@/lib/db/api";
 import { Calendar, Users, FileText, ArrowRight, ShieldCheck } from "lucide-react";
 import PageHeader from "@/components/ui/PageHeader";
 import Badge from "@/components/ui/Badge";
+import SafeImage from "@/components/ui/SafeImage";
 
 export const revalidate = 60;
 
@@ -115,24 +115,29 @@ export default async function LaporanPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {reports.map((rep) => (
-              <div
-                key={rep.id}
-                className="bg-[var(--cream-100)] rounded-3xl overflow-hidden border border-[var(--cream-200)] flex flex-col justify-between hover:border-[var(--gold-500)]/80 hover:shadow-xl transition-all duration-300 group"
-              >
-                <div>
-                  {rep.cover_url && (
-                    <div className="relative h-56 w-full overflow-hidden bg-[var(--green-950)]">
-                      <Image
-                        src={rep.cover_url}
-                        alt={rep.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[var(--green-950)]/70 via-transparent to-transparent" />
-                    </div>
-                  )}
+            {reports.map((rep) => {
+              const displayCover =
+                rep.cover_url ||
+                (rep.gallery_urls && rep.gallery_urls.length > 0 ? rep.gallery_urls[0] : null);
+
+              return (
+                <div
+                  key={rep.id}
+                  className="bg-[var(--cream-100)] rounded-3xl overflow-hidden border border-[var(--cream-200)] flex flex-col justify-between hover:border-[var(--gold-500)]/80 hover:shadow-xl transition-all duration-300 group"
+                >
+                  <div>
+                    {displayCover && (
+                      <div className="relative h-56 w-full overflow-hidden bg-[var(--green-950)]">
+                        <SafeImage
+                          src={displayCover}
+                          alt={rep.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[var(--green-950)]/70 via-transparent to-transparent" />
+                      </div>
+                    )}
 
                   <div className="p-6 space-y-4">
                     <div className="flex items-center justify-between gap-2">
@@ -178,7 +183,8 @@ export default async function LaporanPage() {
                   </Link>
                 </div>
               </div>
-            ))}
+            );
+          })}
           </div>
         )}
       </section>

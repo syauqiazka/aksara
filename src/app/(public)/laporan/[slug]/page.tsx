@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { Metadata } from "next";
 import { db } from "@/lib/db/api";
 import { ArrowLeft, Users, Download } from "lucide-react";
 import Button from "@/components/ui/Button";
 import PageHeader from "@/components/ui/PageHeader";
+import SafeImage from "@/components/ui/SafeImage";
 import { formatTanggal } from "@/lib/format-date";
 
 interface Props {
@@ -85,6 +85,14 @@ export default async function LaporanDetailPage({ params }: Props) {
     mainEntityOfPage: `${siteUrl}/laporan/${slug}`,
   };
 
+  const primaryCover =
+    report.cover_url ||
+    (report.gallery_urls && report.gallery_urls.length > 0 ? report.gallery_urls[0] : null);
+
+  const visualGallery = (report.gallery_urls || []).filter(
+    (imgUrl, idx) => imgUrl && (imgUrl !== primaryCover || (report.cover_url && idx > 0))
+  );
+
   return (
     <div className="flex flex-col w-full bg-[var(--cream-50)] text-[var(--ink-900)]">
       <script
@@ -135,10 +143,10 @@ export default async function LaporanDetailPage({ params }: Props) {
 
       {/* 3. Main Report Body */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full space-y-12">
-        {report.cover_url && (
+        {primaryCover && (
           <div className="relative aspect-[16/9] w-full rounded-3xl overflow-hidden shadow-xl border border-[var(--cream-200)] bg-[var(--green-950)]">
-            <Image
-              src={report.cover_url}
+            <SafeImage
+              src={primaryCover}
               alt={report.title}
               fill
               className="object-cover"
@@ -159,7 +167,7 @@ export default async function LaporanDetailPage({ params }: Props) {
         </article>
 
         {/* Gallery if present */}
-        {report.gallery_urls && report.gallery_urls.length > 0 && (
+        {visualGallery.length > 0 && (
           <div className="mt-16 pt-12 border-t border-[var(--cream-200)] space-y-6">
             <div>
               <div className="text-xs uppercase tracking-[0.2em] text-[var(--gold-700)] font-semibold">
@@ -170,9 +178,9 @@ export default async function LaporanDetailPage({ params }: Props) {
               </h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {report.gallery_urls.map((img, idx) => (
+              {visualGallery.map((img, idx) => (
                 <div key={idx} className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-[var(--cream-200)] bg-[var(--green-950)]">
-                  <Image
+                  <SafeImage
                     src={img}
                     alt={`Dokumentasi ${report.title} #${idx + 1}`}
                     fill

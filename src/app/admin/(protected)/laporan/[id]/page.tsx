@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Save, AlertCircle, Loader2, Plus, Trash2, Camera } from "lucide-react";
+import { ArrowLeft, Save, AlertCircle, Loader2, Plus, Trash2, Camera, Star } from "lucide-react";
 import Select from "@/components/ui/Select";
 import ImageUploader from "@/components/admin/ImageUploader";
 import { uploadPendingFileOnSave } from "@/lib/upload-helper";
@@ -433,15 +433,36 @@ export default function AdminEditReportPage() {
                     <span className="text-xs font-semibold text-[var(--green-950)]">
                       Foto Dokumentasi #{idx + 1}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveGalleryItem(item.id)}
-                      className="text-xs text-red-600 hover:text-red-700 flex items-center gap-1 transition-colors"
-                      title="Hapus foto ini"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span>Hapus</span>
-                    </button>
+                    <div className="flex items-center gap-3">
+                      {(item.url || item.file) && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (item.file) {
+                              setSelectedCoverFile(item.file);
+                              setFormData((prev) => ({ ...prev, cover_url: "" }));
+                            } else if (item.url) {
+                              setFormData((prev) => ({ ...prev, cover_url: item.url }));
+                              setSelectedCoverFile(null);
+                            }
+                          }}
+                          className="text-xs text-[var(--gold-700)] hover:text-[var(--gold-800)] font-medium flex items-center gap-1 transition-colors"
+                          title="Gunakan foto ini sebagai foto cover sampul utama"
+                        >
+                          <Star className="w-3.5 h-3.5 text-[var(--gold-600)]" />
+                          <span>Jadikan Sampul</span>
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveGalleryItem(item.id)}
+                        className="text-xs text-red-600 hover:text-red-700 flex items-center gap-1 transition-colors"
+                        title="Hapus foto ini"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Hapus</span>
+                      </button>
+                    </div>
                   </div>
 
                   <ImageUploader

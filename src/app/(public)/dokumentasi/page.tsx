@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import { db } from "@/lib/db/api";
 import PageHeader from "@/components/ui/PageHeader";
 import { ImageIcon, Calendar } from "lucide-react";
@@ -70,7 +70,7 @@ export default async function DokumentasiPage() {
                 key={item.id}
                 className="group relative rounded-3xl overflow-hidden border border-[var(--cream-200)] bg-[var(--green-950)] aspect-[4/3] shadow-md hover:shadow-2xl transition-all duration-300"
               >
-                <Image
+                <SafeImage
                   src={item.image_url}
                   alt={item.title}
                   fill

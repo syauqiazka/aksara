@@ -29,11 +29,14 @@ export async function POST(request: Request) {
     const json = await request.json();
     const validated = reportSchema.parse(json);
 
+    const galleryUrls = (validated.gallery_urls || []).filter(Boolean);
+    const coverUrl = validated.cover_url || (galleryUrls.length > 0 ? galleryUrls[0] : null);
+
     const result = await db.saveReport({
       ...validated,
       amount_idr: validated.amount_idr || null,
-      cover_url: validated.cover_url || null,
-      gallery_urls: validated.gallery_urls || [],
+      cover_url: coverUrl,
+      gallery_urls: galleryUrls,
       pdf_url: null,
     });
 
@@ -45,6 +48,10 @@ export async function POST(request: Request) {
     }
 
     revalidatePath("/laporan");
+    revalidatePath("/laporan/[slug]", "page");
+    if (result.slug) {
+      revalidatePath(`/laporan/${result.slug}`);
+    }
     revalidatePath("/");
 
     return NextResponse.json(result);
@@ -64,12 +71,15 @@ export async function PUT(request: Request) {
     const validated = reportSchema.parse(data);
     const previousRecord = await db.getReportById(id);
 
+    const galleryUrls = (validated.gallery_urls || []).filter(Boolean);
+    const coverUrl = validated.cover_url || (galleryUrls.length > 0 ? galleryUrls[0] : null);
+
     const result = await db.saveReport(
       {
         ...validated,
         amount_idr: validated.amount_idr || null,
-        cover_url: validated.cover_url || null,
-        gallery_urls: validated.gallery_urls || [],
+        cover_url: coverUrl,
+        gallery_urls: galleryUrls,
         pdf_url: null,
       },
       id
@@ -86,6 +96,7 @@ export async function PUT(request: Request) {
     if (
       previousRecord?.cover_url &&
       previousRecord.cover_url !== result.cover_url &&
+      !result.gallery_urls.includes(previousRecord.cover_url) &&
       (previousRecord.cover_url.startsWith("http") || previousRecord.cover_url.startsWith("/uploads/"))
     ) {
       await deleteBlobFromStorage(previousRecord.cover_url);
@@ -107,6 +118,13 @@ export async function PUT(request: Request) {
     }
 
     revalidatePath("/laporan");
+    revalidatePath("/laporan/[slug]", "page");
+    if (result.slug) {
+      revalidatePath(`/laporan/${result.slug}`);
+    }
+    if (previousRecord?.slug && previousRecord.slug !== result.slug) {
+      revalidatePath(`/laporan/${previousRecord.slug}`);
+    }
     revalidatePath("/");
 
     return NextResponse.json(result);
@@ -142,6 +160,10 @@ export async function DELETE(request: Request) {
     }
 
     revalidatePath("/laporan");
+    revalidatePath("/laporan/[slug]", "page");
+    if (previousRecord?.slug) {
+      revalidatePath(`/laporan/${previousRecord.slug}`);
+    }
     revalidatePath("/");
 
     return NextResponse.json({ success });
