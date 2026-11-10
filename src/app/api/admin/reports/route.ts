@@ -91,6 +91,21 @@ export async function PUT(request: Request) {
       await deleteBlobFromStorage(previousRecord.cover_url);
     }
 
+    // Clean up removed gallery photos
+    if (previousRecord?.gallery_urls && Array.isArray(previousRecord.gallery_urls)) {
+      const currentGallerySet = new Set(result.gallery_urls || []);
+      for (const oldGUrl of previousRecord.gallery_urls) {
+        if (
+          oldGUrl &&
+          !currentGallerySet.has(oldGUrl) &&
+          oldGUrl !== result.cover_url &&
+          (oldGUrl.startsWith("http") || oldGUrl.startsWith("/uploads/"))
+        ) {
+          await deleteBlobFromStorage(oldGUrl);
+        }
+      }
+    }
+
     revalidatePath("/laporan");
     revalidatePath("/");
 

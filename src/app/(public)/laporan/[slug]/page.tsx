@@ -176,6 +176,7 @@ export default async function LaporanDetailPage({ params }: Props) {
                     src={img}
                     alt={`Dokumentasi ${report.title} #${idx + 1}`}
                     fill
+                    sizes="(max-width: 640px) 100vw, 50vw"
                     className="object-cover hover:scale-105 transition-transform duration-300"
                   />
                 </div>

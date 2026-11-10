@@ -3,12 +3,19 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Save, AlertCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, AlertCircle, Loader2, Plus, Trash2, Camera } from "lucide-react";
 import Select from "@/components/ui/Select";
 import ImageUploader from "@/components/admin/ImageUploader";
-import { uploadPendingFileOnSave, deleteOldBlobAfterUpdate } from "@/lib/upload-helper";
+import { uploadPendingFileOnSave } from "@/lib/upload-helper";
 import { cleanNumericString } from "@/lib/numeric-utils";
 import { Report } from "@/lib/db/types";
+import { reportSchema, formatHumanError, formatZodError } from "@/lib/validation/schemas";
+
+interface GalleryEntry {
+  id: string;
+  url: string;
+  file: File | null;
+}
 
 export default function AdminEditReportPage() {
   const router = useRouter();
@@ -18,8 +25,12 @@ export default function AdminEditReportPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [originalCoverUrl, setOriginalCoverUrl] = useState<string | null>(null);
+
+  // Cover photo state
+  const [selectedCoverFile, setSelectedCoverFile] = useState<File | null>(null);
+
+  // Documentation gallery photos state
+  const [galleryItems, setGalleryItems] = useState<GalleryEntry[]>([]);
 
   const [formData, setFormData] = useState({
     slug: "",
@@ -44,7 +55,6 @@ export default function AdminEditReportPage() {
         throw new Error("Gagal mengambil data laporan dari server");
       }
       const item: Report = await res.json();
-      setOriginalCoverUrl(item.cover_url || null);
       setFormData({
         slug: item.slug || "",
         title: item.title || "",
@@ -58,6 +68,19 @@ export default function AdminEditReportPage() {
         cover_url: item.cover_url || "",
         status: item.status,
       });
+
+      // Load existing visual documentation photos
+      if (Array.isArray(item.gallery_urls)) {
+        setGalleryItems(
+          item.gallery_urls.map((gUrl, idx) => ({
+            id: `gal-exist-${idx}-${Date.now()}`,
+            url: gUrl,
+            file: null,
+          }))
+        );
+      } else {
+        setGalleryItems([]);
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Gagal memuat dokumen laporan");
     } finally {
@@ -69,76 +92,118 @@ export default function AdminEditReportPage() {
     loadData();
   }, [loadData]);
 
+  const handleAddGalleryItem = () => {
+    setGalleryItems((prev) => [
+      ...prev,
+      {
+        id: `gal-${Date.now()}-${prev.length + 1}`,
+        url: "",
+        file: null,
+      },
+    ]);
+  };
+
+  const handleRemoveGalleryItem = (itemId: string) => {
+    setGalleryItems((prev) => prev.filter((item) => item.id !== itemId));
+  };
+
+  const handleGalleryItemChange = (itemId: string, updates: Partial<GalleryEntry>) => {
+    setGalleryItems((prev) =>
+      prev.map((item) => (item.id === itemId ? { ...item, ...updates } : item))
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setError(null);
 
-    let uploadRollback: (() => Promise<void>) | null = null;
+    // 1. Client-side pre-validation
+    const rawBeneficiaries = parseInt(formData.beneficiaries || "0", 10);
+    const rawAmountIdr = formData.amount_idr ? parseInt(formData.amount_idr, 10) : null;
+
+    const candidatePayload = {
+      ...formData,
+      beneficiaries: isNaN(rawBeneficiaries) ? 0 : rawBeneficiaries,
+      amount_idr: isNaN(rawAmountIdr as number) ? null : rawAmountIdr,
+      cover_url: formData.cover_url || null,
+      gallery_urls: galleryItems.map((g) => g.url).filter(Boolean),
+      status: formData.status,
+    };
+
+    const preValidation = reportSchema.safeParse({
+      ...candidatePayload,
+      cover_url: selectedCoverFile ? "https://placeholder.internal/cover.webp" : candidatePayload.cover_url,
+      gallery_urls: galleryItems
+        .map((g) => g.url || (g.file ? "https://placeholder.internal/gallery.webp" : ""))
+        .filter(Boolean),
+    });
+
+    if (!preValidation.success) {
+      setError(formatZodError(preValidation.error));
+      setSaving(false);
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      return;
+    }
+
+    // 2. Upload pending files (Cover + Gallery)
+    const rollbacks: (() => Promise<void>)[] = [];
+    const commits: (() => Promise<void>)[] = [];
 
     try {
       let finalCoverUrl = formData.cover_url || null;
 
-      if (selectedFile) {
-        const { url, rollback, commit } = await uploadPendingFileOnSave(selectedFile);
-        uploadRollback = rollback;
+      if (selectedCoverFile) {
+        const { url, rollback, commit } = await uploadPendingFileOnSave(selectedCoverFile);
+        rollbacks.push(rollback);
+        commits.push(commit);
         finalCoverUrl = url;
+      }
 
-        const res = await fetch("/api/admin/reports", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id,
-            ...formData,
-            cover_url: finalCoverUrl,
-            beneficiaries: parseInt(formData.beneficiaries || "0", 10),
-            amount_idr: formData.amount_idr ? parseInt(formData.amount_idr, 10) : null,
-            gallery_urls: [],
-          }),
-        });
-
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error || "Gagal memperbarui laporan");
-        }
-
-        await commit();
-
-        if (originalCoverUrl && originalCoverUrl !== finalCoverUrl) {
-          await deleteOldBlobAfterUpdate(originalCoverUrl);
-        }
-      } else {
-        const res = await fetch("/api/admin/reports", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id,
-            ...formData,
-            cover_url: finalCoverUrl,
-            beneficiaries: parseInt(formData.beneficiaries || "0", 10),
-            amount_idr: formData.amount_idr ? parseInt(formData.amount_idr, 10) : null,
-            gallery_urls: [],
-          }),
-        });
-
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error || "Gagal memperbarui laporan");
-        }
-
-        if (originalCoverUrl && !finalCoverUrl) {
-          await deleteOldBlobAfterUpdate(originalCoverUrl);
+      const finalGalleryUrls: string[] = [];
+      for (const item of galleryItems) {
+        if (item.file) {
+          const { url, rollback, commit } = await uploadPendingFileOnSave(item.file);
+          rollbacks.push(rollback);
+          commits.push(commit);
+          if (url) finalGalleryUrls.push(url);
+        } else if (item.url && item.url.trim()) {
+          finalGalleryUrls.push(item.url.trim());
         }
       }
+
+      // 3. Put to API
+      const res = await fetch("/api/admin/reports", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          ...candidatePayload,
+          cover_url: finalCoverUrl,
+          gallery_urls: finalGalleryUrls,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Gagal memperbarui laporan");
+      }
+
+      // 4. Commit all newly uploaded files
+      await Promise.all(commits.map((c) => c()));
 
       router.push("/admin/laporan");
       router.refresh();
     } catch (err: unknown) {
-      if (uploadRollback) {
-        await uploadRollback();
-      }
-      setError(err instanceof Error ? err.message : "Terjadi kesalahan saat menyimpan");
+      // Compensating rollback on failure
+      await Promise.all(rollbacks.map((r) => r()));
+      setError(err instanceof Error ? err.message : "Terjadi kesalahan saat menyimpan perubahan");
       setSaving(false);
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     }
   };
 
@@ -162,10 +227,10 @@ export default function AdminEditReportPage() {
         </Link>
         <div>
           <h1 className="font-serif text-2xl font-bold text-[var(--ink-900)]">
-            Ubah Dokumen Laporan
+            Edit Dokumen Laporan
           </h1>
           <p className="text-xs text-[var(--ink-600)] mt-0.5">
-            Perbarui data akuntabilitas, ringkasan eksekutif, dan rincian penyaluran program.
+            Perbarui data ringkasan, anggaran, foto sampul, dan arsip visual dokumentasi.
           </p>
         </div>
       </div>
@@ -173,7 +238,7 @@ export default function AdminEditReportPage() {
       {error && (
         <div className="p-4 rounded-2xl bg-[var(--danger)]/15 border border-[var(--danger)]/30 text-xs text-[var(--danger)] flex items-center gap-2">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span>{error}</span>
+          <span>{formatHumanError(error)}</span>
         </div>
       )}
 
@@ -186,10 +251,7 @@ export default function AdminEditReportPage() {
             type="text"
             required
             value={formData.title}
-            onChange={(e) => {
-              const val = e.target.value;
-              setFormData({ ...formData, title: val });
-            }}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             placeholder="Contoh: Laporan Penyaluran 500 Mushaf Al-Qur'an Tahap 2"
             className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
           />
@@ -322,15 +384,78 @@ export default function AdminEditReportPage() {
           </div>
         </div>
 
-        <div>
+        {/* 1. Foto Sampul Utama */}
+        <div className="pt-2">
           <ImageUploader
-            label="Foto Sampul / Cover Laporan *"
+            label="Foto Sampul / Cover Laporan"
             value={formData.cover_url}
             onChange={(url) => setFormData({ ...formData, cover_url: url })}
-            file={selectedFile}
-            onFileChange={(f) => setSelectedFile(f)}
+            file={selectedCoverFile}
+            onFileChange={(f) => setSelectedCoverFile(f)}
             helperText="Upload foto cover laporan kegiatan. Otomatis dikompresi WebP."
           />
+        </div>
+
+        {/* 2. Foto Dokumentasi / Arsip Visual Kegiatan */}
+        <div className="pt-4 border-t border-[var(--cream-200)] space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <label className="block text-xs font-semibold uppercase text-[var(--ink-900)]">
+                Arsip Visual - Dokumentasi Serah Terima & Kegiatan
+              </label>
+              <p className="text-[11px] text-[var(--ink-600)] mt-0.5">
+                Kelola foto-foto kegiatan lapangan (foto kedua, ketiga, dll.) yang ditampilkan di halaman publik laporan.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleAddGalleryItem}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--green-800)] text-[var(--cream-50)] hover:bg-[var(--green-700)] transition-colors shadow-sm"
+            >
+              <Plus className="w-3.5 h-3.5 text-[var(--gold-400)]" />
+              <span>Tambah Foto</span>
+            </button>
+          </div>
+
+          {galleryItems.length === 0 ? (
+            <div className="p-4 rounded-2xl border-2 border-dashed border-[var(--cream-300)] bg-[var(--cream-50)] text-center text-xs text-[var(--ink-500)] flex items-center justify-center gap-2">
+              <Camera className="w-4 h-4 text-[var(--gold-600)]" />
+              <span>Belum ada foto dokumentasi tambahan. Klik &quot;Tambah Foto&quot; untuk menambahkan foto kegiatan.</span>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {galleryItems.map((item, idx) => (
+                <div
+                  key={item.id}
+                  className="p-4 rounded-2xl bg-[var(--cream-50)] border border-[var(--cream-200)] relative space-y-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-[var(--green-950)]">
+                      Foto Dokumentasi #{idx + 1}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveGalleryItem(item.id)}
+                      className="text-xs text-red-600 hover:text-red-700 flex items-center gap-1 transition-colors"
+                      title="Hapus foto ini"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Hapus</span>
+                    </button>
+                  </div>
+
+                  <ImageUploader
+                    label={`Pilih Berkas Foto #${idx + 1}`}
+                    value={item.url}
+                    onChange={(url) => handleGalleryItemChange(item.id, { url })}
+                    file={item.file}
+                    onFileChange={(f) => handleGalleryItemChange(item.id, { file: f })}
+                    placeholder="Pilih file foto dokumentasi kegiatan"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div>
@@ -342,7 +467,7 @@ export default function AdminEditReportPage() {
             required
             value={formData.summary}
             onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
-            placeholder="Ringkasan singkat hasil kegiatan penyaluran..."
+            placeholder="Ringkasan singkat hasil kegiatan penyaluran (minimal 10 karakter)..."
             className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
           />
         </div>
@@ -356,7 +481,7 @@ export default function AdminEditReportPage() {
             required
             value={formData.body}
             onChange={(e) => setFormData({ ...formData, body: e.target.value })}
-            placeholder="Tuliskan detail kronologi, lembaga yang menerima manfaat, dan pertanggungjawaban dana..."
+            placeholder="Tuliskan detail kronologi, lembaga yang menerima manfaat, dan pertanggungjawaban dana (minimal 20 karakter)..."
             className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)] font-sans"
           />
         </div>
@@ -374,11 +499,10 @@ export default function AdminEditReportPage() {
             className="px-6 py-2.5 rounded-full text-xs font-semibold bg-gold-gradient text-[var(--green-950)] hover:brightness-110 shadow-md flex items-center gap-2 transition-all disabled:opacity-50"
           >
             <Save className="w-4 h-4" />
-            <span>{saving ? "Menyimpan Perubahan..." : "Simpan Perubahan Laporan"}</span>
+            <span>{saving ? "Menyimpan..." : "Simpan Perubahan"}</span>
           </button>
         </div>
       </form>
     </div>
   );
 }
-

@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { PlusCircle, Search, Trash2, Edit } from "lucide-react";
+import Image from "next/image";
+import { PlusCircle, Search, Trash2, Edit, Image as ImageIcon } from "lucide-react";
 import { Report } from "@/lib/db/types";
 
 export default function AdminReportsListPage() {
@@ -110,8 +111,28 @@ export default function AdminReportsListPage() {
             ) : (
               filtered.map((row) => (
                 <tr key={row.id} className="hover:bg-[var(--cream-100)] transition-colors">
-                  <td className="py-3 px-4 font-serif font-bold text-[var(--ink-900)] max-w-xs truncate">
-                    {row.title}
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-3 max-w-xs">
+                      {row.cover_url ? (
+                        <div className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-[var(--green-950)] border border-[var(--cream-300)]">
+                          <Image
+                            src={row.cover_url}
+                            alt={row.title}
+                            fill
+                            className="object-cover"
+                            sizes="40px"
+                            unoptimized
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg flex-shrink-0 bg-[var(--cream-200)] flex items-center justify-center text-[var(--ink-400)]">
+                          <ImageIcon className="w-4 h-4" />
+                        </div>
+                      )}
+                      <span className="font-serif font-bold text-[var(--ink-900)] truncate">
+                        {row.title}
+                      </span>
+                    </div>
                   </td>
                   <td className="py-3 px-4 text-xs font-medium text-[var(--gold-700)]">
                     {row.program.replace("_", " ")}

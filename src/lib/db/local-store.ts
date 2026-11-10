@@ -252,7 +252,29 @@ export const localStore = {
   updateReport: (id: string, updates: Partial<Report>) => {
     const list = getReportsData();
     const idx = list.findIndex(r => r.id === id);
-    if (idx === -1) return null;
+    if (idx === -1) {
+      const newItem: Report = {
+        id,
+        slug: updates.slug || `rep-${Date.now()}`,
+        title: updates.title || "",
+        program: updates.program || "infak_alquran",
+        period_start: updates.period_start || new Date().toISOString().split("T")[0],
+        period_end: updates.period_end || new Date().toISOString().split("T")[0],
+        summary: updates.summary || "",
+        body: updates.body || "",
+        beneficiaries: updates.beneficiaries || 0,
+        amount_idr: updates.amount_idr ?? null,
+        cover_url: updates.cover_url ?? null,
+        gallery_urls: updates.gallery_urls || [],
+        pdf_url: updates.pdf_url ?? null,
+        status: updates.status || "published",
+        created_at: updates.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      list.unshift(newItem);
+      saveJsonFile("reports.json", list);
+      return newItem;
+    }
     list[idx] = { ...list[idx], ...updates, updated_at: new Date().toISOString() };
     saveJsonFile("reports.json", list);
     return list[idx];
@@ -374,7 +396,7 @@ export const localStore = {
   getAggregatedStats: (): AggregatedStats => {
     const pubInfak = infakList.filter(i => i.status === 'published');
     const pubGeber = geberList.filter(g => g.status === 'published');
-    const pubReports = reportList.filter(r => r.status === 'published');
+    const pubReports = getReportsData().filter(r => r.status === 'published');
 
     const totalMushaf = pubInfak.reduce((acc, curr) => acc + (curr.quantity || 1), 0);
     const totalMasjid = pubGeber.length;
