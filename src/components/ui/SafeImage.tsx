@@ -32,7 +32,7 @@ export default function SafeImage({
 
   const shouldBeUnoptimized = unoptimized !== undefined ? unoptimized : isExternalOrBlob;
 
-  if (error && !fallbackSrc) {
+  if ((!currentSrc || error) && !fallbackSrc) {
     return (
       <div
         className={`w-full h-full flex flex-col items-center justify-center bg-[var(--green-950)] text-[var(--gold-400)]/70 p-4 ${className}`}

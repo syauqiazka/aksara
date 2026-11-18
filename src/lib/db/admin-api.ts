@@ -408,7 +408,6 @@ export const db = {
         photo_url: item.photo_url || null,
         notes: item.notes || null,
         status: item.status,
-        created_by: item.created_by || null,
       };
 
       const result = id
@@ -508,7 +507,6 @@ export const db = {
         activity_notes: item.activity_notes || null,
         photo_urls: (item.photo_urls || []) as unknown as Prisma.InputJsonValue,
         status: item.status,
-        created_by: item.created_by || null,
       };
 
       const result = id
@@ -637,7 +635,6 @@ export const db = {
         gallery_urls: (item.gallery_urls || []) as unknown as Prisma.InputJsonValue,
         pdf_url: item.pdf_url || null,
         status: item.status,
-        created_by: item.created_by || null,
       };
 
       const result = id
