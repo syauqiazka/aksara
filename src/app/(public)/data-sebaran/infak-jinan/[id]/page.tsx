@@ -8,7 +8,7 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;

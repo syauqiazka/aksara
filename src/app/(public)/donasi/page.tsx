@@ -6,7 +6,7 @@ import { Phone, Mail, ShieldCheck, ImageIcon, Calendar, ArrowRight, HeartHandsha
 import BankAccountsList from "@/components/sections/BankAccountsList";
 import PageHeader from "@/components/ui/PageHeader";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Info Donasi & Rekening Resmi | Yayasan Sahabat Aksara",

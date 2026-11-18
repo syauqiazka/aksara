@@ -22,7 +22,7 @@ import IndonesiaMap from "@/components/sections/IndonesiaMap";
 import Button from "@/components/ui/Button";
 import IslamicCornerOrnament from "@/components/ui/IslamicCornerOrnament";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Yayasan Sahabat Aksara: Menebar Cahaya Al-Qur'an & Inovasi Teknologi",

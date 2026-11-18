@@ -2,7 +2,24 @@ import "server-only";
 
 import { PrismaClient } from "@prisma/client";
 
+// Restrict Tokio worker threads to prevent "OS can't spawn worker thread (os error 11)"
+// on resource-constrained environments like Hostinger Shared Hosting (CloudLinux)
+if (typeof process !== "undefined" && !process.env.TOKIO_WORKER_THREADS) {
+  process.env.TOKIO_WORKER_THREADS = "1";
+}
+
+// Detect if Next.js is currently running the production build phase
+const isBuildPhase =
+  process.env.NEXT_PHASE === "phase-production-build" ||
+  process.env.npm_lifecycle_event === "build";
+
 function getFormattedDatabaseUrl(): string | undefined {
+  // During build phase on shared hosting, do not initiate database connection
+  // to avoid spawning query engine worker threads that exceed OS nproc limits
+  if (isBuildPhase) {
+    return undefined;
+  }
+
   const url =
     process.env.DATABASE_URL_ACCOUNT ||
     process.env.DIRECT_URL_ACCOUNT ||
@@ -16,7 +33,7 @@ function getFormattedDatabaseUrl(): string | undefined {
   if (url.startsWith("mysql://") || url.startsWith("mariadb://")) {
     if (!url.includes("connection_limit=")) {
       const separator = url.includes("?") ? "&" : "?";
-      return `${url}${separator}connection_limit=10&connect_timeout=10`;
+      return `${url}${separator}connection_limit=5&connect_timeout=10`;
     }
   }
 
@@ -26,6 +43,7 @@ function getFormattedDatabaseUrl(): string | undefined {
 const formattedUrl = getFormattedDatabaseUrl();
 
 export const isPrismaConfigured = Boolean(
+  !isBuildPhase &&
   formattedUrl &&
   (formattedUrl.startsWith("mysql://") || formattedUrl.startsWith("mariadb://"))
 );

@@ -4,7 +4,7 @@ import { db } from "@/lib/db/api";
 import PageHeader from "@/components/ui/PageHeader";
 import { ImageIcon, Calendar } from "lucide-react";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Galeri Dokumentasi Program | Yayasan Sahabat Aksara",

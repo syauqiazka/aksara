@@ -4,7 +4,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import StatCounter from "@/components/motion/StatCounter";
 import { Metadata } from "next";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Data Sebaran Donasi: Infak Jinan, BUSS Al-Qur'an, & Geber Masjid",

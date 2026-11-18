@@ -7,7 +7,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import Badge from "@/components/ui/Badge";
 import SafeImage from "@/components/ui/SafeImage";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Laporan Penyaluran & Audit Terbuka | Yayasan Sahabat Aksara",
