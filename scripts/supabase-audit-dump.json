@@ -1,0 +1,304 @@
+{
+  "site_settings": {
+    "status": "EXISTS",
+    "rowCount": 2,
+    "columns": [
+      "key",
+      "value",
+      "updated_at"
+    ],
+    "sample": {
+      "key": "bank_accounts",
+      "value": [
+        {
+          "bank": "Bank BCA",
+          "branch": "Jakarta",
+          "holder": "Yayasan Ajirasa Aksara Semesta",
+          "number": "0353392091"
+        }
+      ],
+      "updated_at": "2026-11-17T07:08:23.859+00:00"
+    }
+  },
+  "upload_ledger": {
+    "status": "EXISTS",
+    "rowCount": 0,
+    "columns": [],
+    "sample": null
+  },
+  "infak_jinan": {
+    "status": "EXISTS",
+    "rowCount": 8,
+    "columns": [
+      "id",
+      "mushaf_no",
+      "donor_name",
+      "show_donor_name",
+      "donor_origin",
+      "donor_phone",
+      "dedication_name",
+      "pesantren_name",
+      "address",
+      "distributed_at",
+      "maps_url",
+      "santri_name",
+      "santri_phone",
+      "status",
+      "created_at",
+      "updated_at",
+      "pesantren_province",
+      "pesantren_city"
+    ],
+    "sample": {
+      "id": "aea109be-94b4-4fbc-99f6-ffb6bcb4eb1a",
+      "mushaf_no": 1,
+      "donor_name": "Muhamad Firdaus",
+      "show_donor_name": true,
+      "donor_origin": "Cirebon",
+      "donor_phone": "085189110954",
+      "dedication_name": "Inayah Binti Kartoni",
+      "pesantren_name": "Madrasah Al-Huffadz 2",
+      "address": "Gedongan",
+      "distributed_at": "2027-01-30",
+      "maps_url": "https://maps.app.goo.gl/cR4ZD3f6iBYPfr1C9",
+      "santri_name": "Fulan",
+      "santri_phone": "082262170018",
+      "status": "published",
+      "created_at": "2026-11-08T00:25:58.426911+00:00",
+      "updated_at": "2026-11-08T00:25:58.426911+00:00",
+      "pesantren_province": null,
+      "pesantren_city": null
+    }
+  },
+  "infak_jinan_photos": {
+    "status": "EXISTS",
+    "rowCount": 8,
+    "columns": [
+      "id",
+      "infak_id",
+      "url",
+      "caption",
+      "sort",
+      "created_at"
+    ],
+    "sample": {
+      "id": "df429c38-ad42-4366-86fc-356d1c166c2e",
+      "infak_id": "aea109be-94b4-4fbc-99f6-ffb6bcb4eb1a",
+      "url": "https://4viey5j46zhcxap3.public.blob.vercel-storage.com/sahabat-aksara/ffc1cf09ccc470ec.webp",
+      "caption": "Serah Terima Mushaf #1",
+      "sort": 1,
+      "created_at": "2026-11-08T00:26:00.407501+00:00"
+    }
+  },
+  "infak_jinan_santri": {
+    "status": "EXISTS",
+    "rowCount": 8,
+    "columns": [
+      "id",
+      "infak_id",
+      "name",
+      "phone",
+      "sort",
+      "status",
+      "created_at",
+      "updated_at"
+    ],
+    "sample": {
+      "id": "614da34f-f3a4-455b-98c6-27ef8819ed07",
+      "infak_id": "aea109be-94b4-4fbc-99f6-ffb6bcb4eb1a",
+      "name": "Fulan",
+      "phone": "082262170018",
+      "sort": 1,
+      "status": "published",
+      "created_at": "2026-11-08T00:25:58.745875+00:00",
+      "updated_at": "2026-11-08T00:25:58.745875+00:00"
+    }
+  },
+  "santri_hafalan_updates": {
+    "status": "EXISTS",
+    "rowCount": 7,
+    "columns": [
+      "id",
+      "santri_id",
+      "updated_on",
+      "surah_no",
+      "surah_name",
+      "ayat",
+      "juz",
+      "notes",
+      "created_at"
+    ],
+    "sample": {
+      "id": "fa24fbfc-6ffc-4912-abf4-dffec35fdbd8",
+      "santri_id": "614da34f-f3a4-455b-98c6-27ef8819ed07",
+      "updated_on": "2027-01-30",
+      "surah_no": 1,
+      "surah_name": "Al-Fatihah",
+      "ayat": 7,
+      "juz": 1,
+      "notes": "Capaian awal saat serah terima mushaf",
+      "created_at": "2026-11-08T00:25:59.567925+00:00"
+    }
+  },
+  "buss_distributions": {
+    "status": "EXISTS",
+    "rowCount": 0,
+    "columns": [],
+    "sample": null
+  },
+  "yatim_distributions": {
+    "status": "ERROR",
+    "error": "Could not find the table 'public.yatim_distributions' in the schema cache",
+    "code": "PGRST205"
+  },
+  "geber_masjid_distributions": {
+    "status": "EXISTS",
+    "rowCount": 1,
+    "columns": [
+      "id",
+      "mosque_name",
+      "province",
+      "city",
+      "district",
+      "address",
+      "lat",
+      "lng",
+      "activity_date",
+      "participants",
+      "activity_notes",
+      "photo_urls",
+      "status",
+      "created_at",
+      "updated_at",
+      "created_by"
+    ],
+    "sample": {
+      "id": "949f24a0-1759-45df-aff9-a4a358d213aa",
+      "mosque_name": "Mushola Al-Hikmah",
+      "province": "Jawa Barat",
+      "city": "Bekasi",
+      "district": "Cikarang",
+      "address": "Cikarang",
+      "lat": null,
+      "lng": null,
+      "activity_date": "2027-01-09",
+      "participants": 5,
+      "activity_notes": "Area halaman dan Tempat wudhu",
+      "photo_urls": [
+        "https://4viey5j46zhcxap3.public.blob.vercel-storage.com/sahabat-aksara/0d5109a3986bfd93.webp"
+      ],
+      "status": "published",
+      "created_at": "2026-11-07T09:59:20.353742+00:00",
+      "updated_at": "2026-11-09T11:20:18.171+00:00",
+      "created_by": null
+    }
+  },
+  "reports": {
+    "status": "EXISTS",
+    "rowCount": 1,
+    "columns": [
+      "id",
+      "slug",
+      "title",
+      "program",
+      "period_start",
+      "period_end",
+      "summary",
+      "body",
+      "beneficiaries",
+      "amount_idr",
+      "cover_url",
+      "gallery_urls",
+      "pdf_url",
+      "status",
+      "created_at",
+      "updated_at",
+      "created_by"
+    ],
+    "sample": {
+      "id": "2344f8d6-2ec4-4dd2-acf3-865667725f39",
+      "slug": "laporan-1",
+      "title": "Pelatihan Design Grafis Anak Yatim",
+      "program": "pena_yatim",
+      "period_start": "2026-11-09",
+      "period_end": "2026-11-09",
+      "summary": "Pelatihan Design Grafis ",
+      "body": "Terdiri dari 20 peserta offline  dari 3 Kabupaten ",
+      "beneficiaries": 20,
+      "amount_idr": 10000000,
+      "cover_url": "https://4viey5j46zhcxap3.public.blob.vercel-storage.com/sahabat-aksara/c7cbc1c2de3b2258.webp",
+      "gallery_urls": [
+        "https://4viey5j46zhcxap3.public.blob.vercel-storage.com/sahabat-aksara/c7cbc1c2de3b2258.webp"
+      ],
+      "pdf_url": null,
+      "status": "published",
+      "created_at": "2026-11-09T07:15:48.25422+00:00",
+      "updated_at": "2026-11-10T08:32:53.326+00:00",
+      "created_by": null
+    }
+  },
+  "gallery_items": {
+    "status": "EXISTS",
+    "rowCount": 1,
+    "columns": [
+      "id",
+      "title",
+      "program",
+      "date",
+      "image_url",
+      "caption",
+      "status",
+      "created_at"
+    ],
+    "sample": {
+      "id": "15a04a2d-c0e1-4589-bb65-f221db3a732a",
+      "title": "Yatim Berdikari",
+      "program": "Bela Berdikari",
+      "date": "2026-11-09",
+      "image_url": "https://4viey5j46zhcxap3.public.blob.vercel-storage.com/sahabat-aksara/08d44f6a63a6e72a.webp",
+      "caption": "Pelatihan Design Grafis 20 Anak Yatim",
+      "status": "published",
+      "created_at": "2026-11-09T07:17:47.79614+00:00"
+    }
+  },
+  "themed_campaigns": {
+    "status": "EXISTS",
+    "rowCount": 1,
+    "columns": [
+      "id",
+      "title",
+      "disaster_type",
+      "location",
+      "status",
+      "description",
+      "cover_url",
+      "target_idr",
+      "collected_idr",
+      "created_at"
+    ],
+    "sample": {
+      "id": "c6ee610f-712d-46a2-947f-d3c05f03308f",
+      "title": "Karhutla ",
+      "disaster_type": "Kebakaran Hutan",
+      "location": "Kalimantan ",
+      "status": "aktif",
+      "description": "Untuk pembelian kebutuhan pokok",
+      "cover_url": "https://4viey5j46zhcxap3.public.blob.vercel-storage.com/sahabat-aksara/175c4425219d2e87.webp",
+      "target_idr": 100000000,
+      "collected_idr": 15000000,
+      "created_at": "2026-11-09T07:17:08.33011+00:00"
+    }
+  },
+  "infak_distributions": {
+    "status": "EXISTS",
+    "rowCount": 0,
+    "columns": [],
+    "sample": null
+  },
+  "admin_users": {
+    "status": "EXISTS",
+    "rowCount": 0,
+    "columns": [],
+    "sample": null
+  }
+}

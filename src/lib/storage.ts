@@ -6,9 +6,8 @@ import { put, del, list } from "@vercel/blob";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { isPrismaConfigured, prisma } from "./db/prisma";
-import { isPostgresConfigured, pgQuery, getErrorMessage } from "./db/postgres";
-import { isSupabaseConfigured, supabase } from "./db/client";
 import { localStore } from "./db/local-store";
+import { toStringArray, getErrorMessage, parseDateTimeString } from "./db/formatters";
 import { UploadLedgerEntry } from "./db/types";
 
 export interface ProcessedUploadResult {
@@ -43,55 +42,54 @@ export async function processAndCompressImage(
   buffer: Buffer,
   _originalFilename = "upload.jpg"
 ): Promise<{ compressedBuffer: Buffer; hash: string; mimeType: string }> {
-  // 1. Max 5MB hard limit
+  // Validate magic bytes to verify genuine image file
+  const isJpeg = buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+  const isPng =
+    buffer[0] === 0x89 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4e &&
+    buffer[3] === 0x47;
+  const isWebp =
+    buffer.length > 12 &&
+    buffer.toString("ascii", 0, 4) === "RIFF" &&
+    buffer.toString("ascii", 8, 12) === "WEBP";
+
+  if (!isJpeg && !isPng && !isWebp) {
+    throw new Error(
+      "Format file tidak didukung. Harap unggah berkas gambar valid (JPEG, PNG, atau WebP)."
+    );
+  }
+
+  // Max raw input limit: 5 MB
   if (buffer.length > 5 * 1024 * 1024) {
-    throw new Error("Ukuran gambar melebihi batas maksimal 5 MB.");
+    throw new Error("Ukuran berkas melebihi batas maksimal 5 MB.");
   }
 
-  // 2. Validate with Sharp
-  let metadata;
-  try {
-    metadata = await sharp(buffer).metadata();
-  } catch {
-    throw new Error("Format file tidak valid atau rusak. Harap unggah gambar JPG, PNG, atau WebP.");
+  // Resize: Max dimension 2000px, fit inside without distortion
+  const pipeline = sharp(buffer).rotate().resize(2000, 2000, {
+    fit: "inside",
+    withoutEnlargement: true,
+  });
+
+  // Convert to WebP with initial quality 82
+  let quality = 82;
+  let compressedBuffer = await pipeline
+    .webp({ quality, effort: 4 })
+    .toBuffer();
+
+  // Progressive compression if size exceeds 300KB
+  while (compressedBuffer.length > 300 * 1024 && quality > 45) {
+    quality -= 10;
+    compressedBuffer = await pipeline
+      .webp({ quality, effort: 4 })
+      .toBuffer();
   }
 
-  const validFormats = ["jpeg", "png", "webp", "gif"];
-  if (!metadata.format || !validFormats.includes(metadata.format)) {
-    throw new Error("Format gambar tidak didukung. Harap pilih gambar JPEG, PNG, atau WebP.");
-  }
-
-  // 3. Resize & convert to WebP (max 2000px dimension)
-  let pipeline = sharp(buffer)
-    .resize({
-      width: 2000,
-      height: 2000,
-      fit: "inside",
-      withoutEnlargement: true,
-    })
-    .webp({ quality: 80 });
-
-  let compressedBuffer = await pipeline.toBuffer();
-
-  // If still larger than 300KB, compress with quality 65
-  if (compressedBuffer.length > 300 * 1024) {
-    pipeline = sharp(buffer)
-      .resize({
-        width: 2000,
-        height: 2000,
-        fit: "inside",
-        withoutEnlargement: true,
-      })
-      .webp({ quality: 65 });
-    compressedBuffer = await pipeline.toBuffer();
-  }
-
-  // 4. Content SHA-256 hash (truncated to 16 hex chars)
+  // Calculate SHA-256 hash of the final compressed WebP
   const hash = crypto
     .createHash("sha256")
     .update(compressedBuffer)
-    .digest("hex")
-    .slice(0, 16);
+    .digest("hex");
 
   return {
     compressedBuffer,
@@ -174,30 +172,7 @@ export async function commitUpload(url: string): Promise<void> {
       });
       return;
     } catch (err: unknown) {
-      console.warn("[prisma] commitUpload fallback:", getErrorMessage(err));
-    }
-  }
-
-  if (isPostgresConfigured) {
-    try {
-      await pgQuery(
-        `update upload_ledger set status = 'committed', committed_at = now() where url = $1`,
-        [url]
-      );
-      return;
-    } catch (err: unknown) {
-      console.warn("[postgres] commitUpload fallback:", getErrorMessage(err));
-    }
-  }
-
-  if (isSupabaseConfigured && supabase) {
-    try {
-      await supabase
-        .from("upload_ledger")
-        .update({ status: "committed", committed_at: new Date().toISOString() })
-        .eq("url", url);
-    } catch {
-      // already committed in localStore
+      console.warn("[prisma] commitUpload:", getErrorMessage(err));
     }
   }
 }
@@ -219,7 +194,7 @@ export async function deleteBlobFromStorage(url: string): Promise<boolean> {
 
     localStore.deleteUploadLedger(url);
 
-    // Update ledger in Prisma / PostgreSQL / Supabase
+    // Update ledger in Prisma
     if (isPrismaConfigured && prisma) {
       try {
         await prisma.uploadLedger.update({
@@ -227,26 +202,7 @@ export async function deleteBlobFromStorage(url: string): Promise<boolean> {
           data: { status: "deleted" },
         });
       } catch (err: unknown) {
-        console.warn("[prisma] deleteBlobFromStorage ledger fallback:", getErrorMessage(err));
-      }
-    }
-
-    if (isPostgresConfigured) {
-      try {
-        await pgQuery(`update upload_ledger set status = 'deleted' where url = $1`, [url]);
-      } catch (err: unknown) {
-        console.warn("[postgres] deleteBlobFromStorage ledger fallback:", getErrorMessage(err));
-      }
-    }
-
-    if (isSupabaseConfigured && supabase) {
-      try {
-        await supabase
-          .from("upload_ledger")
-          .update({ status: "deleted" })
-          .eq("url", url);
-      } catch {
-        // already updated in localStore
+        console.warn("[prisma] deleteBlobFromStorage ledger:", getErrorMessage(err));
       }
     }
 
@@ -317,80 +273,39 @@ export async function getAllReferencedPhotoUrls(): Promise<Set<string>> {
       ]);
 
       jinanPhotos.forEach((r) => r.url && referenced.add(r.url));
-      geber.forEach((r) => r.photo_urls.forEach((u) => u && referenced.add(u)));
+      geber.forEach((r) => {
+        const urls = toStringArray(r.photo_urls);
+        urls.forEach((u) => u && referenced.add(u));
+      });
       reports.forEach((r) => {
         if (r.cover_url) referenced.add(r.cover_url);
-        r.gallery_urls.forEach((u) => u && referenced.add(u));
+        const urls = toStringArray(r.gallery_urls);
+        urls.forEach((u) => u && referenced.add(u));
       });
       gallery.forEach((r) => r.image_url && referenced.add(r.image_url));
       campaigns.forEach((r) => r.cover_url && referenced.add(r.cover_url));
 
       return referenced;
     } catch (err: unknown) {
-      console.warn("[prisma] getAllReferencedPhotoUrls fallback:", getErrorMessage(err));
+      console.warn("[prisma] getAllReferencedPhotoUrls:", getErrorMessage(err));
     }
   }
 
-  if (isPostgresConfigured) {
-    try {
-      const [jinanPhotos, geber, reports, gallery, campaigns] = await Promise.all([
-        pgQuery(`select url from infak_jinan_photos where url is not null`),
-        pgQuery(`select photo_urls from geber_masjid_distributions where photo_urls is not null`),
-        pgQuery(`select cover_url, gallery_urls from reports`),
-        pgQuery(`select image_url from gallery_items where image_url is not null`),
-        pgQuery(`select cover_url from themed_campaigns where cover_url is not null`),
-      ]);
+  // Fallback to localStore
+  const infak = localStore.getInfak(false);
+  const geber = localStore.getGeber(false);
+  const reports = localStore.getReports(false);
+  const gallery = localStore.getGallery(false);
+  const campaigns = localStore.getCampaigns();
 
-      jinanPhotos.rows.forEach((r) => r.url && referenced.add(r.url));
-      geber.rows.forEach((r) => Array.isArray(r.photo_urls) && r.photo_urls.forEach((u: string) => u && referenced.add(u)));
-      reports.rows.forEach((r) => {
-        if (r.cover_url) referenced.add(r.cover_url);
-        if (Array.isArray(r.gallery_urls)) r.gallery_urls.forEach((u: string) => u && referenced.add(u));
-      });
-      gallery.rows.forEach((r) => r.image_url && referenced.add(r.image_url));
-      campaigns.rows.forEach((r) => r.cover_url && referenced.add(r.cover_url));
-
-      return referenced;
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.warn("[postgres] getAllReferencedPhotoUrls fallback:", msg);
-    }
-  }
-
-  if (isSupabaseConfigured && supabase) {
-    const [infak, geber, reports, gallery, campaigns] = await Promise.all([
-      supabase.from("infak_distributions").select("photo_url"),
-      supabase.from("geber_masjid_distributions").select("photo_urls"),
-      supabase.from("reports").select("cover_url, gallery_urls"),
-      supabase.from("gallery_items").select("image_url"),
-      supabase.from("themed_campaigns").select("cover_url"),
-    ]);
-
-    infak.data?.forEach((i: { photo_url: string | null }) => i.photo_url && referenced.add(i.photo_url));
-    geber.data?.forEach((g: { photo_urls: string[] | null }) => g.photo_urls?.forEach((u) => u && referenced.add(u)));
-    reports.data?.forEach((r: { cover_url: string | null; gallery_urls: string[] | null }) => {
-      if (r.cover_url) referenced.add(r.cover_url);
-      r.gallery_urls?.forEach((u) => u && referenced.add(u));
-    });
-    gallery.data?.forEach((g: { image_url: string | null }) => g.image_url && referenced.add(g.image_url));
-    campaigns.data?.forEach((c: { cover_url: string | null }) => c.cover_url && referenced.add(c.cover_url));
-  } else {
-    // Local store
-    const infak = localStore.getInfak(false);
-    const geber = localStore.getGeber(false);
-    const reports = localStore.getReports(false);
-    const gallery = localStore.getGallery(false);
-    const campaigns = localStore.getCampaigns();
-
-    infak.forEach((i: { photo_url?: string | null }) => i.photo_url && referenced.add(i.photo_url));
-    geber.forEach((g: { photo_urls?: string[] | null }) => g.photo_urls?.forEach((u: string) => u && referenced.add(u)));
-    reports.forEach((r: { cover_url?: string | null; gallery_urls?: string[] | null }) => {
-      if (r.cover_url) referenced.add(r.cover_url);
-      r.gallery_urls?.forEach((u: string) => u && referenced.add(u));
-    });
-    gallery.forEach((g: { image_url?: string | null }) => g.image_url && referenced.add(g.image_url));
-    campaigns.forEach((c: { cover_url?: string | null }) => c.cover_url && referenced.add(c.cover_url));
-  }
+  infak.forEach((i: { photo_url?: string | null }) => i.photo_url && referenced.add(i.photo_url));
+  geber.forEach((g: { photo_urls?: string[] | null }) => g.photo_urls?.forEach((u: string) => u && referenced.add(u)));
+  reports.forEach((r: { cover_url?: string | null; gallery_urls?: string[] | null }) => {
+    if (r.cover_url) referenced.add(r.cover_url);
+    r.gallery_urls?.forEach((u: string) => u && referenced.add(u));
+  });
+  gallery.forEach((g: { image_url?: string | null }) => g.image_url && referenced.add(g.image_url));
+  campaigns.forEach((c: { cover_url?: string | null }) => c.cover_url && referenced.add(c.cover_url));
 
   return referenced;
 }
@@ -441,46 +356,22 @@ async function getLedgerByHash(hash: string): Promise<UploadLedgerEntry | null> 
           size_bytes: row.size_bytes,
           mime_type: row.mime_type,
           status: row.status as "pending" | "committed" | "deleted",
-          created_at: row.created_at.toISOString(),
-          committed_at: row.committed_at?.toISOString() || null,
+          created_at: parseDateTimeString(row.created_at),
+          committed_at: row.committed_at ? parseDateTimeString(row.committed_at) : null,
         };
       }
     } catch (err: unknown) {
-      console.warn("[prisma] getLedgerByHash fallback:", getErrorMessage(err));
+      console.warn("[prisma] getLedgerByHash:", getErrorMessage(err));
     }
   }
 
-  if (isPostgresConfigured) {
-    try {
-      const res = await pgQuery(
-        `select * from upload_ledger where content_hash = $1 and status = 'committed' limit 1`,
-        [hash]
-      );
-      if (res.rows.length) return res.rows[0] as UploadLedgerEntry;
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.warn("[postgres] getLedgerByHash fallback:", msg);
-    }
-  }
-
-  if (isSupabaseConfigured && supabase) {
-    try {
-      const { data, error } = await supabase
-        .from("upload_ledger")
-        .select("*")
-        .eq("content_hash", hash)
-        .eq("status", "committed")
-        .maybeSingle();
-      if (!error && data) return data as UploadLedgerEntry;
-    } catch {
-      // fallback to localStore
-    }
-  }
   return localStore.getUploadLedgerByHash(hash);
 }
 
 // Helper: Insert record into ledger
-async function recordUploadLedger(entry: Omit<UploadLedgerEntry, "id" | "created_at" | "committed_at">): Promise<void> {
+async function recordUploadLedger(
+  entry: Omit<UploadLedgerEntry, "id" | "created_at" | "committed_at">
+): Promise<void> {
   localStore.addUploadLedger(entry);
 
   if (isPrismaConfigured && prisma) {
@@ -503,33 +394,7 @@ async function recordUploadLedger(entry: Omit<UploadLedgerEntry, "id" | "created
       });
       return;
     } catch (err: unknown) {
-      console.warn("[prisma] recordUploadLedger fallback:", getErrorMessage(err));
-    }
-  }
-
-  if (isPostgresConfigured) {
-    try {
-      await pgQuery(
-        `insert into upload_ledger (url, content_hash, size_bytes, mime_type, status, created_at)
-         values ($1, $2, $3, $4, $5, now())
-         on conflict (url) do nothing`,
-        [entry.url, entry.content_hash, entry.size_bytes, entry.mime_type, entry.status]
-      );
-      return;
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.warn("[postgres] recordUploadLedger fallback:", msg);
-    }
-  }
-
-  if (isSupabaseConfigured && supabase) {
-    try {
-      await supabase.from("upload_ledger").insert({
-        ...entry,
-        created_at: new Date().toISOString(),
-      });
-    } catch {
-      // already added to localStore
+      console.warn("[prisma] recordUploadLedger:", getErrorMessage(err));
     }
   }
 }

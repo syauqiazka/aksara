@@ -1,17 +1,7 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey =
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-
-export const isSupabaseConfigured = Boolean(
-  supabaseUrl &&
-  supabaseAnonKey &&
-  supabaseUrl !== 'https://your-project.supabase.co'
-);
-
-export const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl!, supabaseAnonKey!)
-  : null;
-
+/**
+ * @deprecated
+ * Aksara has migrated completely to Hostinger MySQL via Prisma ORM.
+ * Supabase client is no longer used for database queries or fallback.
+ */
+export const isSupabaseConfigured = false;
+export const supabase = null;

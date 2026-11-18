@@ -1,0 +1,62 @@
+{
+  "started_at": "2026-11-18T15:46:51.339Z",
+  "is_dry_run": true,
+  "tables": {
+    "site_settings": {
+      "source_count": 2,
+      "target_count": 0
+    },
+    "upload_ledger": {
+      "source_count": 0,
+      "target_count": 0
+    },
+    "infak_jinan": {
+      "source_count": 8,
+      "target_count": 0
+    },
+    "infak_jinan_photos": {
+      "source_count": 8,
+      "target_count": 0
+    },
+    "infak_jinan_santri": {
+      "source_count": 8,
+      "target_count": 0
+    },
+    "santri_hafalan_updates": {
+      "source_count": 7,
+      "target_count": 0
+    },
+    "geber_masjid_distributions": {
+      "source_count": 1,
+      "target_count": 0
+    },
+    "reports": {
+      "source_count": 1,
+      "target_count": 0
+    },
+    "gallery_items": {
+      "source_count": 1,
+      "target_count": 0
+    },
+    "themed_campaigns": {
+      "source_count": 1,
+      "target_count": 0
+    },
+    "buss_distributions": {
+      "source_count": 0,
+      "target_count": 0
+    },
+    "yatim_distributions": {
+      "source_count": 0,
+      "target_count": 0
+    },
+    "infak_distributions": {
+      "source_count": 0,
+      "target_count": 0
+    }
+  },
+  "total_source_records": 37,
+  "total_migrated_records": 0,
+  "errors": [],
+  "completed_at": "2026-11-18T15:46:53.599Z"
+}
