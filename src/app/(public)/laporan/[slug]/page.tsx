@@ -12,18 +12,13 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
-export const revalidate = 60;
-
-export async function generateStaticParams() {
-  const reports = await db.getReports(true);
-  return reports.map((r) => ({ slug: r.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const report = await db.getReportBySlug(slug);
   if (!report) return { title: "Laporan Tidak Ditemukan" };
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sahabataksara.id";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sahabataksarasemesta.org";
   const image = report.cover_url
     ? (report.cover_url.startsWith("http") ? report.cover_url : `${siteUrl}${report.cover_url}`)
     : `${siteUrl}/images/logo-sahabat-aksara.jpg`;

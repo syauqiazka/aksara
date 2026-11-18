@@ -70,8 +70,8 @@ export const db = {
         updated_at: parseDateTimeString(d.updated_at),
       }));
     } catch (err: unknown) {
-      console.error("[db.api] getInfakDistributions error:", getErrorMessage(err));
-      throw new Error(`Gagal memuat data sebaran infak: ${getErrorMessage(err)}`);
+      console.warn("[db.api] getInfakDistributions fallback:", getErrorMessage(err));
+      return [];
     }
   }),
 
@@ -92,8 +92,8 @@ export const db = {
         updated_at: parseDateTimeString(d.updated_at),
       };
     } catch (err: unknown) {
-      console.error("[db.api] getInfakById error:", getErrorMessage(err));
-      throw new Error(`Gagal memuat detail infak: ${getErrorMessage(err)}`);
+      console.warn("[db.api] getInfakById fallback:", getErrorMessage(err));
+      return null;
     }
   }),
 
@@ -117,8 +117,8 @@ export const db = {
         updated_at: parseDateTimeString(d.updated_at),
       }));
     } catch (err: unknown) {
-      console.error("[db.api] getGeberDistributions error:", getErrorMessage(err));
-      throw new Error(`Gagal memuat data Geber Masjid: ${getErrorMessage(err)}`);
+      console.warn("[db.api] getGeberDistributions fallback:", getErrorMessage(err));
+      return [];
     }
   }),
 
@@ -139,8 +139,8 @@ export const db = {
         updated_at: parseDateTimeString(d.updated_at),
       };
     } catch (err: unknown) {
-      console.error("[db.api] getGeberById error:", getErrorMessage(err));
-      throw new Error(`Gagal memuat detail Geber Masjid: ${getErrorMessage(err)}`);
+      console.warn("[db.api] getGeberById fallback:", getErrorMessage(err));
+      return null;
     }
   }),
 
@@ -165,8 +165,8 @@ export const db = {
         updated_at: parseDateTimeString(d.updated_at),
       }));
     } catch (err: unknown) {
-      console.error("[db.api] getReports error:", getErrorMessage(err));
-      throw new Error(`Gagal memuat laporan penyaluran: ${getErrorMessage(err)}`);
+      console.warn("[db.api] getReports fallback:", getErrorMessage(err));
+      return [];
     }
   }),
 
@@ -188,8 +188,8 @@ export const db = {
         updated_at: parseDateTimeString(d.updated_at),
       };
     } catch (err: unknown) {
-      console.error("[db.api] getReportBySlug error:", getErrorMessage(err));
-      throw new Error(`Gagal memuat laporan "${slug}": ${getErrorMessage(err)}`);
+      console.warn("[db.api] getReportBySlug fallback:", getErrorMessage(err));
+      return null;
     }
   }),
 
@@ -211,8 +211,8 @@ export const db = {
         updated_at: parseDateTimeString(d.updated_at),
       };
     } catch (err: unknown) {
-      console.error("[db.api] getReportById error:", getErrorMessage(err));
-      throw new Error(`Gagal memuat laporan: ${getErrorMessage(err)}`);
+      console.warn("[db.api] getReportById fallback:", getErrorMessage(err));
+      return null;
     }
   }),
 
@@ -232,8 +232,8 @@ export const db = {
         created_at: parseDateTimeString(c.created_at),
       }));
     } catch (err: unknown) {
-      console.error("[db.api] getThemedCampaigns error:", getErrorMessage(err));
-      throw new Error(`Gagal memuat donasi tematik: ${getErrorMessage(err)}`);
+      console.warn("[db.api] getThemedCampaigns fallback:", getErrorMessage(err));
+      return [];
     }
   }),
 
@@ -253,8 +253,8 @@ export const db = {
         created_at: parseDateTimeString(g.created_at),
       }));
     } catch (err: unknown) {
-      console.error("[db.api] getGalleryItems error:", getErrorMessage(err));
-      throw new Error(`Gagal memuat galeri foto: ${getErrorMessage(err)}`);
+      console.warn("[db.api] getGalleryItems fallback:", getErrorMessage(err));
+      return [];
     }
   }),
 
@@ -269,7 +269,7 @@ export const db = {
       }
       return DEFAULT_BANK_ACCOUNTS;
     } catch (err: unknown) {
-      console.error("[db.api] getBankAccounts error:", getErrorMessage(err));
+      console.warn("[db.api] getBankAccounts fallback:", getErrorMessage(err));
       return DEFAULT_BANK_ACCOUNTS;
     }
   }),
@@ -284,7 +284,7 @@ export const db = {
       }
       return DEFAULT_CONTACT_INFO;
     } catch (err: unknown) {
-      console.error("[db.api] getContactInfo error:", getErrorMessage(err));
+      console.warn("[db.api] getContactInfo fallback:", getErrorMessage(err));
       return DEFAULT_CONTACT_INFO;
     }
   }),
@@ -299,7 +299,7 @@ export const db = {
       }
       return DEFAULT_SOCIAL_LINKS;
     } catch (err: unknown) {
-      console.error("[db.api] getSocialLinks error:", getErrorMessage(err));
+      console.warn("[db.api] getSocialLinks fallback:", getErrorMessage(err));
       return DEFAULT_SOCIAL_LINKS;
     }
   }),
@@ -353,8 +353,8 @@ export const db = {
         santri_count: item.santri_list.length,
       }));
     } catch (err: unknown) {
-      console.error("[db.api] getInfakJinan error:", getErrorMessage(err));
-      throw new Error(`Gagal memuat data sebaran Infak Al-Qur'an Jinan: ${getErrorMessage(err)}`);
+      console.warn("[db.api] getInfakJinan fallback:", getErrorMessage(err));
+      return [];
     }
   }),
 
@@ -452,8 +452,8 @@ export const db = {
 
         return { donation, santri };
       } catch (err: unknown) {
-        console.error("[db.api] getPublicInfakJinanDetail error:", getErrorMessage(err));
-        throw new Error(`Gagal memuat detail santri mushaf: ${getErrorMessage(err)}`);
+        console.warn("[db.api] getPublicInfakJinanDetail fallback:", getErrorMessage(err));
+        return null;
       }
     }
   ),
@@ -506,8 +506,8 @@ export const db = {
         santri_count: item.santri_list.length,
       };
     } catch (err: unknown) {
-      console.error("[db.api] getInfakJinanById error:", getErrorMessage(err));
-      throw new Error(`Gagal memuat record infak: ${getErrorMessage(err)}`);
+      console.warn("[db.api] getInfakJinanById fallback:", getErrorMessage(err));
+      return null;
     }
   }),
 
@@ -527,8 +527,8 @@ export const db = {
         created_at: parseDateTimeString(b.created_at),
       }));
     } catch (err: unknown) {
-      console.error("[db.api] getBussDistributions error:", getErrorMessage(err));
-      throw new Error(`Gagal memuat data BUSS Al-Qur'an: ${getErrorMessage(err)}`);
+      console.warn("[db.api] getBussDistributions fallback:", getErrorMessage(err));
+      return [];
     }
   }),
 
@@ -576,8 +576,8 @@ export const db = {
         };
       });
     } catch (err: unknown) {
-      console.error("[db.api] getYatimActivities error:", getErrorMessage(err));
-      throw new Error(`Gagal memuat kegiatan Yatim Berdikari: ${getErrorMessage(err)}`);
+      console.warn("[db.api] getYatimActivities fallback:", getErrorMessage(err));
+      return [];
     }
   }),
 
@@ -635,7 +635,7 @@ export const db = {
         totalBeneficiaries,
       };
     } catch (err: unknown) {
-      console.error("[db.api] getAggregatedStats error:", getErrorMessage(err));
+      console.warn("[db.api] getAggregatedStats fallback:", getErrorMessage(err));
       return {
         totalMushaf: 0,
         totalMasjid: 0,

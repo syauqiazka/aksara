@@ -50,7 +50,7 @@ export const prisma: PrismaClient | null =
       })
     : null);
 
-if (process.env.NODE_ENV !== "production" && prisma) {
+if (prisma) {
   globalForPrisma.prisma = prisma;
 }
 
