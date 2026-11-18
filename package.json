@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.64.1",
-    "@tailwindcss/turbopack": "^4",
+    "@tailwindcss/postcss": "4.3.3",
     "@types/node": "^20",
     "@types/pg": "^8.23.1",
     "@types/react": "^19",
@@ -46,8 +46,9 @@
     "eslint": "^9.39.5",
     "eslint-config-next": "16.4.4",
     "prisma": "^6.4.1",
+    "postcss": "^8.5.23",
     "puppeteer-core": "^25.16.0",
-    "tailwindcss": "^4",
+    "tailwindcss": "4.3.3",
     "typescript": "^5"
   },
   "packageManager": "pnpm@12.16.1"
