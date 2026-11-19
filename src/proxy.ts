@@ -111,7 +111,11 @@ export async function proxy(request: NextRequest) {
   if (!validSession) {
     if (isAdminApi) {
       return NextResponse.json(
-        { success: false, message: "Sesi admin tidak valid atau telah berakhir" },
+        {
+          success: false,
+          error: "Sesi admin tidak valid atau telah berakhir. Silakan login kembali.",
+          message: "Sesi admin tidak valid atau telah berakhir. Silakan login kembali.",
+        },
         { status: 401 }
       );
     }

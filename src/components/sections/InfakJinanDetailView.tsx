@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { formatTanggal } from "@/lib/format-date";
-import Image from "next/image";
 import SafeImage from "@/components/ui/SafeImage";
 import {
   ArrowLeft,

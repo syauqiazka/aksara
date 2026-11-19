@@ -19,17 +19,41 @@ export async function uploadPendingFileOnSave(
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch("/api/admin/upload", {
+  let res = await fetch("/api/upload", {
     method: "POST",
     body: formData,
   });
 
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || "Gagal mengunggah foto ke storage");
+  if (!res.ok && res.status === 404) {
+    // Fallback to /api/admin/upload if needed
+    res = await fetch("/api/admin/upload", {
+      method: "POST",
+      body: formData,
+    });
   }
 
-  const uploadedUrl = data.url as string;
+  let data: Record<string, unknown> | null = null;
+  try {
+    data = await res.json();
+  } catch {
+    // Non-JSON response
+  }
+
+  if (!res.ok) {
+    if (res.status === 401) {
+      throw new Error("Sesi admin Anda telah berakhir. Silakan buka tab baru dan login kembali di /admin/login.");
+    }
+    const errorMsg =
+      (data?.error as string) ||
+      (data?.message as string) ||
+      `Gagal mengunggah foto ke server (Status: ${res.status})`;
+    throw new Error(errorMsg);
+  }
+
+  const uploadedUrl = (data?.url as string) || "";
+  if (!uploadedUrl) {
+    throw new Error("URL gambar tidak diterima dari server");
+  }
 
   // Compensation rollback function
   const rollback = async () => {

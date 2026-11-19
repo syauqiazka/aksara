@@ -11,7 +11,11 @@ export async function POST(request: Request) {
   const session = await getAdminSession();
   if (!session) {
     return NextResponse.json(
-      { error: "Unauthorized: Silakan login terlebih dahulu" },
+      {
+        success: false,
+        error: "Sesi admin Anda telah berakhir. Silakan login kembali.",
+        message: "Sesi admin Anda telah berakhir. Silakan login kembali.",
+      },
       { status: 401 }
     );
   }
@@ -65,7 +69,11 @@ export async function DELETE(request: Request) {
   const session = await getAdminSession();
   if (!session) {
     return NextResponse.json(
-      { error: "Unauthorized: Silakan login terlebih dahulu" },
+      {
+        success: false,
+        error: "Sesi admin Anda telah berakhir. Silakan login kembali.",
+        message: "Sesi admin Anda telah berakhir. Silakan login kembali.",
+      },
       { status: 401 }
     );
   }
@@ -120,7 +128,11 @@ export async function PATCH(request: Request) {
   const session = await getAdminSession();
   if (!session) {
     return NextResponse.json(
-      { error: "Unauthorized: Silakan login terlebih dahulu" },
+      {
+        success: false,
+        error: "Sesi admin Anda telah berakhir. Silakan login kembali.",
+        message: "Sesi admin Anda telah berakhir. Silakan login kembali.",
+      },
       { status: 401 }
     );
   }

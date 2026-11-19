@@ -65,37 +65,48 @@ export async function processAndCompressImage(
     throw new Error("Ukuran berkas melebihi batas maksimal 5 MB.");
   }
 
-  // Resize: Max dimension 2000px, fit inside without distortion
-  const pipeline = sharp(buffer).rotate().resize(2000, 2000, {
-    fit: "inside",
-    withoutEnlargement: true,
-  });
+  try {
+    // Resize: Max dimension 2000px, fit inside without distortion
+    const pipeline = sharp(buffer).rotate().resize(2000, 2000, {
+      fit: "inside",
+      withoutEnlargement: true,
+    });
 
-  // Convert to WebP with initial quality 82
-  let quality = 82;
-  let compressedBuffer = await pipeline
-    .webp({ quality, effort: 4 })
-    .toBuffer();
-
-  // Progressive compression if size exceeds 300KB
-  while (compressedBuffer.length > 300 * 1024 && quality > 45) {
-    quality -= 10;
-    compressedBuffer = await pipeline
+    // Convert to WebP with initial quality 82
+    let quality = 82;
+    let compressedBuffer = await pipeline
       .webp({ quality, effort: 4 })
       .toBuffer();
+
+    // Progressive compression if size exceeds 300KB
+    while (compressedBuffer.length > 300 * 1024 && quality > 45) {
+      quality -= 10;
+      compressedBuffer = await pipeline
+        .webp({ quality, effort: 4 })
+        .toBuffer();
+    }
+
+    // Calculate SHA-256 hash of the final compressed WebP
+    const hash = crypto
+      .createHash("sha256")
+      .update(compressedBuffer)
+      .digest("hex");
+
+    return {
+      compressedBuffer,
+      hash,
+      mimeType: "image/webp",
+    };
+  } catch (sharpError) {
+    console.warn("[storage] sharp compression fallback to raw buffer:", sharpError);
+    const hash = crypto.createHash("sha256").update(buffer).digest("hex");
+    const mimeType = isJpeg ? "image/jpeg" : isPng ? "image/png" : "image/webp";
+    return {
+      compressedBuffer: buffer,
+      hash,
+      mimeType,
+    };
   }
-
-  // Calculate SHA-256 hash of the final compressed WebP
-  const hash = crypto
-    .createHash("sha256")
-    .update(compressedBuffer)
-    .digest("hex");
-
-  return {
-    compressedBuffer,
-    hash,
-    mimeType: "image/webp",
-  };
 }
 
 /**
@@ -107,7 +118,8 @@ export async function uploadToStorage(
   originalFilename = "image.png"
 ): Promise<ProcessedUploadResult> {
   const { compressedBuffer, hash, mimeType } = await processAndCompressImage(buffer, originalFilename);
-  const fileName = `${hash}.webp`;
+  const ext = mimeType === "image/jpeg" ? "jpg" : mimeType === "image/png" ? "png" : "webp";
+  const fileName = `${hash}.${ext}`;
   const blobPath = `sahabat-aksara/${fileName}`;
 
   // Check if hash already committed in ledger to deduplicate
