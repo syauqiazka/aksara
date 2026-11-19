@@ -1,3 +1,9 @@
+export interface GuidebookChapter {
+  title: string;
+  subtitle: string;
+  bullets: string[];
+}
+
 export interface PortfolioApp {
   id: string;
   name: string;
@@ -10,6 +16,14 @@ export interface PortfolioApp {
   status: "Coming Soon";
   playStoreUrl?: string;
   webUrl?: string;
+  // Partnership & Guidebook/Poster extensions
+  partnershipNote?: string;
+  hasGuidebook?: boolean;
+  hasPoster?: boolean;
+  guidebookSubtitle?: string;
+  guidebookChapters?: GuidebookChapter[];
+  posterHeadline?: string;
+  posterHighlight?: string;
 }
 
 export const portfolioContent: PortfolioApp[] = [
@@ -48,6 +62,44 @@ export const portfolioContent: PortfolioApp[] = [
     logoImage: "/images/portfolio/banksaku.webp",
     status: "Coming Soon",
     playStoreUrl: "Akan segera tersedia di Google Play Store",
+    partnershipNote: "Dapatkan dengan berinfak Al-Qur'an (Rp. 200.000,-) + Donasi Seikhlasnya",
+    hasGuidebook: true,
+    hasPoster: true,
+    guidebookSubtitle: "Buku Panduan Teknis & Implementasi Sistem Tabungan M-Banking Sekolah",
+    posterHeadline: "Sistem Tabungan Sekolah Model M-Banking Internal",
+    posterHighlight: "Dapatkan dengan berinfak Al-Qur'an (Rp. 200.000,-) + Donasi Seikhlasnya",
+    guidebookChapters: [
+      {
+        title: "Gambaran Umum & Arsitektur Sistem",
+        subtitle: "Konsep dasar operasional perbankan mini berbasis digital internal sekolah",
+        bullets: [
+          "Aplikasi Android yang memfasilitasi santri dan siswa belajar literasi finansial islami sejak dini",
+          "Dua kanal akses terintegrasi: Aplikasi mobile pengguna dan Web Console untuk bendahara sekolah",
+          "Pencatatan mutasi transaksi realtime bebas selisih pembukuan kas manual",
+          "Rekomendasi kesehatan finansial cerdas berdasarkan pola tabungan dan pengeluaran berkala",
+        ],
+      },
+      {
+        title: "Modul Transaksi & Pembayaran Sekolah",
+        subtitle: "Kelengkapan fitur transaksi harian dan kewajiban administrasi pendidikan",
+        bullets: [
+          "Buku tabungan digital lengkap dengan nomor rekening internal dan cetak rekening koran",
+          "Modul pembayaran rutin SPP, uang gedung, daftar ulang, serta ekstrakurikuler",
+          "Fitur impian dan target investasi masa depan santri (beli kitab, laptop, atau kurban)",
+          "Fitur kartu transaksi digital dengan QR Code unik per siswa untuk kemudahan verifikasi",
+        ],
+      },
+      {
+        title: "SOP Implementasi & Skema Kemitraan",
+        subtitle: "Langkah pengaktifan sistem di sekolah atau pesantren mitra",
+        bullets: [
+          "Program kemitraan nirlaba: Dapatkan dengan berinfak Al-Qur'an (Rp. 200.000,-) + Donasi Seikhlasnya",
+          "Pendampingan setup awal database santri dan pelatihan staf tata usaha / bendahara",
+          "Penyediaan modul buku panduan cetak serta banner poster sosialisasi bagi wali murid",
+          "Dukungan teknis dan konsultasi berkala melalui hotline resmi Yayasan Sahabat Aksara",
+        ],
+      },
+    ],
   },
   {
     id: "diaryqu",
@@ -83,6 +135,44 @@ export const portfolioContent: PortfolioApp[] = [
     mockupIcon: "ScanFace",
     status: "Coming Soon",
     playStoreUrl: "Akan segera tersedia di Google Play Store",
+    partnershipNote: "Dapatkan dengan berinfak Al-Qur'an (Rp. 200.000,-) + Donasi Seikhlasnya",
+    hasGuidebook: true,
+    hasPoster: true,
+    guidebookSubtitle: "Buku Panduan Teknis Presensi Biometrik & Radius Geolocation Cloud",
+    posterHeadline: "Solusi Presensi Modern Biometrik GPS Cloud Anti-Kecurangan",
+    posterHighlight: "Dapatkan dengan berinfak Al-Qur'an (Rp. 200.000,-) + Donasi Seikhlasnya",
+    guidebookChapters: [
+      {
+        title: "Arsitektur Geofencing & Biometrik",
+        subtitle: "Pencegahan manipulasi absensi dengan validasi lokasi dan wajah ganda",
+        bullets: [
+          "Teknologi penandaan radius GPS sekolah/kantor dengan toleransi presisi tinggi",
+          "Pencocokan biometrik wajah (facial recognition) langsung dari kamera smartphone",
+          "Deteksi spoofing lokasi dan pemblokiran penggunaan fake GPS pihak ketiga",
+          "Penyimpanan rekam presensi secara terenkripsi langsung ke server cloud",
+        ],
+      },
+      {
+        title: "Manajemen Shift, Cuti, & Laporan",
+        subtitle: "Otomasi administrasi kepegawaian dan kehadiran santri/staf",
+        bullets: [
+          "Pengaturan jadwal shift kerja fleksibel, waktu toleransi keterlambatan, dan lembur",
+          "Pengajuan izin, sakit, dan cuti online dengan lampiran foto bukti surat dokter",
+          "Rekapitulasi otomatis bulanan siap cetak dalam format PDF dan lembar kerja Excel",
+          "Notifikasi kehadiran masuk dan pulang secara otomatis ke nomor wali/pimpinan",
+        ],
+      },
+      {
+        title: "Panduan Deployment & Kemitraan",
+        subtitle: "Tata cara aktivasi sistem presensi di lingkungan instansi Anda",
+        bullets: [
+          "Dapatkan dengan berinfak Al-Qur'an (Rp. 200.000,-) + Donasi Seikhlasnya",
+          "Konfigurasi titik koordinat instansi dan import data master pengguna dalam hitungan menit",
+          "Buku petunjuk pengoperasian ringkas bagi pegawai serta staf administrasi",
+          "Bimbingan implementasi langsung melalui tim IT Yayasan Sahabat Aksara",
+        ],
+      },
+    ],
   },
   {
     id: "dkm-masjidqu",
@@ -119,5 +209,43 @@ export const portfolioContent: PortfolioApp[] = [
     logoImage: "/images/portfolio/sapawargaqu.webp",
     status: "Coming Soon",
     playStoreUrl: "Akan segera tersedia di Google Play Store",
+    partnershipNote: "Dapatkan dengan berinfak Al-Qur'an (Rp. 200.000,-) + Donasi Seikhlasnya",
+    hasGuidebook: true,
+    hasPoster: true,
+    guidebookSubtitle: "Buku Panduan Tata Kelola Lingkungan, Iuran Warga, & Kas Terbuka",
+    posterHeadline: "Platform Administrasi Lingkungan & Pengelolaan Arus Kas Warga",
+    posterHighlight: "Dapatkan dengan berinfak Al-Qur'an (Rp. 200.000,-) + Donasi Seikhlasnya",
+    guidebookChapters: [
+      {
+        title: "Database Hunian & Komunikasi Warga",
+        subtitle: "Digitalisasi arsip kependudukan warga RT, RW, dan komplek perumahan",
+        bullets: [
+          "Pencatatan data keluarga, status kepemilikan rumah (pemilik/penyewa), dan nomor darurat",
+          "Kanal pengumuman resmi pengurus komplek yang langsung tampil di ponsel warga",
+          "Sistem tiket laporan warga (lampu jalan mati, keamanan, sampah) dengan pelacakan progres",
+          "Forum warga tertutup untuk musyawarah dan pengambilan suara mufakat warga",
+        ],
+      },
+      {
+        title: "Pengelolaan Iuran & Transparansi Kas",
+        subtitle: "Sistem keuangan kas lingkungan bebas praduga dan salah catat",
+        bullets: [
+          "Notifikasi tagihan iuran bulanan (keamanan, sampah, pemeliharaan fasilitas) otomatis",
+          "Catatan penerimaan kas realtime yang dapat dipantau oleh setiap warga secara terbuka",
+          "Laporan pembukuan pengeluaran lingkungan disertai bukti kuitansi digital",
+          "Rekapitulasi tunggakan iuran yang tertata rapi untuk kemudahan bendahara",
+        ],
+      },
+      {
+        title: "Alur Penerapan di Lingkungan",
+        subtitle: "Panduan pengurus lingkungan mengadopsi platform SapawargaQu",
+        bullets: [
+          "Dapatkan dengan berinfak Al-Qur'an (Rp. 200.000,-) + Donasi Seikhlasnya",
+          "Input data blok/nomor rumah dan pengurus lingkungan didampingi tim teknis yayasan",
+          "Penyebaran poster sosialisasi dan modul instalasi mandiri bagi warga",
+          "Layanan pendampingan penuh melalui narahubung resmi: 0822-6217-0018",
+        ],
+      },
+    ],
   },
 ];
