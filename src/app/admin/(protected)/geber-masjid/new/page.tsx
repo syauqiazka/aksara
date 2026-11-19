@@ -5,9 +5,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, AlertCircle } from "lucide-react";
 import ImageUploader from "@/components/admin/ImageUploader";
+import SearchableSelect from "@/components/ui/SearchableSelect";
 import { uploadPendingFileOnSave } from "@/lib/upload-helper";
 import { cleanNumericString } from "@/lib/numeric-utils";
 import { formatHumanError } from "@/lib/validation/schemas";
+import { PROVINCES_38 } from "@/lib/provinces-38";
+import { INDONESIA_CITIES, getCitiesByProvince, findProvinceByCity } from "@/lib/indonesia-cities";
 
 export default function AdminNewGeberPage() {
   const router = useRouter();
@@ -151,33 +154,45 @@ export default function AdminNewGeberPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div>
-            <label className="block text-xs font-semibold uppercase text-[var(--ink-900)] mb-2">
-              Provinsi *
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.province}
-              onChange={(e) => setFormData({ ...formData, province: e.target.value })}
-              placeholder="Contoh: Jawa Barat"
-              className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
-            />
-          </div>
+          <SearchableSelect
+            label="Provinsi *"
+            required
+            value={formData.province}
+            onChange={(val) => {
+              setFormData((prev) => ({
+                ...prev,
+                province: val,
+              }));
+            }}
+            placeholder="Cari atau pilih provinsi..."
+            options={PROVINCES_38.map((p) => ({
+              value: p.name,
+              label: p.name,
+            }))}
+            allowCustom={true}
+          />
 
-          <div>
-            <label className="block text-xs font-semibold uppercase text-[var(--ink-900)] mb-2">
-              Kota / Kabupaten *
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.city}
-              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-              placeholder="Contoh: Bekasi"
-              className="w-full px-4 py-2.5 rounded-xl bg-[var(--cream-50)] border border-[var(--cream-200)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-400)]"
-            />
-          </div>
+          <SearchableSelect
+            label="Kota / Kabupaten *"
+            required
+            value={formData.city}
+            onChange={(val, opt) => {
+              const matchedProv = opt?.sublabel || findProvinceByCity(val);
+              setFormData((prev) => ({
+                ...prev,
+                city: val,
+                province: prev.province || matchedProv || prev.province,
+              }));
+            }}
+            placeholder="Ketik / scroll kota/kabupaten..."
+            options={(formData.province ? getCitiesByProvince(formData.province) : INDONESIA_CITIES).map((c) => ({
+              value: c.name,
+              label: c.name,
+              sublabel: c.province,
+            }))}
+            helperText={formData.province ? `Difilter untuk ${formData.province}` : undefined}
+            allowCustom={true}
+          />
 
           <div>
             <label className="block text-xs font-semibold uppercase text-[var(--ink-900)] mb-2">

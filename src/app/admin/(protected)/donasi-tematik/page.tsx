@@ -3,11 +3,13 @@
 import { useState, useEffect } from "react";
 import SafeImage from "@/components/ui/SafeImage";
 import Select from "@/components/ui/Select";
+import SearchableSelect from "@/components/ui/SearchableSelect";
 import { PlusCircle, Search, Trash2, Edit, X, HeartHandshake } from "lucide-react";
 import { ThemedCampaign } from "@/lib/db/types";
 import ImageUploader from "@/components/admin/ImageUploader";
 import { cleanNumericString } from "@/lib/numeric-utils";
 import { uploadPendingFileOnSave, deleteOldBlobAfterUpdate } from "@/lib/upload-helper";
+import { INDONESIA_CITIES } from "@/lib/indonesia-cities";
 
 export default function AdminThemedCampaignsPage() {
   const [campaigns, setCampaigns] = useState<ThemedCampaign[]>([]);
@@ -414,16 +416,21 @@ export default function AdminThemedCampaignsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[var(--ink-700)] mb-1">
-                    Lokasi Wilayah *
-                  </label>
-                  <input
-                    type="text"
+                  <SearchableSelect
+                    label="Lokasi Wilayah *"
                     required
                     value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    placeholder="Contoh: Cianjur, Jawa Barat"
-                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-[var(--cream-200)] focus:ring-2 focus:ring-[var(--gold-500)] focus:outline-none"
+                    onChange={(val, opt) => {
+                      const text = opt?.sublabel ? `${val}, ${opt.sublabel}` : val;
+                      setFormData((prev) => ({ ...prev, location: text }));
+                    }}
+                    placeholder="Ketik / scroll kota atau lokasi..."
+                    options={INDONESIA_CITIES.map((c) => ({
+                      value: c.name,
+                      label: c.name,
+                      sublabel: c.province,
+                    }))}
+                    allowCustom={true}
                   />
                 </div>
               </div>

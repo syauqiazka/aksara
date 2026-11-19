@@ -18,11 +18,13 @@ import {
 } from "lucide-react";
 import Select from "@/components/ui/Select";
 import Input from "@/components/ui/Input";
+import SearchableSelect from "@/components/ui/SearchableSelect";
 import ImageUploader from "@/components/admin/ImageUploader";
 import { uploadPendingFileOnSave } from "@/lib/upload-helper";
 import { QURAN_SURAHS, getSuggestedJuz, validateAyatNumber } from "@/lib/quran-surahs";
 import { cleanNumericString } from "@/lib/numeric-utils";
 import { PROVINCES_38 } from "@/lib/provinces-38";
+import { INDONESIA_CITIES, getCitiesByProvince, findProvinceByCity } from "@/lib/indonesia-cities";
 import { infakJinanSchema, formatZodError, formatHumanError } from "@/lib/validation/schemas";
 
 interface SantriFormItem {
@@ -370,7 +372,7 @@ export default function AdminNewInfakPage() {
         className="space-y-4"
       >
         {/* LANGKAH 1: IDENTITAS DONASI & DONATUR (ACCORDION) */}
-        <div className="bg-white rounded-2xl border border-[var(--cream-200)] shadow-xs overflow-hidden">
+        <div className={`bg-white rounded-2xl border border-[var(--cream-200)] shadow-xs ${openSections.step1 ? "overflow-visible" : "overflow-hidden"}`}>
           <button
             type="button"
             onClick={() => toggleSection("step1")}
@@ -434,15 +436,18 @@ export default function AdminNewInfakPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
-                    Asal Donatur (Kota/Kabupaten) *
-                  </label>
-                  <Input
-                    type="text"
+                  <SearchableSelect
+                    label="Asal Donatur (Kota/Kabupaten) *"
                     required
                     value={formData.donor_origin}
-                    onChange={(e) => setFormData({ ...formData, donor_origin: e.target.value })}
-                    placeholder="Contoh: Cirebon, Jakarta"
+                    onChange={(val) => setFormData((prev) => ({ ...prev, donor_origin: val }))}
+                    placeholder="Ketik / scroll kota donatur..."
+                    options={INDONESIA_CITIES.map((c) => ({
+                      value: c.name,
+                      label: c.name,
+                      sublabel: c.province,
+                    }))}
+                    allowCustom={true}
                   />
                 </div>
               </div>
@@ -494,7 +499,7 @@ export default function AdminNewInfakPage() {
         </div>
 
         {/* LANGKAH 2: LEMBAGA & LOKASI PENYALURAN (ACCORDION) */}
-        <div className="bg-white rounded-2xl border border-[var(--cream-200)] shadow-xs overflow-hidden">
+        <div className={`bg-white rounded-2xl border border-[var(--cream-200)] shadow-xs ${openSections.step2 ? "overflow-visible" : "overflow-hidden"}`}>
           <button
             type="button"
             onClick={() => toggleSection("step2")}
@@ -536,9 +541,9 @@ export default function AdminNewInfakPage() {
                     onChange={(e) => {
                       const val = e.target.value;
                       const matched = [
-                        { name: "Pesantren Tahfidz Darul Qur'an Bogor", province: "Jawa Barat", city: "Bogor", address: "Jl. Raya Bogor No. 12, Bogor, Jawa Barat", maps: "https://maps.google.com" },
-                        { name: "Pesantren Tahfidz Al-Hikmah", province: "Jawa Barat", city: "Bogor", address: "Jl. Pesantren No. 45, Bogor, Jawa Barat", maps: "" },
-                        { name: "Madrasah Diniyah Nurul Iman", province: "Banten", city: "Serang", address: "Desa Ender, Serang, Banten", maps: "" },
+                        { name: "Pesantren Tahfidz Darul Qur'an Bogor", province: "Jawa Barat", city: "Kota Bogor", address: "Jl. Raya Bogor No. 12, Bogor, Jawa Barat", maps: "https://maps.google.com" },
+                        { name: "Pesantren Tahfidz Al-Hikmah", province: "Jawa Barat", city: "Kota Bogor", address: "Jl. Pesantren No. 45, Bogor, Jawa Barat", maps: "" },
+                        { name: "Madrasah Diniyah Nurul Iman", province: "Banten", city: "Kota Serang", address: "Desa Ender, Serang, Banten", maps: "" },
                       ].find((p) => p.name.toLowerCase() === val.toLowerCase());
 
                       if (matched) {
@@ -577,31 +582,44 @@ export default function AdminNewInfakPage() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
-                    Provinsi Lembaga (Peta Sebaran) *
-                  </label>
-                  <Select
-                    value={formData.pesantren_province || ""}
-                    onChange={(e) => setFormData({ ...formData, pesantren_province: e.target.value })}
-                    options={[
-                      { value: "", label: "-- Pilih Provinsi (38 Provinsi) --" },
-                      ...PROVINCES_38.map((p) => ({ value: p.name, label: p.name })),
-                    ]}
-                  />
-                </div>
+                <SearchableSelect
+                  label="Provinsi Lembaga (Peta Sebaran) *"
+                  required
+                  value={formData.pesantren_province || ""}
+                  onChange={(val) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      pesantren_province: val,
+                    }));
+                  }}
+                  placeholder="Cari atau pilih provinsi..."
+                  options={PROVINCES_38.map((p) => ({
+                    value: p.name,
+                    label: p.name,
+                  }))}
+                  allowCustom={true}
+                />
 
-                <div>
-                  <label className="block text-xs font-semibold text-[var(--ink-800)] mb-1">
-                    Kota / Kabupaten Lembaga
-                  </label>
-                  <Input
-                    type="text"
-                    value={formData.pesantren_city || ""}
-                    onChange={(e) => setFormData({ ...formData, pesantren_city: e.target.value })}
-                    placeholder="Contoh: Cirebon, Bogor"
-                  />
-                </div>
+                <SearchableSelect
+                  label="Kota / Kabupaten Lembaga"
+                  value={formData.pesantren_city || ""}
+                  onChange={(val, opt) => {
+                    const matchedProv = opt?.sublabel || findProvinceByCity(val);
+                    setFormData((prev) => ({
+                      ...prev,
+                      pesantren_city: val,
+                      pesantren_province: prev.pesantren_province || matchedProv || prev.pesantren_province,
+                    }));
+                  }}
+                  placeholder="Ketik / scroll kota/kabupaten..."
+                  options={(formData.pesantren_province ? getCitiesByProvince(formData.pesantren_province) : INDONESIA_CITIES).map((c) => ({
+                    value: c.name,
+                    label: c.name,
+                    sublabel: c.province,
+                  }))}
+                  helperText={formData.pesantren_province ? `Difilter untuk ${formData.pesantren_province}` : undefined}
+                  allowCustom={true}
+                />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
