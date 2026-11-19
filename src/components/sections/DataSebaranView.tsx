@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import {
   Search,
   BookOpen,
@@ -1179,7 +1180,7 @@ export default function DataSebaranView({
                         key={pIdx}
                         className="relative aspect-16/10 rounded-2xl overflow-hidden border border-[var(--cream-200)] bg-[var(--green-950)] shadow-sm"
                       >
-                        <Image
+                        <SafeImage
                           src={url}
                           alt={activeGalleryModal.title}
                           fill

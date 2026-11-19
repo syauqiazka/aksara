@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { formatTanggal } from "@/lib/format-date";
 import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import {
   ArrowLeft,
   Calendar,
@@ -398,7 +399,7 @@ export default function InfakJinanDetailView({ donation, santri }: Props) {
                       className="rounded-2xl overflow-hidden border border-[var(--cream-200)] bg-[var(--green-950)] space-y-2 p-2"
                     >
                       <div className="relative aspect-4/3 rounded-xl overflow-hidden">
-                        <Image
+                        <SafeImage
                           src={p.url}
                           alt={p.caption || `Mushaf #${donation.mushaf_no}`}
                           fill

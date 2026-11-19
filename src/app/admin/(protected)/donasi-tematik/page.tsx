@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import Select from "@/components/ui/Select";
 import { PlusCircle, Search, Trash2, Edit, X, HeartHandshake } from "lucide-react";
 import { ThemedCampaign } from "@/lib/db/types";
@@ -284,7 +284,7 @@ export default function AdminThemedCampaignsPage() {
                 <div className="space-y-3">
                   {camp.cover_url && (
                     <div className="relative aspect-16/9 rounded-2xl overflow-hidden border border-[var(--cream-200)] shadow-xs">
-                      <Image
+                      <SafeImage
                         src={camp.cover_url}
                         alt={camp.title}
                         fill
