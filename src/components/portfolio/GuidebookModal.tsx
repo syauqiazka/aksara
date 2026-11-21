@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import {
@@ -16,7 +16,6 @@ import {
   ExternalLink,
   ShieldCheck,
   Building,
-  Sparkles,
 } from "lucide-react";
 import { PortfolioApp } from "@/content/portfolio";
 
@@ -30,6 +29,7 @@ export default function GuidebookModal({ app, isOpen, onClose }: GuidebookModalP
   const [currentPage, setCurrentPage] = useState(1);
   const [zoomLevel, setZoomLevel] = useState(100);
   const [mounted, setMounted] = useState(false);
+  const viewportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -54,6 +54,13 @@ export default function GuidebookModal({ app, isOpen, onClose }: GuidebookModalP
       };
     }
   }, [isOpen, onClose]);
+
+  // Always reset scroll to top whenever modal opens or page changes
+  useEffect(() => {
+    if (isOpen && viewportRef.current) {
+      viewportRef.current.scrollTop = 0;
+    }
+  }, [isOpen, currentPage]);
 
   if (!mounted || !isOpen || !app) return null;
 
@@ -183,6 +190,7 @@ export default function GuidebookModal({ app, isOpen, onClose }: GuidebookModalP
 
         {/* PDF VIEWPORT (SCROLLABLE CANVAS) */}
         <div
+          ref={viewportRef}
           data-lenis-prevent
           onWheel={(e) => e.stopPropagation()}
           className="flex-1 overflow-y-auto p-4 sm:p-8 bg-[#1f2421]/90 flex justify-center overscroll-contain"
@@ -247,10 +255,6 @@ export default function GuidebookModal({ app, isOpen, onClose }: GuidebookModalP
 
                   {/* HIGHLIGHT BOX REDAKSI KEMITRAAN */}
                   <div className="p-4 rounded-2xl bg-[var(--gold-400)]/15 border-2 border-[var(--gold-500)]/40 text-[var(--ink-900)] space-y-2 shadow-xs">
-                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--gold-800)]">
-                      <Sparkles className="w-4 h-4 text-[var(--gold-600)]" />
-                      <span>Ketentuan Kemitraan &amp; Hak Penggunaan</span>
-                    </div>
                     <p className="text-sm sm:text-base font-bold text-[var(--green-950)] leading-snug">
                       &ldquo;Dapatkan dengan berinfak Al-Qur&apos;an (Rp. 200.000,-) + Donasi Seikhlasnya&rdquo;
                     </p>

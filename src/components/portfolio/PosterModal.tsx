@@ -261,9 +261,6 @@ export default function PosterModal({ app, isOpen, onClose }: PosterModalProps) 
 
               {/* THE REQUESTED PROMINENT CALLOUT BOX */}
               <div className="p-4 rounded-2xl bg-gradient-to-r from-[var(--gold-500)]/20 via-[var(--gold-400)]/30 to-[var(--gold-500)]/20 border-2 border-[var(--gold-400)] text-center shadow-lg space-y-1">
-                <div className="text-[10px] uppercase tracking-widest font-bold text-[var(--gold-300)]">
-                  Paket Kemitraan Dakwah
-                </div>
                 <div className="font-serif text-sm sm:text-base font-extrabold text-[#ffd700] leading-snug">
                   &ldquo;Dapatkan dengan berinfak Al-Qur&apos;an (Rp. 200.000,-) + Donasi Seikhlasnya&rdquo;
                 </div>

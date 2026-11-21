@@ -13,7 +13,6 @@ import {
   Layers,
   FileText,
   ImageIcon,
-  Sparkles,
 } from "lucide-react";
 import { PortfolioApp } from "@/content/portfolio";
 import GuidebookModal from "./GuidebookModal";
@@ -104,10 +103,6 @@ export default function PortfolioClient({ apps }: PortfolioClientProps) {
                 {/* THE REQUESTED PARTNERSHIP CALLOUT BOX (For Bank Saku Digital, E-AbsensiQu, SapawargaQu) */}
                 {app.partnershipNote && (
                   <div className="mt-6 p-4 rounded-2xl bg-gradient-to-r from-[var(--gold-400)]/20 via-[var(--gold-500)]/15 to-[var(--gold-400)]/20 border-2 border-[var(--gold-500)]/40 text-[var(--ink-900)] space-y-1.5 shadow-xs">
-                    <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[var(--gold-800)]">
-                      <Sparkles className="w-3.5 h-3.5 text-[var(--gold-600)]" />
-                      <span>Paket Kemitraan Dakwah</span>
-                    </div>
                     <p className="text-xs sm:text-[13px] font-bold text-[var(--green-950)] leading-snug">
                       &ldquo;{app.partnershipNote}&rdquo;
                     </p>

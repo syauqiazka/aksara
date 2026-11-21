@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   Building,
   ShieldCheck,
-  Sparkles,
 } from "lucide-react";
 import PrintButton from "./PrintButton";
 
@@ -110,10 +109,6 @@ export default async function GuidebookPage({ params }: GuidebookPageProps) {
 
             {/* THE REQUESTED PROMINENT CALLOUT BOX */}
             <div className="p-5 rounded-2xl bg-[var(--gold-400)]/15 border-2 border-[var(--gold-500)]/40 text-[var(--ink-900)] space-y-2 mb-8">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--gold-800)]">
-                <Sparkles className="w-4 h-4 text-[var(--gold-600)]" />
-                <span>Ketentuan Kemitraan &amp; Hak Penggunaan</span>
-              </div>
               <p className="text-base font-bold text-[var(--green-950)] leading-snug">
                 &ldquo;Dapatkan dengan berinfak Al-Qur&apos;an (Rp. 200.000,-) + Donasi Seikhlasnya&rdquo;
               </p>
