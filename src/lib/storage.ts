@@ -9,6 +9,7 @@ import { isPrismaConfigured, prisma } from "./db/prisma";
 import { localStore } from "./db/local-store";
 import { toStringArray, getErrorMessage, parseDateTimeString } from "./db/formatters";
 import { UploadLedgerEntry } from "./db/types";
+import { saveUploadedFile } from "./server-uploads";
 
 export interface ProcessedUploadResult {
   url: string;
@@ -145,11 +146,8 @@ export async function uploadToStorage(
     });
     finalUrl = blob.url;
   } else {
-    // Local storage fallback for local development
-    const localUploadsDir = path.join(process.cwd(), "public", "uploads");
-    await fs.mkdir(localUploadsDir, { recursive: true });
-    await fs.writeFile(path.join(localUploadsDir, fileName), compressedBuffer);
-    finalUrl = `/uploads/${fileName}`;
+    // Robust local storage fallback with multi-directory persistence
+    finalUrl = await saveUploadedFile(fileName, compressedBuffer);
   }
 
   // Record into upload_ledger as 'pending'

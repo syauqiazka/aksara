@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import {
   X,
@@ -28,23 +29,33 @@ interface GuidebookModalProps {
 export default function GuidebookModal({ app, isOpen, onClose }: GuidebookModalProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [zoomLevel, setZoomLevel] = useState(100);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
       setCurrentPage(1);
       document.body.style.overflow = "hidden";
+      // Pause Lenis smooth scroll while modal is active so inner mouse wheel scrolls correctly
+      const globalLenis = (window as unknown as { lenis?: { stop: () => void; start: () => void } }).lenis;
+      globalLenis?.stop?.();
+
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === "Escape") onClose();
       };
       window.addEventListener("keydown", handleKeyDown);
       return () => {
         document.body.style.overflow = "";
+        globalLenis?.start?.();
         window.removeEventListener("keydown", handleKeyDown);
       };
     }
   }, [isOpen, onClose]);
 
-  if (!isOpen || !app) return null;
+  if (!mounted || !isOpen || !app) return null;
 
   const totalPages = app.guidebookChapters ? app.guidebookChapters.length : 3;
 
@@ -60,9 +71,12 @@ export default function GuidebookModal({ app, isOpen, onClose }: GuidebookModalP
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl h-[92vh] flex flex-col rounded-3xl bg-[var(--ink-950)]/90 border border-white/10 shadow-2xl overflow-hidden text-[var(--cream-50)]">
+  return createPortal(
+    <div
+      data-lenis-prevent
+      className="fixed inset-0 z-[99999] flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 overflow-hidden"
+    >
+      <div className="relative w-full max-w-4xl h-[90vh] max-h-[920px] flex flex-col rounded-3xl bg-[var(--green-950)] border border-[var(--gold-500)]/40 shadow-2xl overflow-hidden text-[var(--cream-50)]">
         
         {/* PDF TOP BAR (READER TOOLBAR) */}
         <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3.5 bg-[var(--green-950)] border-b border-[var(--gold-500)]/30 text-xs flex-shrink-0">
@@ -168,7 +182,11 @@ export default function GuidebookModal({ app, isOpen, onClose }: GuidebookModalP
         </div>
 
         {/* PDF VIEWPORT (SCROLLABLE CANVAS) */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-[#1f2421]/90 flex justify-center">
+        <div
+          data-lenis-prevent
+          onWheel={(e) => e.stopPropagation()}
+          className="flex-1 overflow-y-auto p-4 sm:p-8 bg-[#1f2421]/90 flex justify-center overscroll-contain"
+        >
           
           {/* A4 PAPER SHEET CONTAINER */}
           <div
@@ -504,6 +522,7 @@ export default function GuidebookModal({ app, isOpen, onClose }: GuidebookModalP
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

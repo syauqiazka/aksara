@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import crypto from "node:crypto";
 import { getAdminSession } from "@/lib/auth";
 import { uploadToStorage } from "@/lib/storage";
+import { saveUploadedFile } from "@/lib/server-uploads";
 
 export const runtime = "nodejs";
 
@@ -61,12 +60,8 @@ export async function POST(request: Request) {
       // Direct disk fallback without compression if sharp encounters any issue
       const extension = file.name.split(".").pop()?.toLowerCase() || "webp";
       const filename = `${crypto.randomUUID()}.${extension}`;
-      const uploadDirectory = path.join(process.cwd(), "public", "uploads");
-      await mkdir(uploadDirectory, { recursive: true });
-      const filePath = path.join(uploadDirectory, filename);
-      await writeFile(filePath, buffer);
+      const fileUrl = await saveUploadedFile(filename, buffer);
 
-      const fileUrl = `/uploads/${filename}`;
       return NextResponse.json({
         success: true,
         url: fileUrl,

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { findUploadedFile } from "@/lib/server-uploads";
 
 export const dynamic = "force-dynamic";
 
@@ -16,9 +17,13 @@ export async function GET(
 
     // Sanitize to prevent path traversal
     const safeFilename = path.basename(filename);
-    const filePath = path.join(process.cwd(), "public", "uploads", safeFilename);
+    const existingFilePath = await findUploadedFile(safeFilename);
 
-    const fileBuffer = await fs.readFile(filePath);
+    if (!existingFilePath) {
+      return new NextResponse("File Not Found", { status: 404 });
+    }
+
+    const fileBuffer = await fs.readFile(existingFilePath);
 
     const ext = path.extname(safeFilename).toLowerCase();
     const contentTypeMap: Record<string, string> = {
@@ -32,7 +37,7 @@ export async function GET(
 
     const contentType = contentTypeMap[ext] || "application/octet-stream";
 
-    return new Response(fileBuffer, {
+    return new NextResponse(new Uint8Array(fileBuffer), {
       status: 200,
       headers: {
         "Content-Type": contentType,

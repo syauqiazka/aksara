@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import {
   X,
@@ -23,22 +24,32 @@ interface PosterModalProps {
 export default function PosterModal({ app, isOpen, onClose }: PosterModalProps) {
   const posterRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      // Pause Lenis smooth scroll while modal is active
+      const globalLenis = (window as unknown as { lenis?: { stop: () => void; start: () => void } }).lenis;
+      globalLenis?.stop?.();
+
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === "Escape") onClose();
       };
       window.addEventListener("keydown", handleKeyDown);
       return () => {
         document.body.style.overflow = "";
+        globalLenis?.start?.();
         window.removeEventListener("keydown", handleKeyDown);
       };
     }
   }, [isOpen, onClose]);
 
-  if (!isOpen || !app) return null;
+  if (!mounted || !isOpen || !app) return null;
 
   const handlePrint = () => {
     window.print();
@@ -100,9 +111,12 @@ export default function PosterModal({ app, isOpen, onClose }: PosterModalProps) 
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl max-h-[94vh] flex flex-col rounded-3xl bg-[var(--green-950)] border border-[var(--gold-500)]/30 shadow-2xl overflow-hidden text-[var(--cream-50)]">
+  return createPortal(
+    <div
+      data-lenis-prevent
+      className="fixed inset-0 z-[99999] flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 overflow-hidden"
+    >
+      <div className="relative w-full max-w-2xl max-h-[92vh] flex flex-col rounded-3xl bg-[var(--green-950)] border border-[var(--gold-500)]/30 shadow-2xl overflow-hidden text-[var(--cream-50)]">
         
         {/* HEADER TOOLBAR */}
         <div className="flex items-center justify-between px-5 py-3.5 bg-black/40 border-b border-[var(--gold-500)]/20 text-xs flex-shrink-0">
@@ -154,7 +168,11 @@ export default function PosterModal({ app, isOpen, onClose }: PosterModalProps) 
         </div>
 
         {/* POSTER VIEWPORT */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 flex justify-center bg-[#0d1410]">
+        <div
+          data-lenis-prevent
+          onWheel={(e) => e.stopPropagation()}
+          className="flex-1 overflow-y-auto p-4 sm:p-6 flex justify-center bg-[#0d1410] overscroll-contain"
+        >
           
           {/* THE OFFICIAL HIGH-RES POSTER CARD */}
           <div
@@ -292,6 +310,7 @@ export default function PosterModal({ app, isOpen, onClose }: PosterModalProps) 
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

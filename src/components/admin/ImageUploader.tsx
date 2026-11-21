@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import {
   UploadCloud,
   X,
@@ -179,8 +179,8 @@ export default function ImageUploader({
         <div className="space-y-3">
           {activeDisplay ? (
             <div className="relative rounded-2xl border-2 border-[var(--cream-200)] bg-[var(--cream-100)] p-3 flex items-center gap-4">
-              <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-[var(--green-950)] flex-shrink-0 border border-[var(--gold-500)]/30">
-                <Image
+              <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-[var(--cream-200)] flex-shrink-0 border border-[var(--gold-500)]/40 shadow-xs">
+                <SafeImage
                   src={activeDisplay}
                   alt="Pratinjau Foto"
                   fill
