@@ -47,7 +47,10 @@ export default function AdminEditGeberPage() {
         throw new Error("Gagal mengambil data Geber Masjid dari server");
       }
       const item: GeberMasjidDistribution = await res.json();
-      const existingPhoto = item.photo_urls && item.photo_urls.length > 0 ? item.photo_urls[0] : "";
+      const existingPhoto =
+        item.photo_urls && item.photo_urls.length > 0 && !item.photo_urls[0].includes("placeholder.internal")
+          ? item.photo_urls[0]
+          : "";
       setOriginalPhotoUrl(existingPhoto || null);
       setFormData({
         mosque_name: item.mosque_name || "",

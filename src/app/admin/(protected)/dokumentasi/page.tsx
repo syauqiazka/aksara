@@ -68,7 +68,7 @@ export default function AdminGalleryPage() {
       title: item.title,
       program: item.program,
       date: item.date ? String(item.date).split("T")[0] : "",
-      image_url: item.image_url,
+      image_url: item.image_url && !item.image_url.includes("placeholder.internal") ? item.image_url : "",
       caption: item.caption || "",
       status: item.status,
     });
@@ -95,6 +95,10 @@ export default function AdminGalleryPage() {
         uploadRollback = rollback;
         uploadCommit = commit;
         finalImg = url || formData.image_url;
+      }
+
+      if (!finalImg || finalImg.includes("placeholder.internal")) {
+        throw new Error("Silakan pilih berkas foto dokumentasi kegiatan terlebih dahulu.");
       }
 
       const url = "/api/admin/gallery";

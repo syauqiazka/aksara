@@ -77,7 +77,7 @@ export default function AdminThemedCampaignsPage() {
       location: camp.location,
       status: camp.status,
       description: camp.description,
-      cover_url: camp.cover_url || "",
+      cover_url: camp.cover_url && !camp.cover_url.includes("placeholder.internal") ? camp.cover_url : "",
       target_idr: camp.target_idr.toString(),
       collected_idr: camp.collected_idr.toString(),
     });
@@ -98,12 +98,15 @@ export default function AdminThemedCampaignsPage() {
     let uploadCommit = null;
 
     try {
-      let finalCover = formData.cover_url;
+      let finalCover = formData.cover_url && !formData.cover_url.includes("placeholder.internal") ? formData.cover_url : "";
       if (selectedFile) {
         const { url, rollback, commit } = await uploadPendingFileOnSave(selectedFile);
         uploadRollback = rollback;
         uploadCommit = commit;
         finalCover = url || formData.cover_url;
+      }
+      if (finalCover && finalCover.includes("placeholder.internal")) {
+        finalCover = "";
       }
 
       const url = "/api/admin/campaigns";

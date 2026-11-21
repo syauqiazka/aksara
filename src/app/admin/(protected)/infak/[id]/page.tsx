@@ -72,7 +72,10 @@ export default function AdminEditInfakPage() {
       const found = list.find((i) => i.id === id);
       if (found) {
         setRecord(found);
-        const existingPhoto = found.photos && found.photos.length > 0 ? found.photos[0].url : "";
+        const existingPhoto =
+          found.photos && found.photos.length > 0 && !found.photos[0].url.includes("placeholder.internal")
+            ? found.photos[0].url
+            : "";
         setPhotoUrl(existingPhoto);
         setFormData({
           mushaf_no: found.mushaf_no.toString(),

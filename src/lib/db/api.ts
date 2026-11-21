@@ -7,6 +7,8 @@ import {
   toNumberOrNull,
   toNumber,
   getErrorMessage,
+  sanitizeImageUrl,
+  sanitizeImageUrls,
 } from "./formatters";
 import {
   InfakDistribution,
@@ -159,7 +161,8 @@ export const db = {
         period_start: parseDateString(d.period_start),
         period_end: parseDateString(d.period_end),
         amount_idr: toNumberOrNull(d.amount_idr),
-        gallery_urls: toStringArray(d.gallery_urls),
+        cover_url: sanitizeImageUrl(d.cover_url),
+        gallery_urls: sanitizeImageUrls(d.gallery_urls),
         status: d.status as "draft" | "published",
         created_at: parseDateTimeString(d.created_at),
         updated_at: parseDateTimeString(d.updated_at),
@@ -182,7 +185,8 @@ export const db = {
         period_start: parseDateString(d.period_start),
         period_end: parseDateString(d.period_end),
         amount_idr: toNumberOrNull(d.amount_idr),
-        gallery_urls: toStringArray(d.gallery_urls),
+        cover_url: sanitizeImageUrl(d.cover_url),
+        gallery_urls: sanitizeImageUrls(d.gallery_urls),
         status: d.status as "draft" | "published",
         created_at: parseDateTimeString(d.created_at),
         updated_at: parseDateTimeString(d.updated_at),
@@ -205,7 +209,8 @@ export const db = {
         period_start: parseDateString(d.period_start),
         period_end: parseDateString(d.period_end),
         amount_idr: toNumberOrNull(d.amount_idr),
-        gallery_urls: toStringArray(d.gallery_urls),
+        cover_url: sanitizeImageUrl(d.cover_url),
+        gallery_urls: sanitizeImageUrls(d.gallery_urls),
         status: d.status as "draft" | "published",
         created_at: parseDateTimeString(d.created_at),
         updated_at: parseDateTimeString(d.updated_at),
@@ -226,6 +231,7 @@ export const db = {
       });
       return data.map((c) => ({
         ...c,
+        cover_url: sanitizeImageUrl(c.cover_url),
         target_idr: toNumber(c.target_idr),
         collected_idr: toNumber(c.collected_idr),
         status: c.status as "aktif" | "selesai",
@@ -246,12 +252,15 @@ export const db = {
         where: { status: "published" },
         orderBy: { date: "desc" },
       });
-      return data.map((g) => ({
-        ...g,
-        date: parseDateString(g.date),
-        status: g.status as "draft" | "published",
-        created_at: parseDateTimeString(g.created_at),
-      }));
+      return data
+        .map((g) => ({
+          ...g,
+          image_url: sanitizeImageUrl(g.image_url) || "",
+          date: parseDateString(g.date),
+          status: g.status as "draft" | "published",
+          created_at: parseDateTimeString(g.created_at),
+        }))
+        .filter((g) => Boolean(g.image_url));
     } catch (err: unknown) {
       console.warn("[db.api] getGalleryItems fallback:", getErrorMessage(err));
       return [];

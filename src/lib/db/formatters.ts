@@ -5,30 +5,44 @@
 
 export function toStringArray(val: unknown): string[] {
   if (!val) return [];
+  let list: string[] = [];
   if (Array.isArray(val)) {
-    return val.map((x) => String(x)).filter(Boolean);
-  }
-  if (typeof val === "string") {
+    list = val.map((x) => String(x)).filter(Boolean);
+  } else if (typeof val === "string") {
     const trimmed = val.trim();
     if (!trimmed) return [];
     try {
       const parsed = JSON.parse(trimmed);
       if (Array.isArray(parsed)) {
-        return parsed.map((x) => String(x)).filter(Boolean);
+        list = parsed.map((x) => String(x)).filter(Boolean);
       }
     } catch {
       // Handle PostgreSQL array syntax if encountered: {"url1","url2"}
       if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
-        return trimmed
+        list = trimmed
           .slice(1, -1)
           .split(",")
           .map((s) => s.replace(/^"|"$/g, "").trim())
           .filter(Boolean);
+      } else {
+        list = [trimmed];
       }
-      return [trimmed];
     }
   }
-  return [];
+  return list.filter((item) => !item.includes("placeholder.internal"));
+}
+
+export function sanitizeImageUrl(url: unknown): string | null {
+  if (!url || typeof url !== "string") return null;
+  const trimmed = url.trim();
+  if (!trimmed || trimmed.includes("placeholder.internal")) return null;
+  return trimmed;
+}
+
+export function sanitizeImageUrls(urls: unknown): string[] {
+  return toStringArray(urls).filter(
+    (u) => Boolean(u) && !u.includes("placeholder.internal")
+  );
 }
 
 export function parseDateString(val: Date | string | null | undefined): string {

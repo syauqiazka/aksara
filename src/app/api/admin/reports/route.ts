@@ -29,8 +29,14 @@ export async function POST(request: Request) {
     const json = await request.json();
     const validated = reportSchema.parse(json);
 
-    const galleryUrls = (validated.gallery_urls || []).filter(Boolean);
-    const coverUrl = validated.cover_url || (galleryUrls.length > 0 ? galleryUrls[0] : null);
+    const galleryUrls = (validated.gallery_urls || []).filter(
+      (u) => Boolean(u) && !u.includes("placeholder.internal")
+    );
+    const rawCover =
+      validated.cover_url && !validated.cover_url.includes("placeholder.internal")
+        ? validated.cover_url
+        : null;
+    const coverUrl = rawCover || (galleryUrls.length > 0 ? galleryUrls[0] : null);
 
     const result = await db.saveReport({
       ...validated,
@@ -71,8 +77,14 @@ export async function PUT(request: Request) {
     const validated = reportSchema.parse(data);
     const previousRecord = await db.getReportById(id);
 
-    const galleryUrls = (validated.gallery_urls || []).filter(Boolean);
-    const coverUrl = validated.cover_url || (galleryUrls.length > 0 ? galleryUrls[0] : null);
+    const galleryUrls = (validated.gallery_urls || []).filter(
+      (u) => Boolean(u) && !u.includes("placeholder.internal")
+    );
+    const rawCover =
+      validated.cover_url && !validated.cover_url.includes("placeholder.internal")
+        ? validated.cover_url
+        : null;
+    const coverUrl = rawCover || (galleryUrls.length > 0 ? galleryUrls[0] : null);
 
     const result = await db.saveReport(
       {

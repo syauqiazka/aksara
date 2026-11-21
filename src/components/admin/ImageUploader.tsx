@@ -63,7 +63,7 @@ export default function ImageUploader({
     if (file) {
       const objUrl = URL.createObjectURL(file);
       setCleanPreview(objUrl);
-    } else if (value) {
+    } else if (value && !value.includes("placeholder.internal")) {
       setCleanPreview(value);
     } else {
       setCleanPreview(null);

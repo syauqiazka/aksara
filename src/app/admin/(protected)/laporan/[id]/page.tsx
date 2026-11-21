@@ -55,6 +55,10 @@ export default function AdminEditReportPage() {
         throw new Error("Gagal mengambil data laporan dari server");
       }
       const item: Report = await res.json();
+      const cleanCover =
+        item.cover_url && !item.cover_url.includes("placeholder.internal")
+          ? item.cover_url
+          : "";
       setFormData({
         slug: item.slug || "",
         title: item.title || "",
@@ -65,14 +69,17 @@ export default function AdminEditReportPage() {
         body: item.body || "",
         beneficiaries: item.beneficiaries !== null && item.beneficiaries !== undefined ? String(item.beneficiaries) : "",
         amount_idr: item.amount_idr !== null && item.amount_idr !== undefined ? String(item.amount_idr) : "",
-        cover_url: item.cover_url || "",
+        cover_url: cleanCover,
         status: item.status,
       });
 
       // Load existing visual documentation photos
       if (Array.isArray(item.gallery_urls)) {
+        const cleanGallery = item.gallery_urls.filter(
+          (u) => Boolean(u) && !u.includes("placeholder.internal")
+        );
         setGalleryItems(
-          item.gallery_urls.map((gUrl, idx) => ({
+          cleanGallery.map((gUrl, idx) => ({
             id: `gal-exist-${idx}-${Date.now()}`,
             url: gUrl,
             file: null,
@@ -126,18 +133,14 @@ export default function AdminEditReportPage() {
       ...formData,
       beneficiaries: isNaN(rawBeneficiaries) ? 0 : rawBeneficiaries,
       amount_idr: isNaN(rawAmountIdr as number) ? null : rawAmountIdr,
-      cover_url: formData.cover_url || null,
-      gallery_urls: galleryItems.map((g) => g.url).filter(Boolean),
+      cover_url: formData.cover_url && !formData.cover_url.includes("placeholder.internal") ? formData.cover_url : null,
+      gallery_urls: galleryItems
+        .map((g) => g.url)
+        .filter((u): u is string => Boolean(u) && !u.includes("placeholder.internal")),
       status: formData.status,
     };
 
-    const preValidation = reportSchema.safeParse({
-      ...candidatePayload,
-      cover_url: selectedCoverFile ? "https://placeholder.internal/cover.webp" : candidatePayload.cover_url,
-      gallery_urls: galleryItems
-        .map((g) => g.url || (g.file ? "https://placeholder.internal/gallery.webp" : ""))
-        .filter(Boolean),
-    });
+    const preValidation = reportSchema.safeParse(candidatePayload);
 
     if (!preValidation.success) {
       setError(formatZodError(preValidation.error));
@@ -153,7 +156,7 @@ export default function AdminEditReportPage() {
     const commits: (() => Promise<void>)[] = [];
 
     try {
-      let finalCoverUrl = formData.cover_url || null;
+      let finalCoverUrl = candidatePayload.cover_url;
 
       if (selectedCoverFile) {
         const { url, rollback, commit } = await uploadPendingFileOnSave(selectedCoverFile);
@@ -169,9 +172,14 @@ export default function AdminEditReportPage() {
           rollbacks.push(rollback);
           commits.push(commit);
           if (url) finalGalleryUrls.push(url);
-        } else if (item.url && item.url.trim()) {
+        } else if (item.url && item.url.trim() && !item.url.includes("placeholder.internal")) {
           finalGalleryUrls.push(item.url.trim());
         }
+      }
+
+      // If cover_url is empty but there's a gallery photo, use first gallery photo as cover
+      if (!finalCoverUrl && finalGalleryUrls.length > 0) {
+        finalCoverUrl = finalGalleryUrls[0];
       }
 
       // 3. Put to API

@@ -75,16 +75,14 @@ export default function AdminNewReportPage() {
       ...formData,
       beneficiaries: isNaN(rawBeneficiaries) ? 0 : rawBeneficiaries,
       amount_idr: isNaN(rawAmountIdr as number) ? null : rawAmountIdr,
-      cover_url: formData.cover_url || null,
-      gallery_urls: galleryItems.map((g) => g.url).filter(Boolean),
+      cover_url: formData.cover_url && !formData.cover_url.includes("placeholder.internal") ? formData.cover_url : null,
+      gallery_urls: galleryItems
+        .map((g) => g.url)
+        .filter((u): u is string => Boolean(u) && !u.includes("placeholder.internal")),
       status: formData.status,
     };
 
-    const preValidation = reportSchema.safeParse({
-      ...candidatePayload,
-      cover_url: selectedCoverFile ? "https://placeholder.internal/cover.webp" : candidatePayload.cover_url,
-      gallery_urls: galleryItems.map((g) => g.url || (g.file ? "https://placeholder.internal/gallery.webp" : "")).filter(Boolean),
-    });
+    const preValidation = reportSchema.safeParse(candidatePayload);
 
     if (!preValidation.success) {
       setError(formatZodError(preValidation.error));
@@ -100,7 +98,7 @@ export default function AdminNewReportPage() {
     const commits: (() => Promise<void>)[] = [];
 
     try {
-      let finalCoverUrl = formData.cover_url || null;
+      let finalCoverUrl = candidatePayload.cover_url;
 
       if (selectedCoverFile) {
         const { url, rollback, commit } = await uploadPendingFileOnSave(selectedCoverFile);
@@ -116,9 +114,14 @@ export default function AdminNewReportPage() {
           rollbacks.push(rollback);
           commits.push(commit);
           if (url) finalGalleryUrls.push(url);
-        } else if (item.url && item.url.trim()) {
+        } else if (item.url && item.url.trim() && !item.url.includes("placeholder.internal")) {
           finalGalleryUrls.push(item.url.trim());
         }
+      }
+
+      // If cover_url is empty but there's a gallery photo, use first gallery photo as cover
+      if (!finalCoverUrl && finalGalleryUrls.length > 0) {
+        finalCoverUrl = finalGalleryUrls[0];
       }
 
       // 3. Post to API
