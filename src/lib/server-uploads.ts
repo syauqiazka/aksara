@@ -23,44 +23,19 @@ export function getPrimaryUploadDir(): string {
 
 /**
  * Returns all potential candidate upload directories on the server.
- * Always searches UPLOAD_DIR first, followed by standard fallback locations.
+ * Uses only the configured UPLOAD_DIR and the persistent Hostinger directory.
  */
 export function getUploadDirectories(): string[] {
-  const dirs: string[] = [];
-
-  // 1. Configured persistent server directory (Hostinger outside deployment)
   const configured = process.env.UPLOAD_DIR?.trim();
-  if (configured) {
-    dirs.push(path.resolve(configured));
-  }
 
-  // 2. Default persistent upload directory on Hostinger server
-  dirs.push(DEFAULT_PERSISTENT_UPLOAD_DIR);
-
-  const cwd = process.cwd();
-
-  // 3. Standard public/uploads inside repository / build
-  dirs.push(path.join(cwd, "public", "uploads"));
-
-  // 3. Root uploads folder
-  dirs.push(path.join(cwd, "uploads"));
-
-  // 4. Relative paths
-  dirs.push(path.resolve("public/uploads"));
-  dirs.push(path.resolve("uploads"));
-
-  // 5. Next.js standalone runtime path
-  dirs.push(path.join(cwd, ".next", "standalone", "public", "uploads"));
-  dirs.push(path.join(cwd, ".next", "standalone", "uploads"));
-
-  // 6. Parent traversal directories (common in Hostinger hbuilds or Passenger)
-  dirs.push(path.resolve("../public/uploads"));
-  dirs.push(path.resolve("../uploads"));
-  dirs.push(path.resolve("../../public/uploads"));
-  dirs.push(path.resolve("../../uploads"));
-
-  // De-duplicate while preserving priority order
-  return Array.from(new Set(dirs));
+  return Array.from(
+    new Set(
+      [
+        configured ? path.resolve(configured) : null,
+        DEFAULT_PERSISTENT_UPLOAD_DIR,
+      ].filter(Boolean) as string[]
+    )
+  );
 }
 
 /**
@@ -143,31 +118,22 @@ export async function findUploadedFile(filename: string): Promise<string | null>
 
 /**
  * Saves an uploaded buffer to the primary persistent upload directory (UPLOAD_DIR).
- * In development or when fallback directory is accessible, also mirrors to public/uploads.
+ * Uses a unique UUID to prevent overwriting existing files.
  * Returns public URL format: /uploads/<safe-filename>.
  */
 export async function saveUploadedFile(
   filename: string,
   buffer: Buffer
 ): Promise<string> {
-  const safeFilename = sanitizeFilename(filename);
+  const originalSafeName = sanitizeFilename(filename);
+  const ext = path.extname(originalSafeName).toLowerCase() || ".webp";
+  const safeFilename = `${crypto.randomUUID()}${ext}`;
+
   const primaryDir = await ensureUploadDir();
   const primaryFilePath = path.join(primaryDir, safeFilename);
 
-  // Write file to persistent primary directory
+  // Write file to persistent primary directory only (no mirroring to deployment folder)
   await fs.writeFile(primaryFilePath, buffer);
-
-  // If primaryDir is outside public/uploads (e.g. Hostinger persistent dir or custom UPLOAD_DIR),
-  // optionally attempt mirroring to public/uploads for local runtime convenience
-  const localPublicUploads = path.join(process.cwd(), "public", "uploads");
-  if (path.resolve(primaryDir) !== path.resolve(localPublicUploads)) {
-    try {
-      await fs.mkdir(localPublicUploads, { recursive: true });
-      await fs.writeFile(path.join(localPublicUploads, safeFilename), buffer);
-    } catch {
-      // Mirroring is best-effort; persistent primaryDir is the authoritative copy
-    }
-  }
 
   // Return public URL path without leaking server filesystem path
   return `/uploads/${safeFilename}`;
