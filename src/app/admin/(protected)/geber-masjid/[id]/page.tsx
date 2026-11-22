@@ -94,11 +94,11 @@ export default function AdminEditGeberPage() {
 
       if (selectedFile) {
         setIsUploading(true);
-        const [uploaded] = await uploadBatchWithProgress([selectedFile], (info) =>
+        const { urls, rollbacks, commits } = await uploadBatchWithProgress([selectedFile], (info) =>
           setUploadProgress(info)
         );
-        uploadRollback = uploaded.rollback;
-        finalPhotoUrl = uploaded.url;
+        uploadRollback = rollbacks[0] || null;
+        finalPhotoUrl = urls[0] || null;
 
         const res = await fetch("/api/admin/geber", {
           method: "PUT",
@@ -119,7 +119,9 @@ export default function AdminEditGeberPage() {
           throw new Error(data.error || "Gagal memperbarui data Geber Masjid");
         }
 
-        await uploaded.commit();
+        for (const commit of commits) {
+          await commit();
+        }
 
         if (originalPhotoUrl && originalPhotoUrl !== finalPhotoUrl) {
           await deleteOldBlobAfterUpdate(originalPhotoUrl, finalPhotoUrl);

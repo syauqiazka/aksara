@@ -264,12 +264,12 @@ export default function AdminNewInfakPage() {
 
       if (selectedFile) {
         setIsUploading(true);
-        const [uploaded] = await uploadBatchWithProgress([selectedFile], (info) =>
+        const { urls, rollbacks, commits } = await uploadBatchWithProgress([selectedFile], (info) =>
           setUploadProgress(info)
         );
-        uploadRollback = uploaded.rollback;
-        if (uploaded.url) {
-          photos = [{ url: uploaded.url, caption: `Serah Terima Mushaf #${formData.mushaf_no}`, sort: 1 }];
+        uploadRollback = rollbacks[0] || null;
+        if (urls[0]) {
+          photos = [{ url: urls[0], caption: `Serah Terima Mushaf #${formData.mushaf_no}`, sort: 1 }];
         }
 
         const payload = {
@@ -288,7 +288,9 @@ export default function AdminNewInfakPage() {
           throw new Error(data.error || "Gagal menyimpan donasi");
         }
 
-        await uploaded.commit();
+        for (const commit of commits) {
+          await commit();
+        }
       } else {
         const payload = {
           ...candidatePayload,

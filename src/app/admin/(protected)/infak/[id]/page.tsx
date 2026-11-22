@@ -203,13 +203,13 @@ export default function AdminEditInfakPage() {
 
       if (selectedFile) {
         setIsUploading(true);
-        const [uploaded] = await uploadBatchWithProgress([selectedFile], (info) =>
+        const { urls, rollbacks, commits } = await uploadBatchWithProgress([selectedFile], (info) =>
           setUploadProgress(info)
         );
-        uploadRollback = uploaded.rollback;
-        uploadCommit = uploaded.commit;
-        if (uploaded.url) {
-          finalPhotos = [{ url: uploaded.url, caption: `Serah Terima Mushaf #${formData.mushaf_no || "1"}`, sort: 1 }];
+        uploadRollback = rollbacks[0] || null;
+        uploadCommit = commits[0] || null;
+        if (urls[0]) {
+          finalPhotos = [{ url: urls[0], caption: `Serah Terima Mushaf #${formData.mushaf_no || "1"}`, sort: 1 }];
         }
       }
 

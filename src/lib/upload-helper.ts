@@ -116,18 +116,30 @@ export interface UploadProgressInfo {
   currentFileName: string;
 }
 
+export interface UploadBatchResult {
+  urls: (string | null)[];
+  rollbacks: (() => Promise<void>)[];
+  commits: (() => Promise<void>)[];
+  url?: string | null;
+  rollback?: () => Promise<void>;
+  commit?: () => Promise<void>;
+  [Symbol.iterator](): Iterator<{
+    url: string | null;
+    rollback: () => Promise<void>;
+    commit: () => Promise<void>;
+  }>;
+}
+
 /**
  * Uploads a list of pending files sequentially while emitting granular progress & ETA info.
  * Provides collective rollback if any item fails.
+ * Returns an iterable result object so both object destructuring ({ urls })
+ * and array destructuring ([uploaded]) work safely.
  */
 export async function uploadBatchWithProgress(
   files: (File | null)[],
   onProgress?: (info: UploadProgressInfo) => void
-): Promise<{
-  urls: (string | null)[];
-  rollbacks: (() => Promise<void>)[];
-  commits: (() => Promise<void>)[];
-}> {
+): Promise<UploadBatchResult> {
   const validItems = files
     .map((file, originalIndex) => ({ file, originalIndex }))
     .filter((item): item is { file: File; originalIndex: number } => Boolean(item.file));
@@ -137,8 +149,28 @@ export async function uploadBatchWithProgress(
   const rollbacks: (() => Promise<void>)[] = [];
   const commits: (() => Promise<void>)[] = [];
 
+  const createBatchResult = (): UploadBatchResult => {
+    const items = results.map((url, idx) => ({
+      url,
+      rollback: rollbacks[idx] || (async () => {}),
+      commit: commits[idx] || (async () => {}),
+    }));
+
+    return {
+      urls: results,
+      rollbacks,
+      commits,
+      url: results[0] || null,
+      rollback: rollbacks[0] || (async () => {}),
+      commit: commits[0] || (async () => {}),
+      [Symbol.iterator]() {
+        return items[Symbol.iterator]();
+      },
+    };
+  };
+
   if (total === 0) {
-    return { urls: results, rollbacks, commits };
+    return createBatchResult();
   }
 
   const startTime = Date.now();
@@ -184,6 +216,6 @@ export async function uploadBatchWithProgress(
     });
   }
 
-  return { urls: results, rollbacks, commits };
+  return createBatchResult();
 }
 
