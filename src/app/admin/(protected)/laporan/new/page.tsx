@@ -6,7 +6,8 @@ import Link from "next/link";
 import { ArrowLeft, Save, AlertCircle, Plus, Trash2, Camera, Star } from "lucide-react";
 import Select from "@/components/ui/Select";
 import ImageUploader from "@/components/admin/ImageUploader";
-import { uploadPendingFileOnSave } from "@/lib/upload-helper";
+import UploadProgressModal from "@/components/admin/UploadProgressModal";
+import { uploadBatchWithProgress, UploadProgressInfo } from "@/lib/upload-helper";
 import { cleanNumericString } from "@/lib/numeric-utils";
 import { reportSchema, formatHumanError, formatZodError } from "@/lib/validation/schemas";
 
@@ -20,6 +21,10 @@ export default function AdminNewReportPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Upload Progress Modal State
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgressInfo | null>(null);
 
   // Cover photo state
   const [selectedCoverFile, setSelectedCoverFile] = useState<File | null>(null);
@@ -93,27 +98,39 @@ export default function AdminNewReportPage() {
       return;
     }
 
-    // 2. Upload pending files (Cover + Gallery)
-    const rollbacks: (() => Promise<void>)[] = [];
-    const commits: (() => Promise<void>)[] = [];
+    // 2. Prepare files for batch upload with progress tracking
+    const pendingFiles: (File | null)[] = [];
+    if (selectedCoverFile) {
+      pendingFiles.push(selectedCoverFile);
+    }
+    galleryItems.forEach((g) => {
+      if (g.file) {
+        pendingFiles.push(g.file);
+      }
+    });
+
+    if (pendingFiles.length > 0) {
+      setIsUploading(true);
+    }
 
     try {
+      const { urls: uploadedUrls, commits } = await uploadBatchWithProgress(
+        pendingFiles,
+        (progressInfo) => setUploadProgress(progressInfo)
+      );
+
+      let uploadIndex = 0;
       let finalCoverUrl = candidatePayload.cover_url;
 
       if (selectedCoverFile) {
-        const { url, rollback, commit } = await uploadPendingFileOnSave(selectedCoverFile);
-        rollbacks.push(rollback);
-        commits.push(commit);
-        finalCoverUrl = url;
+        finalCoverUrl = uploadedUrls[uploadIndex++];
       }
 
       const finalGalleryUrls: string[] = [];
       for (const item of galleryItems) {
         if (item.file) {
-          const { url, rollback, commit } = await uploadPendingFileOnSave(item.file);
-          rollbacks.push(rollback);
-          commits.push(commit);
-          if (url) finalGalleryUrls.push(url);
+          const u = uploadedUrls[uploadIndex++];
+          if (u) finalGalleryUrls.push(u);
         } else if (item.url && item.url.trim() && !item.url.includes("placeholder.internal")) {
           finalGalleryUrls.push(item.url.trim());
         }
@@ -146,13 +163,15 @@ export default function AdminNewReportPage() {
       router.push("/admin/laporan");
       router.refresh();
     } catch (err: unknown) {
-      // Compensating rollback on failure
-      await Promise.all(rollbacks.map((r) => r()));
       setError(err instanceof Error ? err.message : "Terjadi kesalahan saat menyimpan laporan");
       setLoading(false);
+      setIsUploading(false);
       if (typeof window !== "undefined") {
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(null);
     }
   };
 
@@ -471,6 +490,13 @@ export default function AdminNewReportPage() {
           </button>
         </div>
       </form>
+
+      {/* Realtime Upload Progress Modal (UX Enhancement) */}
+      <UploadProgressModal
+        isOpen={isUploading}
+        progress={uploadProgress}
+        title="Menyimpan & Mengunggah Berkas Laporan"
+      />
     </div>
   );
 }

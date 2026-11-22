@@ -6,7 +6,8 @@ import Image from "next/image";
 import { PlusCircle, Search, Trash2, Edit, Eye, EyeOff, X, Image as ImageIcon } from "lucide-react";
 import { GalleryItem } from "@/lib/db/types";
 import ImageUploader from "@/components/admin/ImageUploader";
-import { uploadPendingFileOnSave, deleteOldBlobAfterUpdate } from "@/lib/upload-helper";
+import UploadProgressModal from "@/components/admin/UploadProgressModal";
+import { uploadBatchWithProgress, UploadProgressInfo, deleteOldBlobAfterUpdate } from "@/lib/upload-helper";
 
 export default function AdminGalleryPage() {
   const [items, setItems] = useState<GalleryItem[]>([]);
@@ -19,6 +20,10 @@ export default function AdminGalleryPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [editingItem, setEditingItem] = useState<GalleryItem | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Upload Progress Modal State
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgressInfo | null>(null);
 
   // Form fields
   const [formData, setFormData] = useState({
@@ -91,10 +96,14 @@ export default function AdminGalleryPage() {
     try {
       let finalImg = formData.image_url;
       if (selectedFile) {
-        const { url, rollback, commit } = await uploadPendingFileOnSave(selectedFile);
-        uploadRollback = rollback;
-        uploadCommit = commit;
-        finalImg = url || formData.image_url;
+        setIsUploading(true);
+        const { urls, rollbacks, commits } = await uploadBatchWithProgress(
+          [selectedFile],
+          (info) => setUploadProgress(info)
+        );
+        uploadRollback = rollbacks[0];
+        uploadCommit = commits[0];
+        finalImg = urls[0] || formData.image_url;
       }
 
       if (!finalImg || finalImg.includes("placeholder.internal")) {
@@ -139,6 +148,8 @@ export default function AdminGalleryPage() {
       setFeedback({ type: "error", message: msg });
     } finally {
       setSubmitting(false);
+      setIsUploading(false);
+      setUploadProgress(null);
     }
   };
 
@@ -459,6 +470,13 @@ export default function AdminGalleryPage() {
           </div>
         </div>
       )}
+
+      {/* Realtime Upload Progress Modal */}
+      <UploadProgressModal
+        isOpen={isUploading}
+        progress={uploadProgress}
+        title="Menyimpan & Mengunggah Foto Dokumentasi"
+      />
     </div>
   );
 }

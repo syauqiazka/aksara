@@ -20,7 +20,8 @@ import Select from "@/components/ui/Select";
 import Input from "@/components/ui/Input";
 import SearchableSelect from "@/components/ui/SearchableSelect";
 import ImageUploader from "@/components/admin/ImageUploader";
-import { uploadPendingFileOnSave } from "@/lib/upload-helper";
+import UploadProgressModal from "@/components/admin/UploadProgressModal";
+import { uploadBatchWithProgress, UploadProgressInfo } from "@/lib/upload-helper";
 import { QURAN_SURAHS, getSuggestedJuz, validateAyatNumber } from "@/lib/quran-surahs";
 import { cleanNumericString } from "@/lib/numeric-utils";
 import { PROVINCES_38 } from "@/lib/provinces-38";
@@ -43,6 +44,10 @@ export default function AdminNewInfakPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  // Upload Progress Modal State
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgressInfo | null>(null);
 
   // Accordion open/close state
   const [openSections, setOpenSections] = useState({
@@ -258,10 +263,13 @@ export default function AdminNewInfakPage() {
       let photos: { url: string; caption?: string; sort: number }[] = [];
 
       if (selectedFile) {
-        const { url, rollback, commit } = await uploadPendingFileOnSave(selectedFile);
-        uploadRollback = rollback;
-        if (url) {
-          photos = [{ url, caption: `Serah Terima Mushaf #${formData.mushaf_no}`, sort: 1 }];
+        setIsUploading(true);
+        const [uploaded] = await uploadBatchWithProgress([selectedFile], (info) =>
+          setUploadProgress(info)
+        );
+        uploadRollback = uploaded.rollback;
+        if (uploaded.url) {
+          photos = [{ url: uploaded.url, caption: `Serah Terima Mushaf #${formData.mushaf_no}`, sort: 1 }];
         }
 
         const payload = {
@@ -280,7 +288,7 @@ export default function AdminNewInfakPage() {
           throw new Error(data.error || "Gagal menyimpan donasi");
         }
 
-        await commit();
+        await uploaded.commit();
       } else {
         const payload = {
           ...candidatePayload,
@@ -314,6 +322,8 @@ export default function AdminNewInfakPage() {
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } finally {
+      setIsUploading(false);
+      setUploadProgress(null);
       setLoading(false);
     }
   };
@@ -910,6 +920,13 @@ export default function AdminNewInfakPage() {
           </div>
         </div>
       </form>
+
+      {/* Realtime Upload Progress Modal */}
+      <UploadProgressModal
+        isOpen={isUploading}
+        progress={uploadProgress}
+        title="Menyimpan & Mengunggah Foto Infak"
+      />
     </div>
   );
 }

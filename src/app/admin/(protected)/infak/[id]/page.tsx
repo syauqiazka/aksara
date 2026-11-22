@@ -15,7 +15,8 @@ import Select from "@/components/ui/Select";
 import Input from "@/components/ui/Input";
 import SearchableSelect from "@/components/ui/SearchableSelect";
 import ImageUploader from "@/components/admin/ImageUploader";
-import { uploadPendingFileOnSave } from "@/lib/upload-helper";
+import UploadProgressModal from "@/components/admin/UploadProgressModal";
+import { uploadBatchWithProgress, UploadProgressInfo } from "@/lib/upload-helper";
 import { PROVINCES_38 } from "@/lib/provinces-38";
 import { INDONESIA_CITIES, getCitiesByProvince, findProvinceByCity } from "@/lib/indonesia-cities";
 import { InfakJinanRecord, InfakJinanSantri } from "@/lib/db/types";
@@ -36,6 +37,10 @@ export default function AdminEditInfakPage() {
   const [record, setRecord] = useState<InfakJinanRecord | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  // Realtime Upload Progress State
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgressInfo | null>(null);
 
   const [formData, setFormData] = useState({
     mushaf_no: "",
@@ -169,40 +174,43 @@ export default function AdminEditInfakPage() {
     setSuccess(null);
 
     const rawMushafNo = parseInt(formData.mushaf_no, 10);
+    const candidatePayload = {
+      ...formData,
+      mushaf_no: isNaN(rawMushafNo) ? 0 : rawMushafNo,
+      donor_phone: formData.donor_phone || null,
+      maps_url: formData.maps_url || null,
+      photos: photoUrl
+        ? [{ url: photoUrl, caption: `Serah Terima Mushaf #${formData.mushaf_no || "1"}`, sort: 1 }]
+        : [],
+      santri_list: record?.santri_list || [],
+    };
+
+    const clientValidation = infakJinanSchema.safeParse(candidatePayload);
+    if (!clientValidation.success) {
+      setError(formatZodError(clientValidation.error));
+      setSaving(false);
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      return;
+    }
+
     let uploadRollback: (() => Promise<void>) | null = null;
     let uploadCommit: (() => Promise<void>) | null = null;
 
     try {
-      let finalPhotos = photoUrl
-        ? [{ url: photoUrl, caption: `Serah Terima Mushaf #${formData.mushaf_no || "1"}`, sort: 1 }]
-        : [];
+      let finalPhotos = candidatePayload.photos;
 
       if (selectedFile) {
-        const { url, rollback, commit } = await uploadPendingFileOnSave(selectedFile);
-        uploadRollback = rollback;
-        uploadCommit = commit;
-        if (url) {
-          finalPhotos = [{ url, caption: `Serah Terima Mushaf #${formData.mushaf_no || "1"}`, sort: 1 }];
+        setIsUploading(true);
+        const [uploaded] = await uploadBatchWithProgress([selectedFile], (info) =>
+          setUploadProgress(info)
+        );
+        uploadRollback = uploaded.rollback;
+        uploadCommit = uploaded.commit;
+        if (uploaded.url) {
+          finalPhotos = [{ url: uploaded.url, caption: `Serah Terima Mushaf #${formData.mushaf_no || "1"}`, sort: 1 }];
         }
-      }
-
-      const candidatePayload = {
-        ...formData,
-        mushaf_no: isNaN(rawMushafNo) ? 0 : rawMushafNo,
-        donor_phone: formData.donor_phone || null,
-        maps_url: formData.maps_url || null,
-        photos: finalPhotos,
-        santri_list: record?.santri_list || [],
-      };
-
-      const clientValidation = infakJinanSchema.safeParse(candidatePayload);
-      if (!clientValidation.success) {
-        setError(formatZodError(clientValidation.error));
-        setSaving(false);
-        if (typeof window !== "undefined") {
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }
-        return;
       }
 
       const res = await fetch("/api/admin/infak", {
@@ -211,6 +219,7 @@ export default function AdminEditInfakPage() {
         body: JSON.stringify({
           id,
           ...candidatePayload,
+          photos: finalPhotos,
         }),
       });
 
@@ -242,6 +251,8 @@ export default function AdminEditInfakPage() {
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } finally {
+      setIsUploading(false);
+      setUploadProgress(null);
       setSaving(false);
     }
   };
@@ -762,6 +773,13 @@ export default function AdminEditInfakPage() {
           </div>
         )}
       </div>
+
+      {/* Realtime Upload Progress Modal */}
+      <UploadProgressModal
+        isOpen={isUploading}
+        progress={uploadProgress}
+        title="Menyimpan & Mengunggah Foto Infak"
+      />
     </div>
   );
 }

@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, AlertCircle } from "lucide-react";
 import ImageUploader from "@/components/admin/ImageUploader";
+import UploadProgressModal from "@/components/admin/UploadProgressModal";
 import SearchableSelect from "@/components/ui/SearchableSelect";
-import { uploadPendingFileOnSave } from "@/lib/upload-helper";
+import { uploadBatchWithProgress, UploadProgressInfo } from "@/lib/upload-helper";
 import { cleanNumericString } from "@/lib/numeric-utils";
 import { formatHumanError } from "@/lib/validation/schemas";
 import { PROVINCES_38 } from "@/lib/provinces-38";
@@ -17,6 +18,10 @@ export default function AdminNewGeberPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  // Realtime Upload Progress State
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgressInfo | null>(null);
 
   const [formData, setFormData] = useState({
     mosque_name: "",
@@ -44,9 +49,12 @@ export default function AdminNewGeberPage() {
       let finalPhotoUrl = formData.photo_url || null;
 
       if (selectedFile) {
-        const { url, rollback, commit } = await uploadPendingFileOnSave(selectedFile);
-        uploadRollback = rollback;
-        finalPhotoUrl = url;
+        setIsUploading(true);
+        const [uploaded] = await uploadBatchWithProgress([selectedFile], (info) =>
+          setUploadProgress(info)
+        );
+        uploadRollback = uploaded.rollback;
+        finalPhotoUrl = uploaded.url;
 
         const res = await fetch("/api/admin/geber", {
           method: "POST",
@@ -66,7 +74,7 @@ export default function AdminNewGeberPage() {
           throw new Error(data.error || "Gagal menyimpan data Geber Masjid");
         }
 
-        await commit();
+        await uploaded.commit();
       } else {
         const res = await fetch("/api/admin/geber", {
           method: "POST",
@@ -94,6 +102,9 @@ export default function AdminNewGeberPage() {
         await uploadRollback();
       }
       setError(err instanceof Error ? err.message : "Terjadi kesalahan");
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(null);
       setLoading(false);
     }
   };
@@ -281,6 +292,13 @@ export default function AdminNewGeberPage() {
           </button>
         </div>
       </form>
+
+      {/* Realtime Upload Progress Modal */}
+      <UploadProgressModal
+        isOpen={isUploading}
+        progress={uploadProgress}
+        title="Menyimpan & Mengunggah Foto Geber Masjid"
+      />
     </div>
   );
 }

@@ -7,8 +7,9 @@ import SearchableSelect from "@/components/ui/SearchableSelect";
 import { PlusCircle, Search, Trash2, Edit, X, HeartHandshake } from "lucide-react";
 import { ThemedCampaign } from "@/lib/db/types";
 import ImageUploader from "@/components/admin/ImageUploader";
+import UploadProgressModal from "@/components/admin/UploadProgressModal";
 import { cleanNumericString } from "@/lib/numeric-utils";
-import { uploadPendingFileOnSave, deleteOldBlobAfterUpdate } from "@/lib/upload-helper";
+import { uploadBatchWithProgress, UploadProgressInfo, deleteOldBlobAfterUpdate } from "@/lib/upload-helper";
 import { INDONESIA_CITIES } from "@/lib/indonesia-cities";
 
 export default function AdminThemedCampaignsPage() {
@@ -22,6 +23,10 @@ export default function AdminThemedCampaignsPage() {
   const [editingCampaign, setEditingCampaign] = useState<ThemedCampaign | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  // Upload Progress Modal State
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgressInfo | null>(null);
 
   // Form states
   const [formData, setFormData] = useState({
@@ -100,10 +105,14 @@ export default function AdminThemedCampaignsPage() {
     try {
       let finalCover = formData.cover_url && !formData.cover_url.includes("placeholder.internal") ? formData.cover_url : "";
       if (selectedFile) {
-        const { url, rollback, commit } = await uploadPendingFileOnSave(selectedFile);
-        uploadRollback = rollback;
-        uploadCommit = commit;
-        finalCover = url || formData.cover_url;
+        setIsUploading(true);
+        const { urls, rollbacks, commits } = await uploadBatchWithProgress(
+          [selectedFile],
+          (info) => setUploadProgress(info)
+        );
+        uploadRollback = rollbacks[0];
+        uploadCommit = commits[0];
+        finalCover = urls[0] || formData.cover_url;
       }
       if (finalCover && finalCover.includes("placeholder.internal")) {
         finalCover = "";
@@ -153,6 +162,8 @@ export default function AdminThemedCampaignsPage() {
       setFeedback({ type: "error", message: msg });
     } finally {
       setSubmitting(false);
+      setIsUploading(false);
+      setUploadProgress(null);
     }
   };
 
@@ -531,6 +542,13 @@ export default function AdminThemedCampaignsPage() {
           </div>
         </div>
       )}
+
+      {/* Realtime Upload Progress Modal */}
+      <UploadProgressModal
+        isOpen={isUploading}
+        progress={uploadProgress}
+        title="Menyimpan & Mengunggah Poster Kampanye"
+      />
     </div>
   );
 }

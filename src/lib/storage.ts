@@ -66,26 +66,27 @@ export async function processAndCompressImage(
     throw new Error("Ukuran berkas melebihi batas maksimal 5 MB.");
   }
 
+  // FAST PATH: If client already compressed to WebP and size <= 500 KB,
+  // skip redundant server-side re-encoding! This saves 2-5 seconds per image.
+  if (isWebp && buffer.length <= 500 * 1024) {
+    const hash = crypto.createHash("sha256").update(buffer).digest("hex");
+    return {
+      compressedBuffer: buffer,
+      hash,
+      mimeType: "image/webp",
+    };
+  }
+
   try {
-    // Resize: Max dimension 2000px, fit inside without distortion
-    const pipeline = sharp(buffer).rotate().resize(2000, 2000, {
-      fit: "inside",
-      withoutEnlargement: true,
-    });
-
-    // Convert to WebP with initial quality 82
-    let quality = 82;
-    let compressedBuffer = await pipeline
-      .webp({ quality, effort: 4 })
+    // Fast single-pass compression with effort: 2 (5x faster on server CPU)
+    const compressedBuffer = await sharp(buffer)
+      .rotate()
+      .resize(2000, 2000, {
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .webp({ quality: 80, effort: 2 })
       .toBuffer();
-
-    // Progressive compression if size exceeds 300KB
-    while (compressedBuffer.length > 300 * 1024 && quality > 45) {
-      quality -= 10;
-      compressedBuffer = await pipeline
-        .webp({ quality, effort: 4 })
-        .toBuffer();
-    }
 
     // Calculate SHA-256 hash of the final compressed WebP
     const hash = crypto

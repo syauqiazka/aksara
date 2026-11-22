@@ -34,16 +34,18 @@ export default function ImageUploader({
   required = false,
 }: ImageUploaderProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [mode, setMode] = useState<"upload" | "url">("upload");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewUrlRef = useRef<string | null>(null);
+  const lastFileRef = useRef<File | null>(null);
 
-  // Revoke object URL on unmount or change
+  // Revoke object URL on unmount or file replacement
   const setCleanPreview = (newUrl: string | null) => {
-    if (previewUrlRef.current && previewUrlRef.current.startsWith("blob:")) {
+    if (previewUrlRef.current && previewUrlRef.current.startsWith("blob:") && previewUrlRef.current !== newUrl) {
       URL.revokeObjectURL(previewUrlRef.current);
     }
     previewUrlRef.current = newUrl;
@@ -58,15 +60,21 @@ export default function ImageUploader({
     };
   }, []);
 
-  // Update preview when file changes or value changes
+  // Update preview only when file instance or value actually changes
   useEffect(() => {
     if (file) {
-      const objUrl = URL.createObjectURL(file);
-      setCleanPreview(objUrl);
-    } else if (value && !value.includes("placeholder.internal")) {
-      setCleanPreview(value);
+      if (lastFileRef.current !== file) {
+        lastFileRef.current = file;
+        const objUrl = URL.createObjectURL(file);
+        setCleanPreview(objUrl);
+      }
     } else {
-      setCleanPreview(null);
+      lastFileRef.current = null;
+      if (value && !value.includes("placeholder.internal")) {
+        setCleanPreview(value);
+      } else {
+        setCleanPreview(null);
+      }
     }
   }, [file, value]);
 
@@ -83,6 +91,7 @@ export default function ImageUploader({
       return;
     }
 
+    setIsProcessing(true);
     try {
       // 2. Client-side WebP compression (max 2000px, target <= 300KB)
       const compressed = await compressImageClient(rawFile);
@@ -97,6 +106,8 @@ export default function ImageUploader({
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Gagal memproses gambar";
       setErrorMessage(msg);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -177,16 +188,32 @@ export default function ImageUploader({
         </div>
       ) : (
         <div className="space-y-3">
-          {activeDisplay ? (
+          {isProcessing ? (
+            <div className="rounded-2xl border-2 border-dashed border-[var(--gold-500)] bg-[var(--gold-500)]/10 p-6 flex flex-col items-center justify-center gap-2">
+              <UploadCloud className="w-6 h-6 text-[var(--gold-700)] animate-bounce" />
+              <span className="text-xs font-semibold text-[var(--ink-800)]">
+                Memproses &amp; mengompresi gambar...
+              </span>
+            </div>
+          ) : activeDisplay ? (
             <div className="relative rounded-2xl border-2 border-[var(--cream-200)] bg-[var(--cream-100)] p-3 flex items-center gap-4">
               <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-[var(--cream-200)] flex-shrink-0 border border-[var(--gold-500)]/40 shadow-xs">
-                <SafeImage
-                  src={activeDisplay}
-                  alt="Pratinjau Foto"
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
+                {file && previewUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={previewUrl}
+                    alt="Pratinjau Foto"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <SafeImage
+                    src={activeDisplay}
+                    alt="Pratinjau Foto"
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                )}
               </div>
 
               <div className="flex-1 min-w-0">

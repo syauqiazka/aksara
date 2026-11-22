@@ -5,8 +5,9 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, AlertCircle, Loader2 } from "lucide-react";
 import ImageUploader from "@/components/admin/ImageUploader";
+import UploadProgressModal from "@/components/admin/UploadProgressModal";
 import SearchableSelect from "@/components/ui/SearchableSelect";
-import { uploadPendingFileOnSave, deleteOldBlobAfterUpdate } from "@/lib/upload-helper";
+import { uploadBatchWithProgress, UploadProgressInfo, deleteOldBlobAfterUpdate } from "@/lib/upload-helper";
 import { cleanNumericString } from "@/lib/numeric-utils";
 import { GeberMasjidDistribution } from "@/lib/db/types";
 import { PROVINCES_38 } from "@/lib/provinces-38";
@@ -22,6 +23,10 @@ export default function AdminEditGeberPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [originalPhotoUrl, setOriginalPhotoUrl] = useState<string | null>(null);
+
+  // Realtime Upload Progress State
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgressInfo | null>(null);
 
   const [formData, setFormData] = useState({
     mosque_name: "",
@@ -88,9 +93,12 @@ export default function AdminEditGeberPage() {
       let finalPhotoUrl = formData.photo_url || null;
 
       if (selectedFile) {
-        const { url, rollback, commit } = await uploadPendingFileOnSave(selectedFile);
-        uploadRollback = rollback;
-        finalPhotoUrl = url;
+        setIsUploading(true);
+        const [uploaded] = await uploadBatchWithProgress([selectedFile], (info) =>
+          setUploadProgress(info)
+        );
+        uploadRollback = uploaded.rollback;
+        finalPhotoUrl = uploaded.url;
 
         const res = await fetch("/api/admin/geber", {
           method: "PUT",
@@ -111,7 +119,7 @@ export default function AdminEditGeberPage() {
           throw new Error(data.error || "Gagal memperbarui data Geber Masjid");
         }
 
-        await commit();
+        await uploaded.commit();
 
         if (originalPhotoUrl && originalPhotoUrl !== finalPhotoUrl) {
           await deleteOldBlobAfterUpdate(originalPhotoUrl, finalPhotoUrl);
@@ -148,6 +156,9 @@ export default function AdminEditGeberPage() {
         await uploadRollback();
       }
       setError(err instanceof Error ? err.message : "Terjadi kesalahan saat menyimpan");
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(null);
       setSaving(false);
     }
   };
@@ -374,6 +385,13 @@ export default function AdminEditGeberPage() {
           </button>
         </div>
       </form>
+
+      {/* Realtime Upload Progress Modal */}
+      <UploadProgressModal
+        isOpen={isUploading}
+        progress={uploadProgress}
+        title="Menyimpan & Mengunggah Foto Geber Masjid"
+      />
     </div>
   );
 }
