@@ -30,15 +30,22 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!file.type.startsWith("image/")) {
+    const MAX_FILE_SIZE = 5 * 1024 * 1024;
+    const allowedMimeTypes = new Set([
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/gif",
+    ]);
+
+    if (!allowedMimeTypes.has(file.type.toLowerCase())) {
       return NextResponse.json(
-        { success: false, error: "File harus berupa gambar (JPG, PNG, WebP)", message: "File harus berupa gambar (JPG, PNG, WebP)" },
+        { success: false, error: "Format gambar tidak didukung", message: "Format gambar tidak didukung" },
         { status: 400 }
       );
     }
 
-    const maxSize = 5 * 1024 * 1024;
-    if (file.size > maxSize) {
+    if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
         { success: false, error: "Ukuran gambar maksimal 5 MB", message: "Ukuran gambar maksimal 5 MB" },
         { status: 400 }

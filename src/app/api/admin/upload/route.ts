@@ -32,16 +32,24 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!file.type.startsWith("image/")) {
+    const MAX_FILE_SIZE = 5 * 1024 * 1024;
+    const allowedMimeTypes = new Set([
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/gif",
+    ]);
+
+    if (!allowedMimeTypes.has(file.type.toLowerCase())) {
       return NextResponse.json(
-        { error: "Tipe file tidak didukung. Harap unggah berkas gambar (JPG, PNG, WebP)" },
+        { error: "Format gambar tidak didukung" },
         { status: 400 }
       );
     }
 
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
-        { error: "Ukuran berkas melebihi batas maksimal 5 MB" },
+        { error: "Ukuran gambar maksimal 5 MB" },
         { status: 400 }
       );
     }

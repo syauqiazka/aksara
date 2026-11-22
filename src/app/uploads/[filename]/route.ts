@@ -11,7 +11,6 @@ const CONTENT_TYPE_MAP: Record<string, string> = {
   ".png": "image/png",
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
-  ".svg": "image/svg+xml",
   ".gif": "image/gif",
 };
 

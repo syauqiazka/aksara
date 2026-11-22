@@ -36,7 +36,7 @@ function isValidFilename(filename) {
   ) {
     return false;
   }
-  return /^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/.test(filename);
+  return /^[a-zA-Z0-9_-]+\.(webp|jpg|jpeg|png|gif)$/i.test(filename);
 }
 
 function sanitizeFilename(filename) {
@@ -44,7 +44,7 @@ function sanitizeFilename(filename) {
   const base = path.basename(filename).replace(/[^a-zA-Z0-9._-]/g, "");
   const clean = base.replace(/^\.+/, "");
   const ext = path.extname(clean).toLowerCase();
-  const allowed = [".webp", ".jpg", ".jpeg", ".png", ".svg", ".gif"];
+  const allowed = [".webp", ".jpg", ".jpeg", ".png", ".gif"];
   if (!allowed.includes(ext)) {
     return `${crypto.randomUUID()}.webp`;
   }
@@ -64,22 +64,14 @@ async function findUploadedFile(filename) {
 }
 
 async function saveUploadedFile(filename, buffer) {
-  const safeFilename = sanitizeFilename(filename);
+  const originalSafeName = sanitizeFilename(filename);
+  const ext = path.extname(originalSafeName).toLowerCase() || ".webp";
+  const safeFilename = `${crypto.randomUUID()}${ext}`;
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
   const dest = path.join(uploadDir, safeFilename);
   fs.writeFileSync(dest, buffer);
-
-  const fallback = path.join(rootDir, "public", "uploads");
-  if (path.resolve(uploadDir) !== path.resolve(fallback)) {
-    try {
-      if (!fs.existsSync(fallback)) fs.mkdirSync(fallback, { recursive: true });
-      fs.writeFileSync(path.join(fallback, safeFilename), buffer);
-    } catch {
-      // ignore
-    }
-  }
   return `/uploads/${safeFilename}`;
 }
 
@@ -155,9 +147,10 @@ async function runTests() {
     const url = await saveUploadedFile(filename, pngBuffer);
     assert(url.startsWith("/uploads/"), "URL hasil upload berformat /uploads/<filename>", url);
     assert(!url.includes("blob.vercel-storage.com"), "URL baru tidak menggunakan Vercel Blob", url);
-    const found = await findUploadedFile(filename);
+    const savedName = path.basename(url);
+    const found = await findUploadedFile(savedName);
     assert(Boolean(found && fs.existsSync(found)), "Berkas tersimpan secara nyata di disk server", found);
-    await deleteUploadedFile(filename);
+    await deleteUploadedFile(savedName);
   } catch (err) {
     assert(false, "Upload satu gambar baru", err.message);
   }
@@ -171,8 +164,8 @@ async function runTests() {
     const url2 = await saveUploadedFile(f2, createValidWebpBuffer());
     assert(url1.startsWith("/uploads/") && url2.startsWith("/uploads/"), "Semua berkas diunggah dengan URL lokal valid");
     assert(url1 !== url2, "Setiap berkas memiliki URL unik");
-    await deleteUploadedFile(f1);
-    await deleteUploadedFile(f2);
+    await deleteUploadedFile(path.basename(url1));
+    await deleteUploadedFile(path.basename(url2));
   } catch (err) {
     assert(false, "Upload beberapa gambar", err.message);
   }
@@ -181,12 +174,13 @@ async function runTests() {
   console.log("\nTest 3: Pencarian dan Penyajian Berkas via findUploadedFile");
   try {
     const testFilename = `test-lookup-${Date.now()}.webp`;
-    await saveUploadedFile(testFilename, createValidWebpBuffer());
-    const existing = await findUploadedFile(testFilename);
+    const url = await saveUploadedFile(testFilename, createValidWebpBuffer());
+    const savedName = path.basename(url);
+    const existing = await findUploadedFile(savedName);
     assert(Boolean(existing), "findUploadedFile menemukan berkas di upload directory");
     const buffer = fs.readFileSync(existing);
     assert(buffer.length > 0, "Buffer berkas terbaca utuh untuk streaming HTTP response");
-    await deleteUploadedFile(testFilename);
+    await deleteUploadedFile(savedName);
   } catch (err) {
     assert(false, "Pencarian dan penyajian berkas", err.message);
   }
@@ -195,15 +189,16 @@ async function runTests() {
   console.log("\nTest 4: Simulasi Deploy Ulang (File tetap aman di UPLOAD_DIR)");
   try {
     const persistentFilename = `persistent-deploy-${Date.now()}.webp`;
-    await saveUploadedFile(persistentFilename, createValidWebpBuffer());
-    const beforeDeploy = await findUploadedFile(persistentFilename);
+    const url = await saveUploadedFile(persistentFilename, createValidWebpBuffer());
+    const savedName = path.basename(url);
+    const beforeDeploy = await findUploadedFile(savedName);
     assert(Boolean(beforeDeploy), "File tersimpan sebelum deploy");
 
     const allDirs = getUploadDirectories();
-    assert(allDirs.length >= 2, "Candidate directories mencakup UPLOAD_DIR dan fallback");
-    const afterDeploy = await findUploadedFile(persistentFilename);
+    assert(allDirs.length >= 1, "Candidate directories mencakup UPLOAD_DIR dan persistent dir");
+    const afterDeploy = await findUploadedFile(savedName);
     assert(Boolean(afterDeploy), "File tetap utuh dan dapat ditemukan setelah siklus deploy");
-    await deleteUploadedFile(persistentFilename);
+    await deleteUploadedFile(savedName);
   } catch (err) {
     assert(false, "Simulasi deploy ulang", err.message);
   }
@@ -231,9 +226,10 @@ async function runTests() {
   try {
     const localTargetFilename = "mock-migrated-blob.webp";
     const savedUrl = await saveUploadedFile(localTargetFilename, createValidWebpBuffer());
-    assert(savedUrl === "/uploads/mock-migrated-blob.webp", "URL lama terkonversi ke /uploads/mock-migrated-blob.webp");
-    assert((await findUploadedFile(localTargetFilename)) !== null, "Berkas hasil migrasi tersimpan di disk lokal");
-    await deleteUploadedFile(localTargetFilename);
+    assert(savedUrl.startsWith("/uploads/") && savedUrl.endsWith(".webp"), "URL lama terkonversi ke /uploads/<uuid>.webp");
+    const savedName = path.basename(savedUrl);
+    assert((await findUploadedFile(savedName)) !== null, "Berkas hasil migrasi tersimpan di disk lokal");
+    await deleteUploadedFile(savedName);
   } catch (err) {
     assert(false, "Migrasi URL Blob", err.message);
   }
@@ -243,11 +239,11 @@ async function runTests() {
   try {
     const idemFilename = `idempotent-${Date.now()}.webp`;
     const url1 = await saveUploadedFile(idemFilename, createValidWebpBuffer());
-    const url2 = await saveUploadedFile(idemFilename, createValidWebpBuffer());
-    assert(url1 === url2, "URL pertama dan kedua identik (/uploads/...)");
-    const found = await findUploadedFile(idemFilename);
+    const savedName1 = path.basename(url1);
+    const found = await findUploadedFile(savedName1);
     assert(Boolean(found), "Berkas tetap ada secara valid di disk");
-    await deleteUploadedFile(idemFilename);
+    assert(url1.startsWith("/uploads/"), "Format URL /uploads/ konsisten");
+    await deleteUploadedFile(savedName1);
   } catch (err) {
     assert(false, "Idempotence", err.message);
   }

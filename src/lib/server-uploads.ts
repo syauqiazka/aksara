@@ -40,6 +40,7 @@ export function getUploadDirectories(): string[] {
 
 /**
  * Validates whether a filename is safe against path traversal and dangerous extensions.
+ * Requires single extension matching allowed safe image formats (webp, jpg, jpeg, png, gif).
  */
 export function isValidFilename(filename: string): boolean {
   if (!filename || typeof filename !== "string") return false;
@@ -56,8 +57,7 @@ export function isValidFilename(filename: string): boolean {
     return false;
   }
 
-  // Must match safe naming: alphanumeric, underscores, hyphens, and single extension dot
-  return /^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/.test(filename);
+  return /^[a-zA-Z0-9_-]+\.(webp|jpg|jpeg|png|gif)$/i.test(filename);
 }
 
 /**
@@ -70,7 +70,7 @@ export function sanitizeFilename(filename: string): string {
   const clean = base.replace(/^\.+/, "");
   const ext = path.extname(clean).toLowerCase();
 
-  const allowedExtensions = [".webp", ".jpg", ".jpeg", ".png", ".svg", ".gif"];
+  const allowedExtensions = [".webp", ".jpg", ".jpeg", ".png", ".gif"];
   if (!allowedExtensions.includes(ext)) {
     return `${crypto.randomUUID()}.webp`;
   }
