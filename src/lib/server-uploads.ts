@@ -3,13 +3,10 @@ import fs from "node:fs/promises";
 import { existsSync } from "node:fs";
 import crypto from "node:crypto";
 
-const DEFAULT_PERSISTENT_UPLOAD_DIR =
-  "/home/u866076018/domains/sahabataksarasemesta.org/uploads";
-
 /**
  * Returns the primary persistent upload directory on the server.
- * Prioritizes the UPLOAD_DIR environment variable (outside deployment folder on Hostinger).
- * Defaults to the persistent server uploads directory.
+ * Reads the UPLOAD_DIR environment variable (configured in .env / Hostinger environment).
+ * If UPLOAD_DIR is not defined, defaults to <cwd>/public/uploads as local development fallback.
  */
 export function getPrimaryUploadDir(): string {
   const configured = process.env.UPLOAD_DIR?.trim();
@@ -18,12 +15,12 @@ export function getPrimaryUploadDir(): string {
     return path.resolve(configured);
   }
 
-  return DEFAULT_PERSISTENT_UPLOAD_DIR;
+  return path.join(process.cwd(), "public", "uploads");
 }
 
 /**
  * Returns all potential candidate upload directories on the server.
- * Uses only the configured UPLOAD_DIR and the persistent Hostinger directory.
+ * Uses the configured UPLOAD_DIR from environment variable and local fallback.
  */
 export function getUploadDirectories(): string[] {
   const configured = process.env.UPLOAD_DIR?.trim();
@@ -32,7 +29,7 @@ export function getUploadDirectories(): string[] {
     new Set(
       [
         configured ? path.resolve(configured) : null,
-        DEFAULT_PERSISTENT_UPLOAD_DIR,
+        path.join(process.cwd(), "public", "uploads"),
       ].filter(Boolean) as string[]
     )
   );
