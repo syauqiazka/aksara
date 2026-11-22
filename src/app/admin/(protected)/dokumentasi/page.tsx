@@ -155,33 +155,48 @@ export default function AdminGalleryPage() {
 
   const handleToggleStatus = async (item: GalleryItem) => {
     const nextStatus = item.status === "published" ? "draft" : "published";
+    // UPDATE FIRST, SYNC LATER (Optimistic UI)
+    const prevItems = items;
+    setItems((prev) =>
+      prev.map((i) => (i.id === item.id ? { ...i, status: nextStatus } : i))
+    );
+    setFeedback({
+      type: "success",
+      message: `Status foto "${item.title}" diubah menjadi ${nextStatus}.`,
+    });
+
     try {
-      await fetch("/api/admin/gallery", {
+      const res = await fetch("/api/admin/gallery", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...item, status: nextStatus }),
       });
-      setFeedback({
-        type: "success",
-        message: `Status foto "${item.title}" diubah menjadi ${nextStatus}.`,
-      });
-      fetchData();
+      if (!res.ok) throw new Error("Gagal memperbarui status foto.");
     } catch {
-      setFeedback({ type: "error", message: "Gagal memperbarui status foto." });
+      // Revert if failed
+      setItems(prevItems);
+      setFeedback({ type: "error", message: "Gagal memperbarui status foto. Perubahan dibatalkan." });
     }
   };
 
   const handleDelete = async (id: string, title: string) => {
     if (!confirm(`Hapus foto dokumentasi "${title}"?`)) return;
+
+    // UPDATE FIRST, SYNC LATER (Optimistic UI)
+    const prevItems = items;
+    setItems((prev) => prev.filter((i) => i.id !== id));
+    setFeedback({
+      type: "success",
+      message: `Foto "${title}" berhasil dihapus.`,
+    });
+
     try {
-      await fetch(`/api/admin/gallery?id=${id}`, { method: "DELETE" });
-      setFeedback({
-        type: "success",
-        message: `Foto "${title}" berhasil dihapus.`,
-      });
-      fetchData();
+      const res = await fetch(`/api/admin/gallery?id=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Gagal menghapus foto.");
     } catch {
-      setFeedback({ type: "error", message: "Gagal menghapus foto." });
+      // Revert if failed
+      setItems(prevItems);
+      setFeedback({ type: "error", message: "Gagal menghapus foto dari server. Data dikembalikan." });
     }
   };
 

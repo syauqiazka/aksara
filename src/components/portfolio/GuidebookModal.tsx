@@ -95,18 +95,26 @@ export default function GuidebookModal({ app, isOpen, onClose }: GuidebookModalP
     >
       <div className="relative w-full max-w-4xl h-[90vh] max-h-[920px] flex flex-col rounded-3xl bg-[var(--green-950)] border border-[var(--gold-500)]/40 shadow-2xl overflow-hidden text-[var(--cream-50)]">
         
+        {/* Tombol Tutup (X) — Posisi Kanan Atas */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-3.5 right-4 sm:top-4 sm:right-5 z-30 p-2 rounded-xl bg-black/40 hover:bg-black/60 text-white/80 hover:text-white border border-white/10 transition-colors shadow-md cursor-pointer"
+          title="Tutup Pratinjau (Esc)"
+          aria-label="Tutup"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
         {/* PDF TOP BAR (READER TOOLBAR) */}
-        <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3.5 bg-[var(--green-950)] border-b border-[var(--gold-500)]/30 text-xs flex-shrink-0">
+        <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3.5 pr-14 sm:pr-16 bg-[var(--green-950)] border-b border-[var(--gold-500)]/30 text-xs flex-shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             <div className="p-2 rounded-xl bg-[var(--gold-500)]/20 text-[var(--gold-400)] flex-shrink-0">
               <FileText className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <div className="font-semibold text-sm text-[var(--cream-50)] truncate flex items-center gap-2">
-                <span>Guidebook_{app.id}.pdf</span>
-                <span className="hidden sm:inline-block text-[10px] px-2 py-0.5 rounded-full bg-[var(--gold-500)]/20 text-[var(--gold-300)] border border-[var(--gold-500)]/40 font-medium">
-                  Pratinjau PDF
-                </span>
+              <div className="font-semibold text-sm text-[var(--cream-50)] truncate">
+                Guidebook_{app.id}.pdf
               </div>
               <p className="text-[11px] text-[var(--cream-200)]/70 truncate">
                 {app.guidebookSubtitle || app.tagline}
@@ -115,12 +123,8 @@ export default function GuidebookModal({ app, isOpen, onClose }: GuidebookModalP
           </div>
 
           {/* Controls: Pagination, Zoom & Actions */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-            {app.pdfUrl ? (
-              <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[var(--gold-500)]/20 border border-[var(--gold-500)]/30 text-xs font-medium text-[var(--gold-300)]">
-                <span>PDF Resmi ({app.name})</span>
-              </div>
-            ) : (
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            {!app.pdfUrl && (
               <>
                 {/* Pagination */}
                 <div className="flex items-center gap-1 bg-black/40 px-2 py-1 rounded-xl border border-white/10 text-xs">
@@ -192,16 +196,6 @@ export default function GuidebookModal({ app, isOpen, onClose }: GuidebookModalP
             >
               <Download className="w-3.5 h-3.5" />
               <span className="text-xs">Unduh PDF</span>
-            </button>
-
-            {/* Close button */}
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors ml-1"
-              title="Tutup Pratinjau (Esc)"
-            >
-              <X className="w-4 h-4" />
             </button>
           </div>
         </div>

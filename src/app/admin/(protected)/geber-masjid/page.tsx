@@ -30,27 +30,45 @@ export default function AdminGeberListPage() {
 
   const handleToggleStatus = async (item: GeberMasjidDistribution) => {
     const nextStatus = item.status === "published" ? "draft" : "published";
+    // UPDATE FIRST, SYNC LATER (Optimistic UI)
+    const prevData = data;
+    setData((prev) =>
+      prev.map((d) => (d.id === item.id ? { ...d, status: nextStatus } : d))
+    );
+    setFeedback({
+      type: "success",
+      message: `Status kegiatan di ${item.mosque_name} diubah ke ${nextStatus}.`,
+    });
+
     try {
-      await fetch("/api/admin/geber", {
+      const res = await fetch("/api/admin/geber", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...item, status: nextStatus }),
       });
-      setFeedback({ type: "success", message: `Status kegiatan di ${item.mosque_name} diubah ke ${nextStatus}.` });
-      fetchData();
+      if (!res.ok) throw new Error("Gagal memperbarui status kegiatan");
     } catch {
-      setFeedback({ type: "error", message: "Gagal memperbarui status kegiatan." });
+      // Revert if failed
+      setData(prevData);
+      setFeedback({ type: "error", message: "Gagal memperbarui status kegiatan. Perubahan dibatalkan." });
     }
   };
 
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`Hapus data kegiatan Geber Masjid di ${name}?`)) return;
+
+    // UPDATE FIRST, SYNC LATER (Optimistic UI)
+    const prevData = data;
+    setData((prev) => prev.filter((d) => d.id !== id));
+    setFeedback({ type: "success", message: `Data kegiatan di ${name} berhasil dihapus.` });
+
     try {
-      await fetch(`/api/admin/geber?id=${id}`, { method: "DELETE" });
-      setFeedback({ type: "success", message: `Data kegiatan di ${name} berhasil dihapus.` });
-      fetchData();
+      const res = await fetch(`/api/admin/geber?id=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Gagal menghapus data kegiatan");
     } catch {
-      setFeedback({ type: "error", message: "Gagal menghapus data kegiatan." });
+      // Revert if failed
+      setData(prevData);
+      setFeedback({ type: "error", message: "Gagal menghapus data kegiatan dari server. Data dikembalikan." });
     }
   };
 

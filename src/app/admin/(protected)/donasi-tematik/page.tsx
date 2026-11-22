@@ -169,37 +169,51 @@ export default function AdminThemedCampaignsPage() {
 
   const handleToggleStatus = async (camp: ThemedCampaign) => {
     const nextStatus = camp.status === "aktif" ? "selesai" : "aktif";
+    // UPDATE FIRST, SYNC LATER (Optimistic UI)
+    const prevCampaigns = campaigns;
+    setCampaigns((prev) =>
+      prev.map((c) => (c.id === camp.id ? { ...c, status: nextStatus } : c))
+    );
+    setFeedback({
+      type: "success",
+      message: `Status kampanye "${camp.title}" diubah menjadi ${nextStatus}.`,
+    });
+
     try {
-      await fetch("/api/admin/campaigns", {
+      const res = await fetch("/api/admin/campaigns", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...camp, status: nextStatus }),
       });
-      setFeedback({
-        type: "success",
-        message: `Status kampanye "${camp.title}" diubah menjadi ${nextStatus}.`,
-      });
-      fetchData();
+      if (!res.ok) throw new Error("Gagal memperbarui status kampanye.");
     } catch {
-      setFeedback({ type: "error", message: "Gagal memperbarui status kampanye." });
+      // Revert if failed
+      setCampaigns(prevCampaigns);
+      setFeedback({ type: "error", message: "Gagal memperbarui status kampanye. Perubahan dibatalkan." });
     }
   };
 
   const handleDelete = async (id: string, title: string, coverUrl?: string | null) => {
     if (!confirm(`Hapus kampanye donasi tematik "${title}"?`)) return;
+
+    // UPDATE FIRST, SYNC LATER (Optimistic UI)
+    const prevCampaigns = campaigns;
+    setCampaigns((prev) => prev.filter((c) => c.id !== id));
+    setFeedback({
+      type: "success",
+      message: `Kampanye "${title}" berhasil dihapus.`,
+    });
+
     try {
       const res = await fetch(`/api/admin/campaigns?id=${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Gagal menghapus kampanye.");
       if (coverUrl) {
         await deleteOldBlobAfterUpdate(coverUrl, "");
       }
-      setFeedback({
-        type: "success",
-        message: `Kampanye "${title}" berhasil dihapus.`,
-      });
-      fetchData();
     } catch {
-      setFeedback({ type: "error", message: "Gagal menghapus kampanye." });
+      // Revert if failed
+      setCampaigns(prevCampaigns);
+      setFeedback({ type: "error", message: "Gagal menghapus kampanye dari server. Data dikembalikan." });
     }
   };
 

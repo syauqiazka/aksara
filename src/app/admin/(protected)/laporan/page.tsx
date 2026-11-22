@@ -30,11 +30,18 @@ export default function AdminReportsListPage() {
 
   const handleDelete = async (id: string, title: string) => {
     if (!confirm(`Hapus laporan "${title}"?`)) return;
+
+    // UPDATE FIRST, SYNC LATER (Optimistic UI)
+    const prevData = data;
+    setData((prev) => prev.filter((d) => d.id !== id));
+
     try {
-      await fetch(`/api/admin/reports?id=${id}`, { method: "DELETE" });
-      fetchData();
+      const res = await fetch(`/api/admin/reports?id=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Gagal menghapus laporan");
     } catch {
-      alert("Gagal menghapus laporan");
+      // Revert if failed
+      setData(prevData);
+      alert("Gagal menghapus laporan. Data dikembalikan.");
     }
   };
 

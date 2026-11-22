@@ -41,6 +41,16 @@ export default function AdminInfakListPage() {
 
   const handleToggleStatus = async (item: InfakJinanRecord) => {
     const nextStatus = item.status === "published" ? "draft" : "published";
+    // UPDATE FIRST, SYNC LATER (Optimistic UI)
+    const prevData = data;
+    setData((prev) =>
+      prev.map((d) => (d.id === item.id ? { ...d, status: nextStatus } : d))
+    );
+    setFeedback({
+      type: "success",
+      message: `Status Mushaf #${item.mushaf_no} diubah ke ${nextStatus}.`,
+    });
+
     try {
       const res = await fetch("/api/admin/infak", {
         method: "PUT",
@@ -48,23 +58,28 @@ export default function AdminInfakListPage() {
         body: JSON.stringify({ ...item, status: nextStatus }),
       });
       if (!res.ok) throw new Error("Gagal update status");
-      setFeedback({ type: "success", message: `Status Mushaf #${item.mushaf_no} diubah ke ${nextStatus}.` });
-      fetchData();
     } catch {
-      setFeedback({ type: "error", message: "Gagal memperbarui status data." });
+      // Revert if sync fails
+      setData(prevData);
+      setFeedback({ type: "error", message: "Gagal memperbarui status data. Perubahan dibatalkan." });
     }
   };
 
   const handleDelete = async (id: string, mushafNo: number) => {
     if (!confirm(`Hapus donasi Mushaf #${mushafNo} beserta seluruh data santri anaknya?`)) return;
 
+    // UPDATE FIRST, SYNC LATER (Optimistic UI)
+    const prevData = data;
+    setData((prev) => prev.filter((d) => d.id !== id));
+    setFeedback({ type: "success", message: `Mushaf #${mushafNo} berhasil dihapus.` });
+
     try {
       const res = await fetch(`/api/admin/infak?id=${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Gagal menghapus data");
-      setFeedback({ type: "success", message: `Mushaf #${mushafNo} berhasil dihapus.` });
-      fetchData();
     } catch {
-      setFeedback({ type: "error", message: "Gagal menghapus data dari server." });
+      // Revert if sync fails
+      setData(prevData);
+      setFeedback({ type: "error", message: "Gagal menghapus data dari server. Data dikembalikan." });
     }
   };
 
