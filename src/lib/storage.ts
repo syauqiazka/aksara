@@ -2,14 +2,14 @@ import "server-only";
 
 import sharp from "sharp";
 import crypto from "node:crypto";
-import { put, del, list } from "@vercel/blob";
+import { del, list } from "@vercel/blob";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { isPrismaConfigured, prisma } from "./db/prisma";
 import { localStore } from "./db/local-store";
 import { toStringArray, getErrorMessage, parseDateTimeString } from "./db/formatters";
 import { UploadLedgerEntry } from "./db/types";
-import { saveUploadedFile } from "./server-uploads";
+import { saveUploadedFile, deleteUploadedFile, getUploadDirectories } from "./server-uploads";
 
 export interface ProcessedUploadResult {
   url: string;
@@ -121,7 +121,6 @@ export async function uploadToStorage(
   const { compressedBuffer, hash, mimeType } = await processAndCompressImage(buffer, originalFilename);
   const ext = mimeType === "image/jpeg" ? "jpg" : mimeType === "image/png" ? "png" : "webp";
   const fileName = `${hash}.${ext}`;
-  const blobPath = `sahabat-aksara/${fileName}`;
 
   // Check if hash already committed in ledger to deduplicate
   const existingLedger = await getLedgerByHash(hash);
@@ -135,20 +134,8 @@ export async function uploadToStorage(
     };
   }
 
-  let finalUrl: string;
-
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
-    // Vercel Blob
-    const blob = await put(blobPath, compressedBuffer, {
-      access: "public",
-      addRandomSuffix: false, // content hash is already collision-resistant
-      contentType: "image/webp",
-    });
-    finalUrl = blob.url;
-  } else {
-    // Robust local storage fallback with multi-directory persistence
-    finalUrl = await saveUploadedFile(fileName, compressedBuffer);
-  }
+  // Save to persistent server storage (UPLOAD_DIR outside deployment)
+  const finalUrl = await saveUploadedFile(fileName, compressedBuffer);
 
   // Record into upload_ledger as 'pending'
   await recordUploadLedger({
@@ -194,12 +181,10 @@ export async function deleteBlobFromStorage(url: string): Promise<boolean> {
   if (!url) return false;
 
   try {
-    if (process.env.BLOB_READ_WRITE_TOKEN && url.startsWith("http")) {
+    if (url.startsWith("/uploads/")) {
+      await deleteUploadedFile(url);
+    } else if (process.env.BLOB_READ_WRITE_TOKEN && url.startsWith("http")) {
       await del(url);
-    } else if (url.startsWith("/uploads/")) {
-      const fileName = path.basename(url);
-      const filePath = path.join(process.cwd(), "public", "uploads", fileName);
-      await fs.unlink(filePath).catch(() => {});
     }
 
     localStore.deleteUploadLedger(url);
@@ -245,22 +230,31 @@ export async function listAllStorageBlobs(): Promise<StorageBlobItem[]> {
     }
   }
 
-  // Also include local uploads directory
+  // Also include files from all candidate upload directories (including UPLOAD_DIR)
   try {
-    const localDir = path.join(process.cwd(), "public", "uploads");
-    const files = await fs.readdir(localDir);
-    for (const f of files) {
-      if (f.startsWith(".")) continue;
-      const stat = await fs.stat(path.join(localDir, f));
-      items.push({
-        url: `/uploads/${f}`,
-        pathname: `uploads/${f}`,
-        sizeBytes: stat.size,
-        uploadedAt: stat.mtime,
-      });
+    const dirs = getUploadDirectories();
+    const seenFiles = new Set<string>();
+
+    for (const d of dirs) {
+      try {
+        const files = await fs.readdir(d);
+        for (const f of files) {
+          if (f.startsWith(".") || seenFiles.has(f)) continue;
+          seenFiles.add(f);
+          const stat = await fs.stat(path.join(d, f));
+          items.push({
+            url: `/uploads/${f}`,
+            pathname: `uploads/${f}`,
+            sizeBytes: stat.size,
+            uploadedAt: stat.mtime,
+          });
+        }
+      } catch {
+        // directory might not exist yet
+      }
     }
   } catch {
-    // local directory doesn't exist yet
+    // ignore
   }
 
   return items;

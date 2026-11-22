@@ -14,6 +14,8 @@
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
     "storage:orphans": "node scripts/storage-orphans.mjs",
+    "storage:migrate": "node scripts/migrate-blob-images.mjs",
+    "storage:test": "node scripts/test-storage-migration.mjs",
     "e2e": "playwright test"
   },
   "dependencies": {

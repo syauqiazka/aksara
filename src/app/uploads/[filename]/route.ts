@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { findUploadedFile } from "@/lib/server-uploads";
+import { findUploadedFile, isValidFilename } from "@/lib/server-uploads";
 
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const CONTENT_TYPE_MAP: Record<string, string> = {
+  ".webp": "image/webp",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".svg": "image/svg+xml",
+  ".gif": "image/gif",
+};
 
 export async function GET(
   _request: NextRequest,
@@ -11,40 +21,42 @@ export async function GET(
 ) {
   try {
     const { filename } = await params;
-    if (!filename) {
-      return new NextResponse("Filename is required", { status: 400 });
+
+    // Strict validation: reject empty, path traversal, slashes, or invalid characters
+    if (!filename || !isValidFilename(filename)) {
+      return new NextResponse("File Not Found", {
+        status: 404,
+        headers: { "Content-Type": "text/plain" },
+      });
     }
 
-    // Sanitize to prevent path traversal
     const safeFilename = path.basename(filename);
     const existingFilePath = await findUploadedFile(safeFilename);
 
     if (!existingFilePath) {
-      return new NextResponse("File Not Found", { status: 404 });
+      return new NextResponse("File Not Found", {
+        status: 404,
+        headers: { "Content-Type": "text/plain" },
+      });
     }
 
     const fileBuffer = await fs.readFile(existingFilePath);
-
     const ext = path.extname(safeFilename).toLowerCase();
-    const contentTypeMap: Record<string, string> = {
-      ".webp": "image/webp",
-      ".png": "image/png",
-      ".jpg": "image/jpeg",
-      ".jpeg": "image/jpeg",
-      ".svg": "image/svg+xml",
-      ".gif": "image/gif",
-    };
-
-    const contentType = contentTypeMap[ext] || "application/octet-stream";
+    const contentType = CONTENT_TYPE_MAP[ext] || "application/octet-stream";
 
     return new NextResponse(new Uint8Array(fileBuffer), {
       status: 200,
       headers: {
         "Content-Type": contentType,
         "Cache-Control": "public, max-age=31536000, immutable",
+        "X-Content-Type-Options": "nosniff",
       },
     });
   } catch {
-    return new NextResponse("File Not Found", { status: 404 });
+    // Never leak server paths or stack traces in the response
+    return new NextResponse("File Not Found", {
+      status: 404,
+      headers: { "Content-Type": "text/plain" },
+    });
   }
 }
