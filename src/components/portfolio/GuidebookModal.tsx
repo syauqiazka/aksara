@@ -104,7 +104,7 @@ export default function GuidebookModal({ app, isOpen, onClose }: GuidebookModalP
             <div className="min-w-0">
               <div className="font-semibold text-sm text-[var(--cream-50)] truncate flex items-center gap-2">
                 <span>Guidebook_{app.id}.pdf</span>
-                <span className="hidden sm:inline-block text-[10px] px-2 py-0.5 rounded-full bg-[var(--gold-500)]/20 text-[var(--gold-300)] border border-[var(--gold-500)]/40 font-mono">
+                <span className="hidden sm:inline-block text-[10px] px-2 py-0.5 rounded-full bg-[var(--gold-500)]/20 text-[var(--gold-300)] border border-[var(--gold-500)]/40 font-medium">
                   Pratinjau PDF
                 </span>
               </div>
@@ -117,7 +117,7 @@ export default function GuidebookModal({ app, isOpen, onClose }: GuidebookModalP
           {/* Controls: Pagination, Zoom & Actions */}
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             {app.pdfUrl ? (
-              <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[var(--gold-500)]/20 border border-[var(--gold-500)]/30 text-[11px] font-semibold text-[var(--gold-300)] font-mono">
+              <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[var(--gold-500)]/20 border border-[var(--gold-500)]/30 text-xs font-medium text-[var(--gold-300)]">
                 <span>PDF Resmi ({app.name})</span>
               </div>
             ) : (
@@ -220,16 +220,12 @@ export default function GuidebookModal({ app, isOpen, onClose }: GuidebookModalP
                 title={`Guidebook ${app.name}`}
                 className="w-full h-[76vh] rounded-2xl border border-[var(--gold-500)]/30 shadow-2xl bg-white"
               />
-              <div className="mt-2.5 flex flex-wrap items-center justify-between gap-3 w-full px-2 text-xs text-[var(--cream-200)]/80">
-                <span className="flex items-center gap-1.5 font-medium text-[var(--cream-100)]">
-                  <CheckCircle2 className="w-4 h-4 text-[var(--gold-400)]" />
-                  <span>Dokumen PDF Resmi Terverifikasi &mdash; {app.name}</span>
-                </span>
+              <div className="mt-2.5 flex items-center justify-end w-full px-2 text-xs text-[var(--cream-200)]/80">
                 <a
                   href={app.pdfUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[var(--gold-300)] hover:underline inline-flex items-center gap-1 font-semibold"
+                  className="text-[var(--gold-300)] hover:underline inline-flex items-center gap-1 font-medium"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                   <span>Buka di tab penuh</span>
