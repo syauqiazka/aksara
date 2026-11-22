@@ -20,6 +20,7 @@ export interface PortfolioApp {
   partnershipNote?: string;
   hasGuidebook?: boolean;
   hasPoster?: boolean;
+  pdfUrl?: string;
   guidebookSubtitle?: string;
   guidebookChapters?: GuidebookChapter[];
   posterHeadline?: string;
@@ -65,6 +66,7 @@ export const portfolioContent: PortfolioApp[] = [
     partnershipNote: "Dapatkan dengan berinfak Al-Qur'an (Rp. 200.000,-) + Donasi Seikhlasnya",
     hasGuidebook: true,
     hasPoster: true,
+    pdfUrl: "/guidebooks/guidebook-banksaku.pdf",
     guidebookSubtitle: "Buku Panduan Teknis & Implementasi Sistem Tabungan M-Banking Sekolah",
     posterHeadline: "Sistem Tabungan Sekolah Model M-Banking Internal",
     posterHighlight: "Dapatkan dengan berinfak Al-Qur'an (Rp. 200.000,-) + Donasi Seikhlasnya",

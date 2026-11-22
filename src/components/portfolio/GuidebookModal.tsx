@@ -71,6 +71,16 @@ export default function GuidebookModal({ app, isOpen, onClose }: GuidebookModalP
   };
 
   const handleDownload = () => {
+    if (app.pdfUrl) {
+      const a = document.createElement("a");
+      a.href = app.pdfUrl;
+      a.download = `Guidebook_${app.name.replace(/\s+/g, "_")}.pdf`;
+      a.target = "_blank";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      return;
+    }
     // Open printable guidebook in new window which triggers download/print dialog
     const printWindow = window.open(`/portofolio/guidebook/${app.id}`, "_blank");
     if (printWindow) {
@@ -106,53 +116,61 @@ export default function GuidebookModal({ app, isOpen, onClose }: GuidebookModalP
 
           {/* Controls: Pagination, Zoom & Actions */}
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-            {/* Pagination */}
-            <div className="flex items-center gap-1 bg-black/40 px-2 py-1 rounded-xl border border-white/10 text-xs">
-              <button
-                type="button"
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage <= 1}
-                className="p-1 rounded-md hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-                title="Halaman Sebelumnya"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-              </button>
-              <span className="font-mono text-[11px] px-1 text-[var(--cream-100)]">
-                {currentPage} / {totalPages}
-              </span>
-              <button
-                type="button"
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage >= totalPages}
-                className="p-1 rounded-md hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-                title="Halaman Berikutnya"
-              >
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
+            {app.pdfUrl ? (
+              <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[var(--gold-500)]/20 border border-[var(--gold-500)]/30 text-[11px] font-semibold text-[var(--gold-300)] font-mono">
+                <span>PDF Resmi ({app.name})</span>
+              </div>
+            ) : (
+              <>
+                {/* Pagination */}
+                <div className="flex items-center gap-1 bg-black/40 px-2 py-1 rounded-xl border border-white/10 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage <= 1}
+                    className="p-1 rounded-md hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                    title="Halaman Sebelumnya"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="font-mono text-[11px] px-1 text-[var(--cream-100)]">
+                    {currentPage} / {totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={currentPage >= totalPages}
+                    className="p-1 rounded-md hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                    title="Halaman Berikutnya"
+                  >
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
 
-            {/* Zoom Controls */}
-            <div className="hidden md:flex items-center gap-1 bg-black/40 px-2 py-1 rounded-xl border border-white/10 text-xs">
-              <button
-                type="button"
-                onClick={() => setZoomLevel((z) => Math.max(80, z - 10))}
-                className="p-1 rounded-md hover:bg-white/10 transition-colors"
-                title="Perkecil"
-              >
-                <ZoomOut className="w-3.5 h-3.5" />
-              </button>
-              <span className="font-mono text-[11px] px-1 text-[var(--cream-200)]">
-                {zoomLevel}%
-              </span>
-              <button
-                type="button"
-                onClick={() => setZoomLevel((z) => Math.min(130, z + 10))}
-                className="p-1 rounded-md hover:bg-white/10 transition-colors"
-                title="Perbesar"
-              >
-                <ZoomIn className="w-3.5 h-3.5" />
-              </button>
-            </div>
+                {/* Zoom Controls */}
+                <div className="hidden md:flex items-center gap-1 bg-black/40 px-2 py-1 rounded-xl border border-white/10 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setZoomLevel((z) => Math.max(80, z - 10))}
+                    className="p-1 rounded-md hover:bg-white/10 transition-colors"
+                    title="Perkecil"
+                  >
+                    <ZoomOut className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="font-mono text-[11px] px-1 text-[var(--cream-200)]">
+                    {zoomLevel}%
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setZoomLevel((z) => Math.min(130, z + 10))}
+                    className="p-1 rounded-md hover:bg-white/10 transition-colors"
+                    title="Perbesar"
+                  >
+                    <ZoomIn className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </>
+            )}
 
             {/* Print / Save PDF */}
             <button
@@ -193,14 +211,37 @@ export default function GuidebookModal({ app, isOpen, onClose }: GuidebookModalP
           ref={viewportRef}
           data-lenis-prevent
           onWheel={(e) => e.stopPropagation()}
-          className="flex-1 overflow-y-auto p-4 sm:p-8 bg-[#1f2421]/90 flex justify-center overscroll-contain"
+          className="flex-1 overflow-y-auto p-3 sm:p-6 bg-[#1f2421]/90 flex justify-center overscroll-contain"
         >
-          
-          {/* A4 PAPER SHEET CONTAINER */}
-          <div
-            style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: "top center" }}
-            className="w-full max-w-[760px] min-h-[960px] bg-white text-[var(--ink-900)] rounded-xl shadow-2xl p-8 sm:p-12 transition-transform duration-150 flex flex-col justify-between border border-gray-200"
-          >
+          {app.pdfUrl ? (
+            <div className="w-full h-full flex flex-col items-center max-w-5xl">
+              <iframe
+                src={`${app.pdfUrl}#toolbar=1&navpanes=0&view=FitH`}
+                title={`Guidebook ${app.name}`}
+                className="w-full h-[76vh] rounded-2xl border border-[var(--gold-500)]/30 shadow-2xl bg-white"
+              />
+              <div className="mt-2.5 flex flex-wrap items-center justify-between gap-3 w-full px-2 text-xs text-[var(--cream-200)]/80">
+                <span className="flex items-center gap-1.5 font-medium text-[var(--cream-100)]">
+                  <CheckCircle2 className="w-4 h-4 text-[var(--gold-400)]" />
+                  <span>Dokumen PDF Resmi Terverifikasi &mdash; {app.name}</span>
+                </span>
+                <a
+                  href={app.pdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[var(--gold-300)] hover:underline inline-flex items-center gap-1 font-semibold"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Buka di tab penuh</span>
+                </a>
+              </div>
+            </div>
+          ) : (
+            /* A4 PAPER SHEET CONTAINER */
+            <div
+              style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: "top center" }}
+              className="w-full max-w-[760px] min-h-[960px] bg-white text-[var(--ink-900)] rounded-xl shadow-2xl p-8 sm:p-12 transition-transform duration-150 flex flex-col justify-between border border-gray-200"
+            >
             {/* SHEET CONTENT DEPENDING ON CURRENT PAGE */}
             <div>
               {/* Document Header (Letterhead on every page) */}
@@ -493,6 +534,7 @@ export default function GuidebookModal({ app, isOpen, onClose }: GuidebookModalP
               </div>
             </div>
           </div>
+          )}
         </div>
 
         {/* BOTTOM ACTION BAR */}

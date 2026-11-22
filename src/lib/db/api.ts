@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { isPrismaConfigured, prisma } from "./prisma";
+import { localStore } from "./local-store";
 import {
   toStringArray,
   parseDateString,
@@ -148,13 +149,16 @@ export const db = {
 
   // 3. Reports
   getReports: cache(async (onlyPublished = true): Promise<Report[]> => {
-    if (!isPrismaConfigured || !prisma) return [];
+    if (!isPrismaConfigured || !prisma) return localStore.getReports(onlyPublished);
 
     try {
       const data = await prisma.report.findMany({
         where: onlyPublished ? { status: "published" } : undefined,
         orderBy: { period_start: "desc" },
       });
+      if (data.length === 0) {
+        return localStore.getReports(onlyPublished);
+      }
       return data.map((d) => ({
         ...d,
         program: d.program as Report["program"],
@@ -169,16 +173,16 @@ export const db = {
       }));
     } catch (err: unknown) {
       console.warn("[db.api] getReports fallback:", getErrorMessage(err));
-      return [];
+      return localStore.getReports(onlyPublished);
     }
   }),
 
   getReportBySlug: cache(async (slug: string): Promise<Report | null> => {
-    if (!isPrismaConfigured || !prisma) return null;
+    if (!isPrismaConfigured || !prisma) return localStore.getReportBySlug(slug);
 
     try {
       const d = await prisma.report.findUnique({ where: { slug } });
-      if (!d) return null;
+      if (!d) return localStore.getReportBySlug(slug);
       return {
         ...d,
         program: d.program as Report["program"],
@@ -193,16 +197,16 @@ export const db = {
       };
     } catch (err: unknown) {
       console.warn("[db.api] getReportBySlug fallback:", getErrorMessage(err));
-      return null;
+      return localStore.getReportBySlug(slug);
     }
   }),
 
   getReportById: cache(async (id: string): Promise<Report | null> => {
-    if (!isPrismaConfigured || !prisma) return null;
+    if (!isPrismaConfigured || !prisma) return localStore.getReportById(id);
 
     try {
       const d = await prisma.report.findUnique({ where: { id } });
-      if (!d) return null;
+      if (!d) return localStore.getReportById(id);
       return {
         ...d,
         program: d.program as Report["program"],
@@ -217,18 +221,21 @@ export const db = {
       };
     } catch (err: unknown) {
       console.warn("[db.api] getReportById fallback:", getErrorMessage(err));
-      return null;
+      return localStore.getReportById(id);
     }
   }),
 
   // 4. Themed Campaigns
   getThemedCampaigns: cache(async (): Promise<ThemedCampaign[]> => {
-    if (!isPrismaConfigured || !prisma) return [];
+    if (!isPrismaConfigured || !prisma) return localStore.getCampaigns();
 
     try {
       const data = await prisma.themedCampaign.findMany({
         orderBy: { created_at: "desc" },
       });
+      if (data.length === 0) {
+        return localStore.getCampaigns();
+      }
       return data.map((c) => ({
         ...c,
         cover_url: sanitizeImageUrl(c.cover_url),
@@ -239,19 +246,22 @@ export const db = {
       }));
     } catch (err: unknown) {
       console.warn("[db.api] getThemedCampaigns fallback:", getErrorMessage(err));
-      return [];
+      return localStore.getCampaigns();
     }
   }),
 
   // 5. Gallery Items
   getGalleryItems: cache(async (): Promise<GalleryItem[]> => {
-    if (!isPrismaConfigured || !prisma) return [];
+    if (!isPrismaConfigured || !prisma) return localStore.getGallery(true);
 
     try {
       const data = await prisma.galleryItem.findMany({
         where: { status: "published" },
         orderBy: { date: "desc" },
       });
+      if (data.length === 0) {
+        return localStore.getGallery(true);
+      }
       return data
         .map((g) => ({
           ...g,
@@ -263,7 +273,7 @@ export const db = {
         .filter((g) => Boolean(g.image_url));
     } catch (err: unknown) {
       console.warn("[db.api] getGalleryItems fallback:", getErrorMessage(err));
-      return [];
+      return localStore.getGallery(true);
     }
   }),
 

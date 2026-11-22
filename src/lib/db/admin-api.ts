@@ -1,5 +1,6 @@
 import { requirePrisma, prisma, isPrismaConfigured } from "./prisma";
 import { Prisma } from "@prisma/client";
+import { localStore } from "./local-store";
 import {
   toStringArray,
   parseDateString,
@@ -551,6 +552,10 @@ export const db = {
         orderBy: { period_start: "desc" },
       });
 
+      if (data.length === 0) {
+        return localStore.getReports(onlyPublished);
+      }
+
       return data.map((d) => ({
         ...d,
         program: d.program as Report["program"],
@@ -573,7 +578,7 @@ export const db = {
     const dbClient = requirePrisma();
     try {
       const d = await dbClient.report.findUnique({ where: { slug } });
-      if (!d) return null;
+      if (!d) return localStore.getReportBySlug(slug);
 
       return {
         ...d,
@@ -597,7 +602,7 @@ export const db = {
     const dbClient = requirePrisma();
     try {
       const d = await dbClient.report.findUnique({ where: { id } });
-      if (!d) return null;
+      if (!d) return localStore.getReportById(id);
 
       return {
         ...d,
@@ -681,6 +686,10 @@ export const db = {
       const data = await dbClient.themedCampaign.findMany({
         orderBy: { created_at: "desc" },
       });
+
+      if (data.length === 0) {
+        return localStore.getCampaigns();
+      }
 
       return data.map((c) => ({
         ...c,
@@ -770,6 +779,10 @@ export const db = {
         orderBy: { date: "desc" },
       });
 
+      if (data.length === 0) {
+        return localStore.getGallery(onlyPublished);
+      }
+
       return data.map((g) => ({
         ...g,
         image_url: sanitizeImageUrl(g.image_url) || "",
@@ -787,7 +800,7 @@ export const db = {
     const dbClient = requirePrisma();
     try {
       const g = await dbClient.galleryItem.findUnique({ where: { id } });
-      if (!g) return null;
+      if (!g) return localStore.getGalleryById(id);
 
       return {
         ...g,

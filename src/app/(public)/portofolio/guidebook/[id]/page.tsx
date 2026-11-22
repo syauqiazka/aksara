@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   Building,
   ShieldCheck,
+  Download,
 } from "lucide-react";
 import PrintButton from "./PrintButton";
 
@@ -49,12 +50,33 @@ export default async function GuidebookPage({ params }: GuidebookPageProps) {
         </Link>
 
         <div className="flex items-center gap-2">
+          {app.pdfUrl && (
+            <a
+              href={app.pdfUrl}
+              download={`Guidebook_${app.name.replace(/\s+/g, "_")}.pdf`}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[var(--gold-500)] text-[var(--green-950)] font-semibold hover:brightness-110 transition-all text-xs shadow-sm"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Unduh Berkas PDF Asli</span>
+            </a>
+          )}
           <PrintButton />
         </div>
       </header>
 
       {/* A4 PRINTABLE DOCUMENT CONTAINER */}
-      <main className="max-w-4xl mx-auto space-y-8 print:space-y-0">
+      {app.pdfUrl ? (
+        <main className="max-w-5xl mx-auto space-y-4">
+          <div className="bg-white rounded-3xl shadow-2xl border border-[var(--gold-500)]/30 overflow-hidden">
+            <iframe
+              src={`${app.pdfUrl}#view=FitH`}
+              title={`Guidebook ${app.name}`}
+              className="w-full h-[85vh] min-h-[720px] border-0"
+            />
+          </div>
+        </main>
+      ) : (
+        <main className="max-w-4xl mx-auto space-y-8 print:space-y-0">
         
         {/* ================= PAGE 1 ================= */}
         <div className="bg-white rounded-2xl p-8 sm:p-14 shadow-2xl border border-gray-200 min-h-[1050px] flex flex-col justify-between print:rounded-none print:shadow-none print:border-none print:min-h-screen print:page-break-after">
@@ -374,6 +396,7 @@ export default async function GuidebookPage({ params }: GuidebookPageProps) {
         </div>
 
       </main>
+      )}
     </div>
   );
 }

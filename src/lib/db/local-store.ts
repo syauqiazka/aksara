@@ -125,9 +125,9 @@ function getGalleryData(): GalleryItem[] {
 
 const infakList: InfakDistribution[] = [];
 const geberList: GeberMasjidDistribution[] = [];
-// reportList dan galleryList di-seed dari file JSON lokal agar persisten across restarts
+// reportList, themedCampaignsList, dan galleryList di-seed dari file JSON lokal agar persisten across restarts
 const reportList: Report[] = loadJsonFile<Report>("reports.json");
-const themedCampaignsList: ThemedCampaign[] = [];
+const themedCampaignsList: ThemedCampaign[] = loadJsonFile<ThemedCampaign>("themed-campaigns.json");
 const galleryList: GalleryItem[] = loadJsonFile<GalleryItem>("gallery-items.json");
 
 let bankAccounts: BankAccount[] = [
