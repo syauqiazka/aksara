@@ -81,8 +81,9 @@ export async function DELETE(request: Request) {
     revalidatePath("/");
 
     return NextResponse.json({ success });
-  } catch {
-    return NextResponse.json({ error: "Penghapusan data gagal" }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Penghapusan data gagal";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

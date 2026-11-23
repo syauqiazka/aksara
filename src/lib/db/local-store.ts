@@ -289,6 +289,7 @@ export const localStore = {
   },
 
   getCampaigns: () => [...themedCampaignsList],
+  getCampaignById: (id: string) => themedCampaignsList.find(c => c.id === id) || null,
   addCampaign: (item: Omit<ThemedCampaign, 'id' | 'created_at'>, id?: string) => {
     const newItem: ThemedCampaign = {
       ...item,
@@ -296,6 +297,7 @@ export const localStore = {
       created_at: new Date().toISOString()
     };
     themedCampaignsList.unshift(newItem);
+    saveJsonFile("themed-campaigns.json", themedCampaignsList);
     return newItem;
   },
   updateCampaign: (id: string, updates: Partial<ThemedCampaign>) => {
@@ -314,10 +316,19 @@ export const localStore = {
         created_at: updates.created_at || new Date().toISOString(),
       };
       themedCampaignsList.unshift(newItem);
+      saveJsonFile("themed-campaigns.json", themedCampaignsList);
       return newItem;
     }
     themedCampaignsList[idx] = { ...themedCampaignsList[idx], ...updates };
+    saveJsonFile("themed-campaigns.json", themedCampaignsList);
     return themedCampaignsList[idx];
+  },
+  deleteCampaign: (id: string) => {
+    const idx = themedCampaignsList.findIndex(c => c.id === id);
+    if (idx === -1) return false;
+    themedCampaignsList.splice(idx, 1);
+    saveJsonFile("themed-campaigns.json", themedCampaignsList);
+    return true;
   },
 
   getGallery: (onlyPublished = true) => {
@@ -342,7 +353,21 @@ export const localStore = {
   updateGalleryItem: (id: string, updates: Partial<GalleryItem>) => {
     const list = getGalleryData();
     const idx = list.findIndex(g => g.id === id);
-    if (idx === -1) return null;
+    if (idx === -1) {
+      const newItem: GalleryItem = {
+        id,
+        title: updates.title || "",
+        program: updates.program || "infak_alquran",
+        date: updates.date || new Date().toISOString().split("T")[0],
+        image_url: updates.image_url || "",
+        caption: updates.caption || null,
+        status: updates.status || "published",
+        created_at: updates.created_at || new Date().toISOString(),
+      };
+      list.unshift(newItem);
+      saveJsonFile("gallery-items.json", list);
+      return newItem;
+    }
     list[idx] = { ...list[idx], ...updates };
     saveJsonFile("gallery-items.json", list);
     return list[idx];

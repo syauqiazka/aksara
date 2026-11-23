@@ -647,9 +647,45 @@ export const db = {
         status: item.status,
       };
 
-      const result = id
-        ? await dbClient.report.update({ where: { id }, data: payload })
-        : await dbClient.report.create({ data: payload });
+      let result;
+      if (id) {
+        try {
+          result = await dbClient.report.update({ where: { id }, data: payload });
+        } catch (updateErr: unknown) {
+          const msg = getErrorMessage(updateErr);
+          if (
+            msg.includes("P2025") ||
+            msg.includes("Record to update not found") ||
+            msg.includes("not found")
+          ) {
+            // Record exists in localStore or was not in DB, create it with this id
+            result = await dbClient.report.create({ data: { id, ...payload } });
+          } else {
+            throw updateErr;
+          }
+        }
+      } else {
+        result = await dbClient.report.create({ data: payload });
+      }
+
+      // Synchronize with localStore fallback
+      try {
+        localStore.updateReport(result.id, {
+          title: result.title,
+          program: result.program as Report["program"],
+          period_start: parseDateString(result.period_start),
+          period_end: parseDateString(result.period_end),
+          summary: result.summary,
+          body: result.body,
+          beneficiaries: result.beneficiaries,
+          amount_idr: toNumberOrNull(result.amount_idr),
+          cover_url: result.cover_url || null,
+          gallery_urls: toStringArray(result.gallery_urls),
+          status: result.status as "draft" | "published",
+        });
+      } catch {
+        // ignore localStore error
+      }
 
       return {
         ...result,
@@ -672,11 +708,18 @@ export const db = {
     const dbClient = requirePrisma();
     try {
       await dbClient.report.delete({ where: { id } });
-      return true;
     } catch (err: unknown) {
-      console.error("[admin-api] deleteReport error:", getErrorMessage(err));
-      throw new Error(`Gagal menghapus laporan: ${getErrorMessage(err)}`);
+      const msg = getErrorMessage(err);
+      if (!msg.includes("P2025") && !msg.includes("not exist") && !msg.includes("not found")) {
+        console.warn("[admin-api] deleteReport prisma warning:", msg);
+      }
     }
+    try {
+      localStore.deleteReport(id);
+    } catch {
+      // ignore
+    }
+    return true;
   },
 
   // 5. Themed Campaigns
@@ -709,7 +752,7 @@ export const db = {
     const dbClient = requirePrisma();
     try {
       const c = await dbClient.themedCampaign.findUnique({ where: { id } });
-      if (!c) return null;
+      if (!c) return localStore.getCampaignById(id);
 
       return {
         ...c,
@@ -721,7 +764,7 @@ export const db = {
       };
     } catch (err: unknown) {
       console.error("[admin-api] getThemedCampaignById error:", getErrorMessage(err));
-      throw new Error(`Gagal memuat detail donasi tematik: ${getErrorMessage(err)}`);
+      return localStore.getCampaignById(id);
     }
   },
 
@@ -742,9 +785,40 @@ export const db = {
         collected_idr: BigInt(item.collected_idr || 0),
       };
 
-      const result = id
-        ? await dbClient.themedCampaign.update({ where: { id }, data: payload })
-        : await dbClient.themedCampaign.create({ data: payload });
+      let result;
+      if (id) {
+        try {
+          result = await dbClient.themedCampaign.update({ where: { id }, data: payload });
+        } catch (updateErr: unknown) {
+          const msg = getErrorMessage(updateErr);
+          if (
+            msg.includes("P2025") ||
+            msg.includes("Record to update not found") ||
+            msg.includes("not found")
+          ) {
+            result = await dbClient.themedCampaign.create({ data: { id, ...payload } });
+          } else {
+            throw updateErr;
+          }
+        }
+      } else {
+        result = await dbClient.themedCampaign.create({ data: payload });
+      }
+
+      try {
+        localStore.updateCampaign(result.id, {
+          title: result.title,
+          disaster_type: result.disaster_type,
+          location: result.location,
+          status: result.status as "aktif" | "selesai",
+          description: result.description,
+          cover_url: result.cover_url || null,
+          target_idr: toNumber(result.target_idr),
+          collected_idr: toNumber(result.collected_idr),
+        });
+      } catch {
+        // ignore
+      }
 
       return {
         ...result,
@@ -763,11 +837,18 @@ export const db = {
     const dbClient = requirePrisma();
     try {
       await dbClient.themedCampaign.delete({ where: { id } });
-      return true;
     } catch (err: unknown) {
-      console.error("[admin-api] deleteThemedCampaign error:", getErrorMessage(err));
-      throw new Error(`Gagal menghapus donasi tematik: ${getErrorMessage(err)}`);
+      const msg = getErrorMessage(err);
+      if (!msg.includes("P2025") && !msg.includes("not exist") && !msg.includes("not found")) {
+        console.warn("[admin-api] deleteThemedCampaign prisma warning:", msg);
+      }
     }
+    try {
+      localStore.deleteCampaign(id);
+    } catch {
+      // ignore
+    }
+    return true;
   },
 
   // 6. Gallery Items
@@ -830,9 +911,38 @@ export const db = {
         status: item.status,
       };
 
-      const result = id
-        ? await dbClient.galleryItem.update({ where: { id }, data: payload })
-        : await dbClient.galleryItem.create({ data: payload });
+      let result;
+      if (id) {
+        try {
+          result = await dbClient.galleryItem.update({ where: { id }, data: payload });
+        } catch (updateErr: unknown) {
+          const msg = getErrorMessage(updateErr);
+          if (
+            msg.includes("P2025") ||
+            msg.includes("Record to update not found") ||
+            msg.includes("not found")
+          ) {
+            result = await dbClient.galleryItem.create({ data: { id, ...payload } });
+          } else {
+            throw updateErr;
+          }
+        }
+      } else {
+        result = await dbClient.galleryItem.create({ data: payload });
+      }
+
+      try {
+        localStore.updateGalleryItem(result.id, {
+          title: result.title,
+          program: result.program,
+          date: parseDateString(result.date),
+          image_url: result.image_url,
+          caption: result.caption || null,
+          status: result.status as "draft" | "published",
+        });
+      } catch {
+        // ignore
+      }
 
       return {
         ...result,
@@ -850,11 +960,18 @@ export const db = {
     const dbClient = requirePrisma();
     try {
       await dbClient.galleryItem.delete({ where: { id } });
-      return true;
     } catch (err: unknown) {
-      console.error("[admin-api] deleteGalleryItem error:", getErrorMessage(err));
-      throw new Error(`Gagal menghapus foto galeri: ${getErrorMessage(err)}`);
+      const msg = getErrorMessage(err);
+      if (!msg.includes("P2025") && !msg.includes("not exist") && !msg.includes("not found")) {
+        console.warn("[admin-api] deleteGalleryItem prisma warning:", msg);
+      }
     }
+    try {
+      localStore.deleteGalleryItem(id);
+    } catch {
+      // ignore
+    }
+    return true;
   },
 
   // 7. Site Settings (Bank, Contact, Social)
