@@ -56,6 +56,9 @@ export async function POST(request: Request) {
     }
 
     revalidatePath("/donasi");
+    revalidatePath("/program");
+    revalidatePath("/tentang");
+    revalidatePath("/portofolio");
     revalidatePath("/");
     revalidatePath("/", "layout");
 

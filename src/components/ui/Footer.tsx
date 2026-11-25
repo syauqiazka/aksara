@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -16,6 +16,29 @@ interface FooterProps {
 export default function Footer({ bankAccounts = [] }: FooterProps) {
   const pathname = usePathname();
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
+  const [accounts, setAccounts] = useState<BankAccount[]>(bankAccounts);
+
+  useEffect(() => {
+    setAccounts(bankAccounts);
+  }, [bankAccounts]);
+
+  useEffect(() => {
+    if (pathname.startsWith("/admin")) return;
+    let active = true;
+    fetch("/api/public/settings", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (active && data && Array.isArray(data.bankAccounts)) {
+          setAccounts(data.bankAccounts);
+        }
+      })
+      .catch(() => {
+        // Keep initial SSR accounts if network request fails
+      });
+    return () => {
+      active = false;
+    };
+  }, [pathname]);
 
   const handleCopy = (num: string, idx: number) => {
     if (!num) return;
@@ -152,7 +175,9 @@ export default function Footer({ bankAccounts = [] }: FooterProps) {
               Rekening Resmi Infak
             </h4>
             {(() => {
-              const validAccounts = (bankAccounts || []).filter((acc) => acc && acc.number);
+              const validAccounts = (accounts || []).filter(
+                (acc) => acc && acc.number && acc.number.trim().length > 0
+              );
               if (validAccounts.length === 0) {
                 return (
                   <div className="p-4 rounded-xl bg-[var(--green-900)]/60 border border-[var(--gold-500)]/30 text-xs text-[var(--cream-200)]/90 leading-relaxed">
